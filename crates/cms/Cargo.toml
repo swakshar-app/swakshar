@@ -1,0 +1,26 @@
+[package]
+name = "swakshar-cms"
+description = "CMS SignedData in the exact layout the GST portal verifies (signtype 1)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+base64 = { workspace = true }
+cms = { workspace = true }
+const-oid = { workspace = true }
+der = { workspace = true }
+ring = { workspace = true }
+sha1 = { workspace = true }
+spki = { workspace = true }
+thiserror = { workspace = true }
+x509-cert = { workspace = true }
+
+[dev-dependencies]
+rcgen = { workspace = true }
+
+[lints]
+workspace = true

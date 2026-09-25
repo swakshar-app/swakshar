@@ -1,0 +1,28 @@
+[package]
+name = "swakshar-token"
+description = "PKCS#11 access to Indian DSC tokens: discovery, certificates, PAN matching and signing."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+const-oid = { workspace = true }
+cryptoki = { workspace = true }
+der = { workspace = true }
+log = { workspace = true }
+secrecy = { workspace = true }
+sha2 = { workspace = true }
+swakshar-cms = { workspace = true }
+swakshar-protocol = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["sync"] }
+x509-cert = { workspace = true }
+
+[dev-dependencies]
+rcgen = { workspace = true }
+
+[lints]
+workspace = true

@@ -1,0 +1,22 @@
+[package]
+name = "swakshar-tls"
+description = "Per-install local CA, name-constrained to loopback, and the OS trust store."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+der = { workspace = true }
+log = { workspace = true }
+rcgen = { workspace = true }
+rustls-pki-types = { workspace = true }
+sha1 = { workspace = true }
+thiserror = { workspace = true }
+time = { workspace = true }
+x509-cert = { workspace = true }
+
+[lints]
+workspace = true
