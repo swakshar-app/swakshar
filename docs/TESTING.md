@@ -1,0 +1,78 @@
+# Testing
+
+## Automated
+
+```sh
+cargo test --workspace --locked
+pnpm run check
+```
+
+| Area | What the tests pin down |
+|---|---|
+| `protocol` | The portal's exact request frame; reply slicing as the portal's JavaScript does it; greeting bytes; origin and host rules; PAN masking; dates |
+| `cms` | Layout (one signer, one certificate, three signed attributes in DER order, attached content); the signer sees exactly the encoded attributes; out-of-range times; base64url |
+| `token` | CCA fields (PAN hash, classes, key usage) from generated certificates; PAN-first ranking across tokens; filters; Mach-O slice detection |
+| `tls` | Minting, reuse, renewal near expiry, name and basic constraints, key file mode |
+| `server` | HTTP routing (origins, host, navigation-only status page); a full greeting, request and reply over an in-memory WebSocket |
+| `cli` | The portal's greeting check |
+
+## Manual acceptance (real token, real portal)
+
+Run in order on Apple Silicon, then on Intel if available.
+
+1. Fresh install: Home shows the four setup steps. Plug in the token: steps 1
+   and 2 complete, the certificate appears without a PIN.
+2. Install certificate: macOS asks for your password; step 3 completes. Test in
+   browser opens `https://127.0.0.1:1585/` without a warning in Chrome and
+   Firefox.
+3. On the GST portal, register or update the DSC in Chrome. Allow the local
+   network prompt. The approval window shows the site, "DSC registration for
+   PAN" and the matching certificate first. Sign: the portal succeeds.
+4. File a return with DSC. The approval window shows the document fingerprint.
+   Sign: the portal issues an ARN.
+5. Press Cancel: the portal shows "Signing Cancelled"; Activity shows Declined.
+6. Enter a wrong PIN once: the window says so and stays open; the token's
+   warning appears when it reports one.
+7. Plug two tokens: the certificate matching the PAN is preselected.
+8. Pull the token during a request: a clear error, nothing signed.
+9. Pause from the menu bar: the portal cannot connect. Resume: it can.
+10. Repeat 3 to 5 in Edge and Brave.
+
+## Command-line checks
+
+```sh
+swakshar doctor                   # drivers, tokens, certificates, trust
+swakshar selftest                 # sign "swakshar-selftest" on the token and verify it
+swakshar serve                    # in one terminal
+swakshar probe --pan ABCDE1234F   # in another: acts exactly like the portal page
+```
+
+`probe` tries the portal's ports in order, checks the greeting the way the
+portal does, sends the portal's request frame, slices the reply the portal's
+way, and verifies the CMS.
+
+## Byte-for-byte comparison with another implementation
+
+RSA PKCS#1 v1.5 is deterministic, so two correct implementations produce
+identical CMS bytes for the same token, content and signing time:
+
+```sh
+swakshar selftest --content ABCDE1234F --signing-time 1790294400 --out rust.der
+```
+
+Produce the other implementation's output for the same content and time, then
+`cmp rust.der other.der`.
+
+## A software token for development
+
+SoftHSM stands in for a USB token without real identities:
+
+```sh
+brew install softhsm opensc
+softhsm2-util --init-token --free --label swakshar-test --pin 1234 --so-pin 12345678
+# create an RSA-2048 key and a self-signed test certificate with the same CKA_ID,
+# for example with pkcs11-tool --keypairgen and openssl, then:
+swakshar doctor --module /opt/homebrew/lib/softhsm/libsofthsm2.so
+```
+
+Never commit anything from a real token.
