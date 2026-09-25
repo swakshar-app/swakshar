@@ -6,6 +6,7 @@ members = [
   "crates/token",
   "crates/tls",
   "crates/server",
+  "crates/cli",
 ]
 
 [workspace.package]

@@ -1,0 +1,33 @@
+[package]
+name = "swakshar-cli"
+description = "Headless Swakshar: diagnostics, setup, a terminal-approved signer, and a portal probe."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "swakshar"
+path = "src/main.rs"
+
+[dependencies]
+der = { workspace = true }
+futures-util = { workspace = true }
+log = { workspace = true }
+rpassword = { workspace = true }
+rustls = { workspace = true }
+rustls-pki-types = { workspace = true }
+swakshar-cms = { workspace = true }
+swakshar-protocol = { workspace = true }
+swakshar-server = { workspace = true }
+swakshar-tls = { workspace = true }
+swakshar-token = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["macros", "net", "rt-multi-thread", "signal", "sync", "time"] }
+tokio-rustls = { workspace = true }
+tokio-tungstenite = { workspace = true }
+
+[lints]
+workspace = true
