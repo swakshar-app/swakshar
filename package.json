@@ -1,0 +1,23 @@
+{
+  "name": "swakshar-workspace",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.23.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run build && pnpm run lines",
+    "typecheck": "tsc -p scripts && pnpm --filter swakshar-ui run typecheck",
+    "lint": "oxlint --deny-warnings",
+    "build": "pnpm --filter swakshar-ui run build",
+    "lines": "node scripts/check-line-limit.ts",
+    "icons": "node scripts/generate-icons.ts",
+    "tauri": "pnpm --filter swakshar-ui exec tauri"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.5",
+    "oxlint": "1.83.0",
+    "typescript": "7.0.2"
+  }
+}

@@ -1,0 +1,7 @@
+# Exact toolchain for every developer machine and CI runner.
+# 1.98.0 was the stable toolchain when the project started (2026-09-25).
+# Bump only through a DECISION.md entry.
+[toolchain]
+channel = "1.98.0"
+components = ["rustfmt", "clippy"]
+profile = "minimal"

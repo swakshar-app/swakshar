@@ -1,0 +1,167 @@
+# Release pipeline.
+# Tag push vX.Y.Z: draft release, signed builds on one native runner per OS,
+# SHA256SUMS, and build provenance once the repository is public.
+# Manual dispatch: the same builds, uploaded as workflow artifacts, no release.
+name: release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  draft:
+    name: Draft release
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    outputs:
+      id: ${{ steps.create.outputs.id }}
+    steps:
+      - name: Create a draft release for the tag
+        id: create
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          id="$(gh api --method POST "repos/${GITHUB_REPOSITORY}/releases" \
+            -f tag_name="${GITHUB_REF_NAME}" \
+            -f name="Swakshar ${GITHUB_REF_NAME}" \
+            -f body="Draft. Install every asset and check SHA256SUMS before publishing." \
+            -F draft=true --jq '.id')"
+          echo "id=${id}" >> "${GITHUB_OUTPUT}"
+
+  build:
+    name: Build ${{ matrix.name }}
+    needs: draft
+    if: ${{ !cancelled() && needs.draft.result != 'failure' }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS universal
+            runner: macos-15
+            targets: aarch64-apple-darwin x86_64-apple-darwin
+            args: --target universal-apple-darwin
+          - name: Windows x64
+            runner: windows-2025
+            targets: x86_64-pc-windows-msvc
+            args: --target x86_64-pc-windows-msvc
+          - name: Linux x64
+            runner: ubuntu-22.04
+            targets: x86_64-unknown-linux-gnu
+            args: --target x86_64-unknown-linux-gnu
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf xdg-utils
+
+      - name: Install the pinned Rust toolchain and targets
+        shell: bash
+        env:
+          TARGETS: ${{ matrix.targets }}
+        run: |
+          rustup toolchain install
+          read -r -a targets <<< "${TARGETS}"
+          rustup target add "${targets[@]}"
+
+      - name: Cache Rust build output
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          key: ${{ matrix.runner }}
+
+      - name: Fail if Cargo.lock is out of date
+        run: cargo fetch --locked
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Install Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Write the App Store Connect API key
+        if: runner.os == 'macOS'
+        env:
+          APPLE_API_PRIVATE_KEY: ${{ secrets.APPLE_API_PRIVATE_KEY }}
+        run: printf '%s' "${APPLE_API_PRIVATE_KEY}" > "${RUNNER_TEMP}/AuthKey.p8"
+
+      - name: Build, sign and upload
+        id: tauri
+        uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # action-v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_PATH: ${{ runner.temp }}/AuthKey.p8
+        with:
+          projectPath: app
+          tauriScript: pnpm tauri
+          args: ${{ matrix.args }}
+          releaseId: ${{ needs.draft.outputs.id }}
+          updaterJsonPreferNsis: true
+          uploadWorkflowArtifacts: ${{ github.event_name == 'workflow_dispatch' }}
+
+  checksums:
+    name: Checksums and provenance
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - name: Download the draft release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --dir dist
+
+      - name: Write SHA256SUMS
+        working-directory: dist
+        run: sha256sum -- * > SHA256SUMS
+
+      - name: Upload SHA256SUMS to the draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${GITHUB_REF_NAME}" dist/SHA256SUMS --repo "${GITHUB_REPOSITORY}"
+
+      # Attestations need a public repository on Free, Pro and Team plans.
+      - name: Attest build provenance
+        if: github.event.repository.visibility == 'public'
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-checksums: dist/SHA256SUMS
