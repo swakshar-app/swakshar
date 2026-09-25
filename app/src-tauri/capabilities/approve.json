@@ -1,0 +1,12 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "approve-window",
+  "description": "The approval window may only read the waiting request and answer it.",
+  "windows": ["approve"],
+  "permissions": [
+    "core:event:default",
+    "allow-get-pending-request",
+    "allow-approve-request",
+    "allow-cancel-request"
+  ]
+}

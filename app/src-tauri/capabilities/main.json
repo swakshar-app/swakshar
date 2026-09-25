@@ -1,0 +1,21 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main-window",
+  "description": "Setup, status, activity, settings and help. Cannot answer signature requests.",
+  "windows": ["main"],
+  "permissions": [
+    "core:event:default",
+    "allow-get-overview",
+    "allow-list-tokens",
+    "allow-open-status-page",
+    "allow-set-paused",
+    "allow-complete-onboarding",
+    "allow-run-doctor",
+    "allow-get-settings",
+    "allow-save-settings",
+    "allow-install-trust",
+    "allow-remove-trust",
+    "allow-get-activity",
+    "allow-clear-activity"
+  ]
+}

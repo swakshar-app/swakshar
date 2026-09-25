@@ -1,0 +1,62 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Swakshar",
+  "version": "0.1.0",
+  "identifier": "com.swakshar.desktop",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "label": "main",
+        "title": "Swakshar",
+        "width": 980,
+        "height": 680,
+        "minWidth": 800,
+        "minHeight": 560,
+        "visible": false,
+        "center": true
+      },
+      {
+        "label": "approve",
+        "title": "Signature request",
+        "width": 460,
+        "height": 700,
+        "resizable": false,
+        "minimizable": false,
+        "maximizable": false,
+        "alwaysOnTop": true,
+        "visible": false,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src ipc: http://ipc.localhost",
+      "freezePrototype": true
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "Productivity",
+    "shortDescription": "Sign GST portal filings with your own DSC token.",
+    "longDescription": "Swakshar answers the GST portal's local signer requests with your own DSC token, only after you approve each request. Open source, no telemetry.",
+    "copyright": "Copyright 2026 The Swakshar Authors",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "12.0",
+      "entitlements": "./Entitlements.plist"
+    }
+  }
+}
