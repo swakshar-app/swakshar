@@ -5,6 +5,24 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## Signatures are pinned byte for byte to the Python signer
+
+`2026-09-26-01-43-00-IST`
+
+**Decision.** `fixtures/reference` holds a certificate, CMS and reply frame
+produced by the earlier Python signer's own code for a throwaway identity, and
+tests assert that Swakshar reproduces the CMS and the reply exactly. Before
+signing, a token certificate must re-encode to its original bytes, or
+Swakshar refuses it with a clear message.
+
+**Reasoning.** The Python signer is what the GST portal accepts today, and
+RSA PKCS#1 v1.5 is deterministic, so byte equality with its output is the
+strongest evidence available without a live portal. The builder embeds the
+certificate by re-encoding the parsed structure; a certificate that does not
+round-trip would reach the portal with bytes its CA never signed and fail
+verification there, so it is refused locally instead. The fixture keys
+existed only in memory, so the fixtures can sign nothing else.
+
 ## Frontend lint follows React's automatic JSX runtime
 
 `2026-09-26-00-44-00-IST`

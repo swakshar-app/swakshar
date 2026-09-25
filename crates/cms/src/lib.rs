@@ -20,4 +20,6 @@ pub use inspect::{Inspection, inspect_layout, inspect_signed_data, verify_rsa_sh
 pub use x509_cert::Certificate;
 
 #[cfg(test)]
+mod parity_tests;
+#[cfg(test)]
 mod tests;

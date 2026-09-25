@@ -10,11 +10,32 @@ pnpm run check
 | Area | What the tests pin down |
 |---|---|
 | `protocol` | The portal's exact request frame; reply slicing as the portal's JavaScript does it; greeting bytes; origin and host rules; PAN masking; dates |
-| `cms` | Layout (one signer, one certificate, three signed attributes in DER order, attached content); the signer sees exactly the encoded attributes; out-of-range times; base64url |
-| `token` | CCA fields (PAN hash, classes, key usage) from generated certificates; PAN-first ranking across tokens; filters; Mach-O slice detection |
+| `cms` | Layout (one signer, one certificate, three signed attributes in DER order, attached content); the signer sees exactly the encoded attributes; out-of-range times; base64url; byte-for-byte parity with the reference CMS |
+| `token` | CCA fields (PAN hash, classes, key usage) from generated certificates; PAN-first ranking across tokens; filters; Mach-O slice detection; the reply frame matches the reference line for line; only canonical DER certificates are embedded |
 | `tls` | Minting, reuse, renewal near expiry, name and basic constraints, key file mode |
 | `server` | HTTP routing (origins, host, navigation-only status page); a full greeting, request and reply over an in-memory WebSocket |
 | `cli` | The portal's greeting check |
+
+## Reference fixtures
+
+`fixtures/reference` pins Swakshar to the output of an earlier Python signer
+that the GST portal accepts. The fixtures were produced by that signer's own
+CMS and reply code, with a throwaway identity whose RSA keys existed only in
+memory: holder `SWAKSHAR TEST SIGNER`, issuer `Swakshar Test CA 2026`, PAN
+`ABCDE1234F`, content `ABCDE1234F`, signing time `2026-09-25T00:00:00Z`.
+
+| File | What |
+|---|---|
+| `signer-cert.der` | The test certificate: class 2 and 3 policies, signing key usage, the PAN hash as subject serial number |
+| `python-signtype1.der` | The reference CMS, with a real RSA signature over the signed attributes |
+| `python-reply.txt` | The reference reply frame, exactly as sent to the page |
+
+`cms::parity_tests` rebuilds the CMS from the same certificate, content, time
+and signature and asserts identical bytes, and that the signer is handed
+exactly the attributes the reference signed. `token::portal_tests` asserts the
+reply frame is identical. Because RSA PKCS#1 v1.5 is deterministic, identical
+inputs to the token give identical output, so these tests cover everything
+except the token call itself.
 
 ## Manual acceptance (real token, real portal)
 

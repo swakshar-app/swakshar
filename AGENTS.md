@@ -92,7 +92,8 @@ publishes the whole history.
 
 - **No real identities in the repo.** No names, PANs, certificate or token
   serials, PINs, real certificates, or screenshots showing any of them.
-  Fixtures come only from the SoftHSM test identity.
+  Fixtures come only from throwaway test identities (`fixtures/reference`,
+  SoftHSM).
 - **Clean-room provenance.** Never add decompiled vendor code, class or method
   names from the vendor jar, the key embedded in it, vendor `.cfg` files or any
   vendor binary. Protocol knowledge comes from the portal's public JavaScript,

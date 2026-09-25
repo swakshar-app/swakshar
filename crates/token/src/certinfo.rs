@@ -98,6 +98,18 @@ pub fn summarize(der: &[u8]) -> Result<CertSummary, TokenError> {
     })
 }
 
+/// Parses a certificate and insists it re-encodes to the same bytes, so the
+/// copy embedded in a signature is byte-identical to the one the CA signed.
+pub(crate) fn parse_canonical(der: &[u8]) -> Result<Certificate, TokenError> {
+    let certificate = Certificate::from_der(der)?;
+    if der::Encode::to_der(&certificate)? != der {
+        return Err(TokenError::Certificate(
+            "the certificate is not canonical DER, so it cannot be embedded unchanged".to_owned(),
+        ));
+    }
+    Ok(certificate)
+}
+
 /// The RSA modulus of a certificate's key, without leading zeros.
 pub(crate) fn rsa_modulus(certificate: &Certificate) -> Option<Vec<u8>> {
     let bits = certificate

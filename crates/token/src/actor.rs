@@ -5,12 +5,10 @@ use std::path::{Path, PathBuf};
 use std::sync::mpsc::Receiver;
 
 use cryptoki::context::Pkcs11;
-use der::Decode;
 use swakshar_cms::{BuildError, SignedDataInput, build_signed_data};
 use tokio::sync::oneshot;
-use x509_cert::Certificate;
 
-use crate::certinfo::summarize;
+use crate::certinfo::{parse_canonical, summarize};
 use crate::error::TokenError;
 use crate::macho::ArchSupport;
 use crate::modules::candidate_modules;
@@ -109,7 +107,7 @@ impl Actor {
         let mechanisms = pkcs11.get_mechanism_list(slot)?;
         let session = pkcs11.open_ro_session(slot)?;
         let cert_der = find_certificate(&session, &job.cert.cert_id)?;
-        let certificate = Certificate::from_der(&cert_der)?;
+        let certificate = parse_canonical(&cert_der)?;
         let summary = summarize(&cert_der)?;
         login(pkcs11, slot, &session, job.pin.as_ref())?;
         let mut mechanism = SignMechanism::Sha1RsaPkcs;

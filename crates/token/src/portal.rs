@@ -36,3 +36,7 @@ pub fn portal_reply(output: &SignedOutput, request: &SignRequest, signing_time: 
         unique_id: request.unique_id.as_deref().unwrap_or_default(),
     })
 }
+
+#[cfg(test)]
+#[path = "portal_tests.rs"]
+mod tests;
