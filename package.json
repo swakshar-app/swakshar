@@ -16,7 +16,7 @@
     "tauri": "pnpm --filter swakshar-ui exec tauri"
   },
   "devDependencies": {
-    "@types/node": "24.13.5",
+    "@types/node": "26.6.1",
     "oxlint": "1.83.0",
     "typescript": "7.0.2"
   }
