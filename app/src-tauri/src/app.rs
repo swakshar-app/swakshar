@@ -44,6 +44,7 @@ pub(crate) fn run() -> Result<(), String> {
             approve::get_pending_request,
             approve::approve_request,
             approve::cancel_request,
+            approve::refresh_request,
             settings_commands::get_settings,
             settings_commands::save_settings,
             trust::install_trust,

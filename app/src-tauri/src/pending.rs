@@ -1,5 +1,6 @@
 //! One request at a time: from the portal, through the approval window, back.
 
+use std::sync::atomic::Ordering;
 use std::time::Duration;
 
 use swakshar_protocol::{
@@ -59,7 +60,7 @@ pub(crate) struct Pending {
     /// The parsed request.
     pub(crate) request: SignRequest,
     /// Page origin.
-    origin: String,
+    pub(crate) origin: String,
     /// Token snapshot the candidates point into.
     pub(crate) inventory: Inventory,
     /// Eligible certificates, best first.
@@ -84,10 +85,41 @@ impl Drop for PendingGuard {
     }
 }
 
+/// Holds the single approval slot until dropped. Taken atomically before any
+/// await, so two requests arriving together cannot both proceed.
+struct Slot {
+    /// App handle.
+    app: AppHandle,
+}
+
+impl Slot {
+    /// Takes the slot, or `None` when another request holds it.
+    fn take(app: &AppHandle) -> Option<Self> {
+        app.state::<AppState>()
+            .busy
+            .compare_exchange(false, true, Ordering::AcqRel, Ordering::Acquire)
+            .ok()
+            .map(|_| Self { app: app.clone() })
+    }
+}
+
+impl Drop for Slot {
+    /// Frees the slot for the next request.
+    fn drop(&mut self) {
+        self.app
+            .state::<AppState>()
+            .busy
+            .store(false, Ordering::Release);
+    }
+}
+
 /// Handles one portal request end to end and returns the reply frame.
 pub(crate) async fn run(app: &AppHandle, portal: PortalRequest) -> String {
     let state = app.state::<AppState>();
-    if portal.request.signtype != SUPPORTED_SIGNTYPE || lock(&state.pending).is_some() {
+    let slot = (portal.request.signtype == SUPPORTED_SIGNTYPE)
+        .then(|| Slot::take(app))
+        .flatten();
+    let Some(_slot) = slot else {
         log::warn!(
             "refusing a request (signtype {}, or another is waiting)",
             portal.request.signtype
@@ -96,7 +128,7 @@ pub(crate) async fn run(app: &AppHandle, portal: PortalRequest) -> String {
             .activity
             .append(&entry(&portal.origin, &portal.request, None, "refused"));
         return REPLY_FAILED.to_owned();
-    }
+    };
     let inventory = state
         .token
         .inventory(state.settings().module_paths())
@@ -106,7 +138,14 @@ pub(crate) async fn run(app: &AppHandle, portal: PortalRequest) -> String {
     let found = candidates(&inventory.tokens, &criteria_for(&portal.request, now));
     let id = state.next_id();
     let expires_at = now + i64::try_from(APPROVAL_TIMEOUT.as_secs()).unwrap_or_default();
-    let view = pending_view(id, &portal, &inventory, &found, expires_at);
+    let view = pending_view(
+        id,
+        &portal.origin,
+        &portal.request,
+        &inventory,
+        &found,
+        expires_at,
+    );
     let (sender, receiver) = oneshot::channel();
     *lock(&state.pending) = Some(Pending {
         id,

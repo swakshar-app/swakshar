@@ -1,7 +1,7 @@
 /**
  * Activity: every request this Mac answered, stored only on this Mac.
  */
-import { type ReactElement, useState } from "react";
+import { type ReactElement, useEffect, useState } from "react";
 
 import { mainApi } from "../api/commands";
 import type { ActivityEntry } from "../api/types";
@@ -11,6 +11,8 @@ import { Button, Card, Notice, Tag, type Tone } from "../components/ui";
 
 /** How often the list refreshes. */
 const ACTIVITY_INTERVAL_MS = 4000;
+/** How long "Press again to clear" waits for the second press. */
+const CONFIRM_WINDOW_MS = 4000;
 
 /** Label and tone per outcome. */
 const OUTCOMES: Record<string, { readonly label: string; readonly tone: Tone }> = {
@@ -43,6 +45,13 @@ export function ActivityView(): ReactElement {
   const activity = usePolling(mainApi.activity, ACTIVITY_INTERVAL_MS);
   const action = useAction();
   const [confirming, setConfirming] = useState(false);
+  useEffect(() => {
+    if (!confirming) {
+      return undefined;
+    }
+    const timer = window.setTimeout(() => setConfirming(false), CONFIRM_WINDOW_MS);
+    return () => window.clearTimeout(timer);
+  }, [confirming]);
   const clear = (): void => {
     if (!confirming) {
       setConfirming(true);
@@ -82,8 +91,8 @@ export function ActivityView(): ReactElement {
               </tr>
             </thead>
             <tbody>
-              {entries.map((entry) => (
-                <Row key={`${String(entry.at)}-${entry.origin}-${entry.outcome}`} entry={entry} />
+              {entries.map((entry, index) => (
+                <Row key={`${String(entry.at)}-${String(index)}`} entry={entry} />
               ))}
             </tbody>
           </table>

@@ -33,9 +33,10 @@ export function StatusHeader({ overview, onChange }: { readonly overview: Overvi
   const action = useAction();
   const { title, detail, tone } = describe(overview);
   const paused = overview.server.state === "paused" || overview.server.state === "failed";
-  const toggle = (): void => {
+  const needsTrust = overview.onboardingComplete && overview.server.state === "running" && overview.trust.status === "not-trusted";
+  const run = (work: () => Promise<unknown>): void => {
     void action.run(async () => {
-      await mainApi.setPaused(!paused);
+      await work();
       onChange();
     });
   };
@@ -47,7 +48,12 @@ export function StatusHeader({ overview, onChange }: { readonly overview: Overvi
         <p>{detail}</p>
       </div>
       <div className="status-actions">
-        <Button icon={paused ? "play" : "pause"} onClick={toggle} disabled={action.busy || overview.server.state === "starting"}>
+        {needsTrust ? (
+          <Button variant="primary" icon="shield" onClick={() => run(mainApi.installTrust)} disabled={action.busy}>
+            Install certificate
+          </Button>
+        ) : null}
+        <Button icon={paused ? "play" : "pause"} onClick={() => run(() => mainApi.setPaused(!paused))} disabled={action.busy || overview.server.state === "starting"}>
           {paused ? "Resume signing" : "Pause signing"}
         </Button>
       </div>

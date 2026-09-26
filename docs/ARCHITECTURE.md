@@ -39,13 +39,16 @@ them (`TokenService`). Everything else talks to it through a channel.
 
 ## The approval lifecycle
 
-1. `pending::run` refuses a second request while one waits, and any
-   `signtype` other than `1`.
+1. `pending::run` takes the single approval slot atomically before any await,
+   so a second request is refused while one waits, as is any `signtype` other
+   than `1`.
 2. It reads tokens (no PIN), ranks certificates with `candidates`, stores a
    `Pending`, emits `sign-request`, and shows the approval window.
 3. It waits up to five minutes for the reply channel.
-4. `approve_request` signs. A wrong PIN keeps the request open and reports the
-   token's PIN flags. Success calls `finish` with the reply.
+4. `refresh_request` re-reads the tokens when one is plugged in after the
+   request arrived. `approve_request` signs. A wrong PIN keeps the request
+   open and reports the token's PIN flags. Success calls `finish` with the
+   reply.
 5. `cancel_request`, closing the window, the timeout, or the page leaving
    (`PendingGuard` on drop) all call `finish` too. `finish` is idempotent:
    the first caller wins.
@@ -56,7 +59,7 @@ them (`TokenService`). Everything else talks to it through a channel.
 | Window | Commands it may call |
 |---|---|
 | `main` | overview, tokens, doctor, settings, trust, activity, pause |
-| `approve` | `get_pending_request`, `approve_request`, `cancel_request` |
+| `approve` | `get_pending_request`, `refresh_request`, `approve_request`, `cancel_request` |
 
 `build.rs` declares every command; `capabilities/*.json` grants each window
 its subset. The CSP allows only the app's own assets and Tauri IPC.

@@ -1,9 +1,10 @@
 /**
  * The main window: a sidebar with four sections.
  */
-import { type ReactElement, useState } from "react";
+import { type ReactElement, useEffect, useState } from "react";
 
 import logo from "../../src-tauri/icons/128x128.png";
+import { mainApi } from "../api/commands";
 import { Icon, type IconName } from "../components/Icon";
 import { ActivityView } from "./ActivityView";
 import { HelpView } from "./HelpView";
@@ -38,6 +39,13 @@ function SectionView({ section }: { readonly section: Section }): ReactElement {
 /** Sidebar plus the selected section. */
 export function MainApp(): ReactElement {
   const [section, setSection] = useState<Section>("home");
+  const [version, setVersion] = useState<string | null>(null);
+  useEffect(() => {
+    mainApi.overview().then(
+      (overview) => setVersion(overview.appVersion),
+      () => undefined,
+    );
+  }, []);
   return (
     <div className="shell">
       <nav className="sidebar" aria-label="Sections">
@@ -57,6 +65,7 @@ export function MainApp(): ReactElement {
             <span>{entry.label}</span>
           </button>
         ))}
+        {version === null ? null : <p className="sidebar-footer muted">Version {version}</p>}
       </nav>
       <main className="content">
         <SectionView section={section} />

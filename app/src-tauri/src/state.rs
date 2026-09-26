@@ -1,13 +1,14 @@
 //! State shared by commands, the broker and the tray.
 
 use std::path::PathBuf;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Mutex, MutexGuard, PoisonError};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 use swakshar_token::TokenService;
 
 use crate::activity::ActivityLog;
+use crate::commands::overview::TrustView;
 use crate::pending::Pending;
 use crate::server_task::ServerControl;
 use crate::settings::Settings;
@@ -39,6 +40,10 @@ pub(crate) struct AppState {
     pub(crate) diagnostics: Mutex<Diagnostics>,
     /// Request history.
     pub(crate) activity: ActivityLog,
+    /// Set while a request holds the single approval slot.
+    pub(crate) busy: AtomicBool,
+    /// Last trust check and when it ran; asking macOS spawns a process.
+    pub(crate) trust_cache: Mutex<Option<(Instant, TrustView)>>,
     /// Next request id.
     next_id: AtomicU64,
 }
@@ -54,6 +59,8 @@ impl AppState {
             server: Mutex::new(ServerControl::default()),
             pending: Mutex::new(None),
             diagnostics: Mutex::new(Diagnostics::default()),
+            busy: AtomicBool::new(false),
+            trust_cache: Mutex::new(None),
             next_id: AtomicU64::new(1),
         }
     }

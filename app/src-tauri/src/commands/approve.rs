@@ -4,13 +4,15 @@ use std::time::Duration;
 
 use serde::Serialize;
 use swakshar_protocol::{REPLY_CANCELED, SignRequest};
-use swakshar_token::{AuthPin, CertRef, SignJob, TokenError, portal_reply};
+use swakshar_token::{
+    AuthPin, CertRef, SignJob, TokenError, candidates, criteria_for, portal_reply,
+};
 use tauri::{AppHandle, Manager as _, State};
 
 use crate::error::CommandResult;
 use crate::pending::{self, Outcome, Pending};
 use crate::state::{AppState, lock, unix_now};
-use crate::views::PendingView;
+use crate::views::{PendingView, pending_view};
 
 /// How an approval attempt ended.
 #[derive(Debug, Clone, Serialize)]
@@ -109,6 +111,34 @@ pub(crate) async fn approve_request(
             message: error.to_string(),
         },
     })
+}
+
+/// Re-reads the tokens for request `id`, for when the token was plugged in
+/// after the request arrived. `None` when the request has already ended.
+#[tauri::command]
+pub(crate) async fn refresh_request(app: AppHandle, id: u64) -> CommandResult<Option<PendingView>> {
+    let state = app.state::<AppState>();
+    let inventory = state
+        .token
+        .inventory(state.settings().module_paths())
+        .await?;
+    let now = unix_now();
+    let mut slot = lock(&state.pending);
+    let Some(pending) = slot.as_mut().filter(|pending| pending.id == id) else {
+        return Ok(None);
+    };
+    let found = candidates(&inventory.tokens, &criteria_for(&pending.request, now));
+    pending.view = pending_view(
+        id,
+        &pending.origin,
+        &pending.request,
+        &inventory,
+        &found,
+        pending.view.expires_at,
+    );
+    pending.inventory = inventory;
+    pending.candidates = found;
+    Ok(Some(pending.view.clone()))
 }
 
 /// Declines request `id`.

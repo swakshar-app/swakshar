@@ -1,16 +1,41 @@
-/* The approval window: one column, the decision at the bottom. */
+/* The approval window: a scrolling body and a decision bar that never scrolls away. */
 .approve {
   display: flex;
   flex-direction: column;
+  height: 100%;
+}
+
+.approve-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   gap: 16px;
-  min-height: 100%;
-  padding: 20px 22px 22px;
+  padding: 20px 22px;
+  overflow-y: auto;
+}
+
+.approve-body h1 {
+  font-size: 19px;
+}
+
+.approve-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 22px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.approve-footer .button {
+  min-width: 96px;
 }
 
 .approve-center {
   align-items: center;
   justify-content: center;
   gap: 12px;
+  padding: 24px 32px;
   text-align: center;
 }
 
@@ -82,7 +107,16 @@
   cursor: pointer;
 }
 
-.choice-selected {
+.choice input {
+  margin: 3px 0 0;
+}
+
+.choice:hover {
+  border-color: var(--border-strong);
+}
+
+.choice-selected,
+.choice-selected:hover {
   border-color: var(--accent);
   box-shadow: inset 0 0 0 1px var(--accent);
 }
@@ -109,14 +143,6 @@
 
 .warn-text {
   color: var(--warn);
-}
-
-.approve-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: auto;
-  padding-top: 8px;
 }
 
 .done-mark {

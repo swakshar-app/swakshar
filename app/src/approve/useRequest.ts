@@ -1,15 +1,16 @@
 /**
  * The waiting request, kept in step with the backend's events.
  */
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { approveApi } from "../api/commands";
 import type { PendingView } from "../api/types";
 
-/** The current request and a way to clear it locally. */
+/** The current request, and ways to clear or replace it locally. */
 export interface RequestState {
   readonly pending: PendingView | null;
   readonly clear: () => void;
+  readonly replace: (view: PendingView | null) => void;
 }
 
 /** Loads the waiting request and follows `sign-request` / `sign-finished`. */
@@ -40,7 +41,8 @@ export function useRequest(onNewRequest: () => void): RequestState {
       void unlistenFinished.then((unlisten) => unlisten());
     };
   }, [onNewRequest]);
-  return { pending, clear: () => setPending(null) };
+  const clear = useCallback(() => setPending(null), []);
+  return { pending, clear, replace: setPending };
 }
 
 /** Current Unix time, ticking every second while `running`. */

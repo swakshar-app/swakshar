@@ -12,6 +12,7 @@ const COMMANDS: &[&str] = &[
     "get_pending_request",
     "approve_request",
     "cancel_request",
+    "refresh_request",
     "get_settings",
     "save_settings",
     "install_trust",

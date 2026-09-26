@@ -3,7 +3,7 @@
 use swakshar_tls::{TlsIdentity, ensure_identity, tls_dir};
 use tauri::{AppHandle, Manager as _};
 
-use crate::commands::overview::{OverviewView, overview};
+use crate::commands::overview::{OverviewView, forget_trust, overview};
 use crate::error::{CommandError, CommandResult};
 use crate::state::{AppState, unix_now};
 
@@ -11,7 +11,9 @@ use crate::state::{AppState, unix_now};
 #[tauri::command]
 pub(crate) async fn install_trust(app: AppHandle) -> CommandResult<OverviewView> {
     let identity = identity(&app)?;
-    run_blocking(move || swakshar_tls::install_trust(&identity)).await?;
+    let installed = run_blocking(move || swakshar_tls::install_trust(&identity)).await;
+    forget_trust(&app);
+    installed?;
     overview(&app).await
 }
 
@@ -19,7 +21,9 @@ pub(crate) async fn install_trust(app: AppHandle) -> CommandResult<OverviewView>
 #[tauri::command]
 pub(crate) async fn remove_trust(app: AppHandle) -> CommandResult<OverviewView> {
     let identity = identity(&app)?;
-    run_blocking(move || swakshar_tls::remove_trust(&identity)).await?;
+    let removed = run_blocking(move || swakshar_tls::remove_trust(&identity)).await;
+    forget_trust(&app);
+    removed?;
     overview(&app).await
 }
 

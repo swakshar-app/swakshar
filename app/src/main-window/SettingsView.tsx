@@ -7,6 +7,7 @@ import { errorText, mainApi } from "../api/commands";
 import type { Settings } from "../api/types";
 import { useAction } from "../components/hooks";
 import { Button, Card, Notice } from "../components/ui";
+import { LocalCertificateCard } from "./LocalCertificateCard";
 
 /** Ports the GST portal tries. */
 const PORTS: readonly number[] = [1585, 2095, 2568, 2868, 4587];
@@ -87,6 +88,7 @@ export function SettingsView(): ReactElement {
           <small className="muted">Full paths to PKCS#11 driver files, one per line. Common drivers are found automatically.</small>
         </label>
       </Card>
+      <LocalCertificateCard />
       <div className="row">
         <Button variant="primary" onClick={save} disabled={action.busy}>Save settings</Button>
         {saved ? <span className="muted">Saved.</span> : null}

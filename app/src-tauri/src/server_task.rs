@@ -32,37 +32,70 @@ pub(crate) struct ServerControl {
     pub(crate) state: ServerState,
     /// Accept loop, aborted on pause.
     task: Option<JoinHandle<()>>,
+    /// Bumped on every start and stop; a launch that finishes after a newer
+    /// start or stop discards itself instead of replacing the current state.
+    generation: u64,
 }
 
 /// Starts the signer in the background.
 pub(crate) fn start(app: &AppHandle) {
+    let generation = transition(app, ServerState::Starting);
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
-        set_state(&app, ServerState::Starting, None);
-        match launch(&app).await {
-            Ok((port, task)) => set_state(&app, ServerState::Running(port), Some(task)),
-            Err(error) => {
-                log::error!("the signer could not start: {error}");
-                set_state(&app, ServerState::Failed(error), None);
+        let launched = launch(&app).await;
+        {
+            let state = app.state::<AppState>();
+            let mut control = lock(&state.server);
+            if control.generation != generation {
+                if let Ok((_, task)) = launched {
+                    task.abort();
+                }
+                return;
+            }
+            match launched {
+                Ok((port, task)) => {
+                    control.state = ServerState::Running(port);
+                    control.task = Some(task);
+                }
+                Err(error) => {
+                    log::error!("the signer could not start: {error}");
+                    control.state = ServerState::Failed(error);
+                }
             }
         }
+        tray::refresh(&app);
     });
 }
 
 /// Stops accepting connections and frees the port.
 pub(crate) fn stop(app: &AppHandle) {
-    set_state(app, ServerState::Paused, None);
+    transition(app, ServerState::Paused);
 }
 
 /// Applies new settings by starting again.
 pub(crate) fn restart(app: &AppHandle) {
-    stop(app);
     start(app);
 }
 
 /// The current state.
 pub(crate) fn current(app: &AppHandle) -> ServerState {
     lock(&app.state::<AppState>().server).state.clone()
+}
+
+/// Aborts any accept loop, moves to `state`, and returns the new generation.
+fn transition(app: &AppHandle, state: ServerState) -> u64 {
+    let generation = {
+        let app_state = app.state::<AppState>();
+        let mut control = lock(&app_state.server);
+        if let Some(task) = control.task.take() {
+            task.abort();
+        }
+        control.state = state;
+        control.generation += 1;
+        control.generation
+    };
+    tray::refresh(app);
+    generation
 }
 
 /// Loads or mints the certificate, binds a port and spawns the accept loop.
@@ -89,18 +122,4 @@ async fn launch(app: &AppHandle) -> Result<(u16, JoinHandle<()>), String> {
     });
     log::info!("listening on wss://127.0.0.1:{port}");
     Ok((port, task))
-}
-
-/// Replaces the state, aborting any previous accept loop, and refreshes the tray.
-fn set_state(app: &AppHandle, state: ServerState, task: Option<JoinHandle<()>>) {
-    {
-        let app_state = app.state::<AppState>();
-        let mut control = lock(&app_state.server);
-        if let Some(previous) = control.task.take() {
-            previous.abort();
-        }
-        control.state = state;
-        control.task = task;
-    }
-    tray::refresh(app);
 }

@@ -2,6 +2,7 @@
 .button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   padding: 7px 14px;
   border: 1px solid var(--border-strong);
@@ -16,6 +17,10 @@
 
 .button:hover:not(:disabled) {
   background: var(--surface-sunken);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 .button:disabled {
@@ -42,6 +47,10 @@
   border-color: transparent;
   background: transparent;
   color: var(--text-muted);
+}
+
+.button-quiet:hover:not(:disabled) {
+  color: var(--text);
 }
 
 .card {
@@ -148,6 +157,21 @@ textarea {
   border-radius: var(--radius-small);
   padding: 8px 10px;
   user-select: text;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+input:not([type="checkbox"], [type="radio"]):focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  padding: 0;
+  accent-color: var(--accent);
 }
 
 textarea {

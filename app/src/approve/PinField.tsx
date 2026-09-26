@@ -1,15 +1,16 @@
 /**
- * The token PIN field. The value lives here only until Sign is pressed.
+ * The token PIN field. The value lives here only until Sign is pressed; the
+ * field remounts for each attempt, so focus returns to it after a wrong PIN.
  */
 import { type KeyboardEvent, type ReactElement, useState } from "react";
 
-/** PIN input with a show toggle, a Caps Lock hint and lockout warnings. */
+/** PIN input with a show toggle, a Caps Lock hint and a last-try warning. */
 export function PinField(props: {
   readonly value: string;
   readonly onChange: (value: string) => void;
-  readonly warning: string | null;
+  readonly finalTry: boolean;
 }): ReactElement {
-  const { value, onChange, warning } = props;
+  const { value, onChange, finalTry } = props;
   const [visible, setVisible] = useState(false);
   const [capsLock, setCapsLock] = useState(false);
   const track = (event: KeyboardEvent<HTMLInputElement>): void => setCapsLock(event.getModifierState("CapsLock"));
@@ -35,7 +36,7 @@ export function PinField(props: {
         </button>
       </div>
       {capsLock ? <small className="warn-text">Caps Lock is on.</small> : null}
-      {warning === null ? null : <small className="warn-text">{warning}</small>}
+      {finalTry ? <small className="warn-text">One more wrong PIN will lock this token.</small> : null}
     </div>
   );
 }

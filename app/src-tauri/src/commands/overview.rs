@@ -1,5 +1,7 @@
 //! Status for the main window, and the actions next to it.
 
+use std::time::{Duration, Instant};
+
 use serde::Serialize;
 use swakshar_protocol::format_date_utc;
 use swakshar_tls::{TrustStatus, install_command, load_identity, tls_dir, trust_status};
@@ -10,6 +12,9 @@ use crate::error::{CommandError, CommandResult};
 use crate::server_task::{self, ServerState};
 use crate::state::{AppState, lock, unix_now};
 use crate::views::{InventoryView, inventory_view};
+
+/// How long a trust check stays fresh.
+const TRUST_CACHE_TTL: Duration = Duration::from_secs(10);
 
 /// Everything the Home view shows.
 #[derive(Debug, Clone, Serialize)]
@@ -133,7 +138,7 @@ pub(crate) async fn overview(app: &AppHandle) -> CommandResult<OverviewView> {
     let waiting = lock(&state.pending).is_some();
     Ok(OverviewView {
         server: server_view(server_task::current(app)),
-        trust: trust_view(tls_dir(&state.data_dir)).await?,
+        trust: cached_trust_view(app).await?,
         onboarding_complete: settings.onboarding_complete,
         waiting,
         last_connection: diagnostics
@@ -163,8 +168,29 @@ fn server_view(state: ServerState) -> ServerView {
     }
 }
 
+/// Trust state, asked of macOS at most every `TRUST_CACHE_TTL`: the check
+/// spawns `security`, and the Home and Help views poll.
+async fn cached_trust_view(app: &AppHandle) -> CommandResult<TrustView> {
+    let state = app.state::<AppState>();
+    let cached = lock(&state.trust_cache)
+        .as_ref()
+        .filter(|(checked, _)| checked.elapsed() < TRUST_CACHE_TTL)
+        .map(|(_, view)| view.clone());
+    if let Some(view) = cached {
+        return Ok(view);
+    }
+    let view = trust_view(tls_dir(&state.data_dir)).await?;
+    *lock(&state.trust_cache) = Some((Instant::now(), view.clone()));
+    Ok(view)
+}
+
+/// Forgets the cached trust state, after installing or removing trust.
+pub(crate) fn forget_trust(app: &AppHandle) {
+    *lock(&app.state::<AppState>().trust_cache) = None;
+}
+
 /// Trust state; asks macOS on a blocking thread.
-pub(crate) async fn trust_view(dir: std::path::PathBuf) -> CommandResult<TrustView> {
+async fn trust_view(dir: std::path::PathBuf) -> CommandResult<TrustView> {
     let view = tauri::async_runtime::spawn_blocking(move || match load_identity(&dir) {
         Ok(identity) => TrustView {
             status: match trust_status(&identity) {

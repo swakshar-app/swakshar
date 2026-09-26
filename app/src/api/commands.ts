@@ -56,6 +56,8 @@ export const approveApi = {
   /** Signs with the chosen certificate. The PIN is not kept anywhere here. */
   approve: (id: number, candidate: number, pin: string | null): Promise<ApproveResult> =>
     invoke<ApproveResult>("approve_request", { id, candidate, pin }),
+  /** Re-reads the tokens for the request, after plugging one in. */
+  refresh: (id: number): Promise<PendingView | null> => invoke<PendingView | null>("refresh_request", { id }),
   /** Declines the request. */
   cancel: (id: number): Promise<void> => invoke<void>("cancel_request", { id }),
   /** Subscribes to new requests. */

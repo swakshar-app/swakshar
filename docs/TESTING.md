@@ -56,8 +56,10 @@ Run in order on Apple Silicon, then on Intel if available.
    warning appears when it reports one.
 7. Plug two tokens: the certificate matching the PAN is preselected.
 8. Pull the token during a request: a clear error, nothing signed.
-9. Pause from the menu bar: the portal cannot connect. Resume: it can.
-10. Repeat 3 to 5 in Edge and Brave.
+9. Start a request with the token unplugged: the window says no suitable
+   certificate. Plug it in and press Check tokens again: it appears.
+10. Pause from the menu bar: the portal cannot connect. Resume: it can.
+11. Repeat 3 to 5 in Edge and Brave.
 
 ## Command-line checks
 

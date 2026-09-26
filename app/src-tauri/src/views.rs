@@ -1,8 +1,7 @@
 //! Serializable views of app state for the webview. Masked, never secret.
 
 use serde::Serialize;
-use swakshar_protocol::{RequestKind, format_date_utc, mask_pan};
-use swakshar_server::PortalRequest;
+use swakshar_protocol::{RequestKind, SignRequest, format_date_utc, mask_pan};
 use swakshar_token::{ArchSupport, Candidate, Inventory, PanMatch, TokenCertificate, TokenEntry};
 
 use crate::state::mask_serial;
@@ -143,19 +142,19 @@ pub(crate) struct CertView {
 /// The approval window's view of a request.
 pub(crate) fn pending_view(
     id: u64,
-    portal: &PortalRequest,
+    origin: &str,
+    request: &SignRequest,
     inventory: &Inventory,
     candidates: &[Candidate],
     expires_at: i64,
 ) -> PendingView {
-    let request = &portal.request;
     let (kind, content) = match request.kind() {
         RequestKind::Registration => ("registration", mask_pan(&request.content)),
         RequestKind::Document => ("document", request.content.clone()),
     };
     PendingView {
         id,
-        origin: portal.origin.clone(),
+        origin: origin.to_owned(),
         kind,
         pan_masked: request.pan.as_deref().map(mask_pan),
         content,
