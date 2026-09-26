@@ -5,6 +5,24 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## cargo-deny fails on what we can act on
+
+`2026-09-26-15-23-00-IST`
+
+**Decision.** `deny.toml` sets `unmaintained = "workspace"`, so unmaintained
+advisories fail only for crates we depend on directly, and
+`allow-wildcard-paths = true`, so our private crates may reach each other by
+path. Vulnerability, yanked, licence and source checks are unchanged and
+still cover the whole graph. Unused licences are dropped from the allow list.
+
+**Reasoning.** The first CI runs failed on `proc-macro-error` (pulled in by
+gtk-rs on Linux) and five `unic-*` crates (pulled in by Tauri's URL
+patterns). Neither can be replaced from this repository, so a failure there
+blocks every change without a fix to make; the advisories stay visible in
+upstream updates. Path dependencies between `publish = false` crates are
+never resolved from a registry, so the wildcard ban has nothing to protect
+there, and cargo-deny limits this allowance to private crates.
+
 ## Apache-2.0 is the only licence
 
 `2026-09-26-01-44-00-IST`
