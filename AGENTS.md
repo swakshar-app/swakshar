@@ -34,8 +34,9 @@ publishes the whole history.
   object type is `tag`, dereference it with
   `gh api repos/<owner>/<repo>/git/tags/<sha> --jq .object.sha`.
 - Pull requests are opened only when the owner asks for one.
-- Macro commits: one scoped commit per completed unit of work, with a title and a
-  body that says what changed and why.
+- Micro commits: one small commit per logical change, each building and
+  passing the gates on its own, with a conventional subject line and a short
+  body only when the reason is not obvious.
 
 ## Verification belongs to the owner
 
