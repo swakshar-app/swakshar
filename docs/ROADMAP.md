@@ -47,9 +47,9 @@ interface so PKCS#11 drivers keep working for every other brand.
   software installed, and the signature is byte-identical to the vendor
   driver's for the same content and time.
 
-## v0.3.0: a signing test page on swakshar.app
+## v0.3.0 (idea): a signing test page on swakshar.app
 
-A public page, `https://swakshar.app/test`, in the spirit of eMudhra's
+An idea, not yet committed to: a public page, `https://swakshar.app/test`, in the spirit of eMudhra's
 emBridge test tool: it checks a computer end to end without the GST portal.
 It finds the local signer on the portal's ports, checks the greeting, sends a
 test request, verifies the returned signature in the browser and shows the
