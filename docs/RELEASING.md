@@ -29,12 +29,22 @@ git tag v0.2.0 && git push origin develop v0.2.0
 
 1. creates a draft GitHub release for the tag;
 2. builds on `macos-15` (universal, signed, notarized), `windows-2025` (x64)
-   and `ubuntu-22.04` (x64), uploading every bundle to the draft;
+   and `ubuntu-22.04` (x64), uploading every bundle to the draft. On macOS
+   the app is notarized and stapled by Tauri, then the disk image is
+   notarized and stapled too and replaces the first upload;
 3. writes `SHA256SUMS` and, when the repository is public, attests build
    provenance over it.
 
-Install each asset from the draft on a clean machine, run
-[TESTING.md](TESTING.md), then publish the draft by hand.
+Before installing, check the macOS image the way Gatekeeper will:
+
+```sh
+spctl -a -t open --context context:primary-signature -v Swakshar_*_universal.dmg
+xcrun stapler validate Swakshar_*_universal.dmg
+```
+
+Both must pass (`accepted`, `source=Notarized Developer ID`). Then install
+each asset from the draft on a clean machine, run [TESTING.md](TESTING.md),
+and publish the draft by hand.
 
 Test builds without a release: run the workflow manually (Actions, release,
 Run workflow); bundles arrive as workflow artifacts.

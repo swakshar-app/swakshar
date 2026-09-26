@@ -134,6 +134,42 @@ jobs:
           updaterJsonPreferNsis: true
           uploadWorkflowArtifacts: ${{ github.event_name == 'workflow_dispatch' }}
 
+      # Tauri notarizes the app but not the disk image around it, and
+      # Gatekeeper checks the image first when a downloaded one is opened.
+      - name: Notarize and staple the disk image
+        if: runner.os == 'macOS'
+        env:
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          ARTIFACT_PATHS: ${{ steps.tauri.outputs.artifactPaths }}
+        run: |
+          dmg="$(jq -r '.[] | select(endswith(".dmg"))' <<< "${ARTIFACT_PATHS}")"
+          xcrun notarytool submit "${dmg}" --key "${RUNNER_TEMP}/AuthKey.p8" \
+            --key-id "${APPLE_API_KEY}" --issuer "${APPLE_API_ISSUER}" --wait
+          xcrun stapler staple "${dmg}"
+          spctl --assess --type open --context context:primary-signature --verbose "${dmg}"
+          echo "DMG_PATH=${dmg}" >> "${GITHUB_ENV}"
+
+      - name: Replace the draft's disk image with the stapled one
+        if: runner.os == 'macOS' && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --json assets \
+            --jq '.assets[].name | select(endswith(".dmg"))' |
+            while read -r name; do
+              gh release delete-asset "${GITHUB_REF_NAME}" "${name}" --repo "${GITHUB_REPOSITORY}" --yes
+            done
+          gh release upload "${GITHUB_REF_NAME}" "${DMG_PATH}" --repo "${GITHUB_REPOSITORY}"
+
+      - name: Replace the workflow artifact with the stapled disk image
+        if: runner.os == 'macOS' && github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: darwin-universal-dmg
+          path: ${{ env.DMG_PATH }}
+          overwrite: true
+
   checksums:
     name: Checksums and provenance
     needs: build
