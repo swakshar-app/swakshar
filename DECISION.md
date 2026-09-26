@@ -5,6 +5,22 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## The bundle identifier is app.swakshar.desktop
+
+`2026-09-27-01-42-00-IST`
+
+**Decision.** The Tauri and macOS bundle identifier, and with it the per-user
+data and log folders, is `app.swakshar.desktop`. The project's domain is
+`swakshar.app`. This supersedes the identifier and domains in "The product
+is named Swakshar" (`decisions/2026-09-25.md`); the rest of that entry
+stands.
+
+**Reasoning.** The owner registered `swakshar.app` on 2026-09-26, and a
+reverse-DNS identifier should come from a domain the project holds. It
+changes before the first release and before an App Store Connect record
+fixes it for good. Pre-release installs start fresh in the new folder: set
+up once more, and remove the old local certificate first.
+
 ## Signing is off until the user turns it on
 
 `2026-09-27-01-29-00-IST`

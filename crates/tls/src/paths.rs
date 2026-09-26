@@ -5,7 +5,7 @@ use std::env;
 use std::path::{Path, PathBuf};
 
 /// Bundle identifier; also the name of the per-user data directory.
-pub const APP_IDENTIFIER: &str = "com.swakshar.desktop";
+pub const APP_IDENTIFIER: &str = "app.swakshar.desktop";
 
 /// Sub-directory holding the TLS files.
 const TLS_DIR: &str = "tls";

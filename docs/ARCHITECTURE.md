@@ -77,7 +77,7 @@ dialog permission.
 
 ## Files on disk
 
-Per-user data directory: `~/Library/Application Support/com.swakshar.desktop`
+Per-user data directory: `~/Library/Application Support/app.swakshar.desktop`
 (shared by the app and the CLI).
 
 | Path | What |
@@ -87,7 +87,7 @@ Per-user data directory: `~/Library/Application Support/com.swakshar.desktop`
 | `settings.json` | Preferences |
 | `activity.jsonl` | Request history, masked |
 
-Logs: `~/Library/Logs/com.swakshar.desktop/`.
+Logs: `~/Library/Logs/app.swakshar.desktop/`.
 
 ## Local certificate
 
