@@ -6,7 +6,7 @@ every change follows, for people and tools alike.
 ## The short version
 
 - Branch from `develop` as `type/topic` (`feat/...`, `fix/...`, `docs/...`).
-- One scoped commit per completed unit of work, with a body that says why.
+- Small commits, one logical change each, every one passing the gates.
 - No AI attribution and no `Co-Authored-By` trailers.
 - Keep every file under 300 lines and every function short and documented.
 - No `#[allow]`, `@ts-ignore` or lint disables: fix the code instead.
