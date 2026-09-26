@@ -72,6 +72,27 @@ pub(crate) fn stop(app: &AppHandle) {
     transition(app, ServerState::Paused);
 }
 
+/// Turns signing on or off at the user's request and remembers the choice,
+/// so the next launch starts the same way.
+///
+/// # Errors
+///
+/// Returns the I/O error when the settings file cannot be written.
+pub(crate) fn set_signing(app: &AppHandle, enabled: bool) -> std::io::Result<()> {
+    {
+        let state = app.state::<AppState>();
+        let mut settings = lock(&state.settings);
+        settings.signing_enabled = enabled;
+        settings.save(&state.data_dir)?;
+    }
+    if !enabled {
+        stop(app);
+    } else if matches!(current(app), ServerState::Paused | ServerState::Failed(_)) {
+        start(app);
+    }
+    Ok(())
+}
+
 /// Applies new settings by starting again.
 pub(crate) fn restart(app: &AppHandle) {
     start(app);

@@ -136,6 +136,7 @@ export interface Settings {
   readonly extraOrigins: readonly string[];
   readonly startAtLogin: boolean;
   readonly onboardingComplete: boolean;
+  readonly signingEnabled: boolean;
 }
 
 /** One finished request. */

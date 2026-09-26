@@ -102,7 +102,8 @@ fn certificate_check(tokens: &InventoryView) -> DoctorCheck {
     let detail = match (count, soon) {
         (0, _) => "No valid signing certificate on the connected tokens.".to_owned(),
         (_, true) => "A certificate expires within 30 days. Renew it with your CA.".to_owned(),
-        (count, false) => format!("{count} valid signing certificate(s)."),
+        (1, false) => "1 valid signing certificate.".to_owned(),
+        (count, false) => format!("{count} valid signing certificates."),
     };
     check(
         "Signing certificate",
@@ -136,11 +137,17 @@ fn signer_check(status: &OverviewView) -> DoctorCheck {
         &status.server.error,
     ) {
         ("running", Some(port), _) => format!("Listening on 127.0.0.1:{port}."),
-        ("paused", _, _) => "Paused. Resume it from Home or the menu bar.".to_owned(),
+        ("paused", _, _) => "Signing is off. Turn it on from Home or the menu bar.".to_owned(),
         (_, _, Some(error)) => error.clone(),
         _ => "Starting.".to_owned(),
     };
-    check("Signer", status.server.state == "running", "fail", detail)
+    let off = status.server.state == "paused";
+    check(
+        "Signer",
+        status.server.state == "running",
+        if off { "warn" } else { "fail" },
+        detail,
+    )
 }
 
 /// A GST page has connected, or at least a browser trusted the certificate.

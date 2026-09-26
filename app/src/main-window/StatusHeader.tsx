@@ -16,9 +16,9 @@ function describe(overview: Overview): { readonly title: string; readonly detail
   }
   switch (server.state) {
     case "failed":
-      return { title: "Swakshar is not running", detail: server.error ?? "The signer could not start.", tone: "danger" };
+      return { title: "Signing could not start", detail: server.error ?? "The signer could not start.", tone: "danger" };
     case "paused":
-      return { title: "Signing is paused", detail: "The GST portal cannot reach Swakshar until you resume.", tone: "neutral" };
+      return { title: "Signing is off", detail: "Turn it on when you are ready to sign on the GST portal. Swakshar remembers your choice.", tone: "neutral" };
     case "starting":
       return { title: "Starting", detail: "Preparing the local certificate and a port.", tone: "neutral" };
     case "running":
@@ -32,7 +32,7 @@ function describe(overview: Overview): { readonly title: string; readonly detail
 export function StatusHeader({ overview, onChange }: { readonly overview: Overview; readonly onChange: () => void }): ReactElement {
   const action = useAction();
   const { title, detail, tone } = describe(overview);
-  const paused = overview.server.state === "paused" || overview.server.state === "failed";
+  const off = overview.server.state === "paused" || overview.server.state === "failed";
   const needsTrust = overview.onboardingComplete && overview.server.state === "running" && overview.trust.status === "not-trusted";
   const run = (work: () => Promise<unknown>): void => {
     void action.run(async () => {
@@ -43,7 +43,7 @@ export function StatusHeader({ overview, onChange }: { readonly overview: Overvi
   return (
     <section className={`status status-${tone}`}>
       <div className="status-text">
-        <Tag tone={tone}>{overview.server.state === "running" ? "Signer on" : "Signer off"}</Tag>
+        <Tag tone={tone}>{overview.server.state === "running" ? "Signing on" : "Signing off"}</Tag>
         <h1>{title}</h1>
         <p>{detail}</p>
       </div>
@@ -53,8 +53,13 @@ export function StatusHeader({ overview, onChange }: { readonly overview: Overvi
             Install certificate
           </Button>
         ) : null}
-        <Button icon={paused ? "play" : "pause"} onClick={() => run(() => mainApi.setPaused(!paused))} disabled={action.busy || overview.server.state === "starting"}>
-          {paused ? "Resume signing" : "Pause signing"}
+        <Button
+          variant={off ? "primary" : "secondary"}
+          icon={off ? "play" : "pause"}
+          onClick={() => run(() => mainApi.setPaused(!off))}
+          disabled={action.busy || overview.server.state === "starting"}
+        >
+          {off ? "Turn on signing" : "Turn off signing"}
         </Button>
       </div>
       {action.error === null ? null : <Notice tone="danger">{action.error}</Notice>}

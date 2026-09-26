@@ -32,7 +32,7 @@ pub(crate) struct TrayItems {
 pub(crate) fn create(app: &App) -> tauri::Result<()> {
     let status = MenuItem::with_id(app, "status", "Starting", false, None::<&str>)?;
     let open = MenuItem::with_id(app, ITEM_OPEN, "Open Swakshar", true, None::<&str>)?;
-    let pause = MenuItem::with_id(app, ITEM_PAUSE, "Pause signing", true, None::<&str>)?;
+    let pause = MenuItem::with_id(app, ITEM_PAUSE, "Turn on signing", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, ITEM_QUIT, "Quit Swakshar", true, None::<&str>)?;
     let first = PredefinedMenuItem::separator(app)?;
     let second = PredefinedMenuItem::separator(app)?;
@@ -60,13 +60,13 @@ pub(crate) fn refresh(app: &AppHandle) {
         (_, true) => "Waiting for your approval".to_owned(),
         (ServerState::Starting, _) => "Starting".to_owned(),
         (ServerState::Running(port), _) => format!("Ready on port {port}"),
-        (ServerState::Paused, _) => "Paused".to_owned(),
+        (ServerState::Paused, _) => "Signing is off".to_owned(),
         (ServerState::Failed(_), _) => "Not running, open Swakshar".to_owned(),
     };
-    let pause = if state == ServerState::Paused {
-        "Resume signing"
+    let pause = if matches!(state, ServerState::Paused | ServerState::Failed(_)) {
+        "Turn on signing"
     } else {
-        "Pause signing"
+        "Turn off signing"
     };
     for result in [items.status.set_text(status), items.pause.set_text(pause)] {
         if let Err(error) = result {
@@ -79,9 +79,16 @@ pub(crate) fn refresh(app: &AppHandle) {
 fn on_menu_event(app: &AppHandle, event: MenuEvent) {
     match event.id().as_ref() {
         ITEM_OPEN => windows::show(app, MAIN),
-        ITEM_PAUSE if server_task::current(app) == ServerState::Paused => server_task::start(app),
-        ITEM_PAUSE => server_task::stop(app),
-        ITEM_QUIT => app.exit(0),
+        ITEM_PAUSE => {
+            let off = matches!(
+                server_task::current(app),
+                ServerState::Paused | ServerState::Failed(_)
+            );
+            if let Err(error) = server_task::set_signing(app, off) {
+                log::warn!("could not save the signing choice: {error}");
+            }
+        }
+        ITEM_QUIT => crate::quit::quit(app),
         _ => {}
     }
 }

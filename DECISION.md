@@ -5,6 +5,21 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## Signing is off until the user turns it on
+
+`2026-09-27-01-29-00-IST`
+
+**Decision.** A fresh install starts with signing off: nothing listens on
+the portal's ports. Turning signing on or off, from Home or the menu bar,
+is saved, and each launch starts the way the user left it. Quit closes the
+listener before anything else.
+
+**Reasoning.** Asked for by the owner on 2026-09-26. A listener on
+loopback is small attack surface, and every signature still needs the user's
+approval and PIN, but there is no reason to listen before the user has set
+Swakshar up and chosen to sign. Remembering the choice keeps people who sign
+daily from turning it on after every restart.
+
 ## OpenSC is not bundled; a native driver is planned for v0.2.0
 
 `2026-09-26-22-14-00-IST`

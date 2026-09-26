@@ -23,6 +23,7 @@ pub(crate) fn save_settings(app: AppHandle, settings: Settings) -> CommandResult
     let previous = state.settings();
     let mut settings = settings;
     settings.onboarding_complete = previous.onboarding_complete;
+    settings.signing_enabled = previous.signing_enabled;
     settings.save(&state.data_dir)?;
     *lock(&state.settings) = settings.clone();
     if settings.start_at_login != previous.start_at_login {

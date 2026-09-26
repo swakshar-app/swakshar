@@ -109,17 +109,10 @@ pub(crate) fn open_status_page(app: AppHandle) -> CommandResult<()> {
         .map_err(|error| CommandError::Message(error.to_string()))
 }
 
-/// Pauses or resumes signing.
+/// Turns signing off (`paused`) or on, and remembers the choice.
 #[tauri::command]
 pub(crate) async fn set_paused(app: AppHandle, paused: bool) -> CommandResult<OverviewView> {
-    if paused {
-        server_task::stop(&app);
-    } else if matches!(
-        server_task::current(&app),
-        ServerState::Paused | ServerState::Failed(_)
-    ) {
-        server_task::start(&app);
-    }
+    server_task::set_signing(&app, !paused)?;
     overview(&app).await
 }
 

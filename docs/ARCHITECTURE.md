@@ -54,6 +54,15 @@ them (`TokenService`). Everything else talks to it through a channel.
    the first caller wins.
 6. `finish` records history, emits `sign-finished`, and hides the window.
 
+## Signing on and off, and quitting
+
+Signing starts off on a fresh install. Turning it on or off, from Home or
+the menu bar, starts or stops the listener and saves `signingEnabled`, so the
+next launch starts the same way. Quit (`quit::quit`) answers a waiting page
+with "signing canceled", stops the listener so the port closes at once,
+hides the windows, then exits; a three second deadline ends the process if a
+token driver holds up the rest of the teardown.
+
 ## Windows and permissions
 
 | Window | Commands it may call |

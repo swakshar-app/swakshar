@@ -40,6 +40,7 @@ export function SetupSteps(props: {
   const hasToken = (tokens?.tokens.length ?? 0) > 0;
   const hasCertificate = tokens?.tokens.some((token) => token.certificates.some((cert) => cert.valid && cert.signing)) ?? false;
   const trusted = overview.trust.status === "trusted";
+  const running = overview.server.state === "running";
   const firstOpen = [hasToken, hasCertificate, trusted].findIndex((done) => !done) + 1 || STEP_COUNT;
   const run = (work: () => Promise<unknown>): void => {
     void action.run(async () => {
@@ -61,8 +62,9 @@ export function SetupSteps(props: {
           <p>The portal connects to Swakshar over a secure local connection, so your Mac must trust Swakshar's local certificate. It works only for this computer (127.0.0.1) and cannot be used for any website. macOS will ask for your password.</p>
           <div className="row">
             <Button variant="primary" icon="shield" onClick={() => run(mainApi.installTrust)} disabled={action.busy}>Install certificate</Button>
-            {trusted ? <Button icon="external" onClick={() => run(mainApi.openStatusPage)}>Test in browser</Button> : null}
+            {trusted && running ? <Button icon="external" onClick={() => run(mainApi.openStatusPage)}>Test in browser</Button> : null}
           </div>
+          {trusted && !running ? <p className="muted">Turn on signing above to test the connection in a browser.</p> : null}
           {overview.trust.command === null ? null : (
             <details className="details">
               <summary>What this runs</summary>

@@ -41,35 +41,44 @@ except the token call itself.
 
 Run in order on Apple Silicon, then on Intel if available.
 
-1. Fresh install, token plugged in, its driver not installed: step 1 names the
+1. Fresh install: Home says Signing is off and nothing listens on the portal's
+   ports (`lsof -nP -iTCP:1585 -sTCP:LISTEN` prints nothing).
+2. With the token plugged in and its driver not installed: step 1 names the
    token and says which driver it needs.
-2. Install the token's driver: within a few seconds, without restarting
+3. Install the token's driver: within a few seconds, without restarting
    Swakshar, the guide disappears and steps 1 and 2 complete. The certificate
-   appears without a PIN.
-3. Install certificate: macOS asks for your password; step 3 completes. Test
-   in browser opens `https://127.0.0.1:1585/` without a warning in Chrome and
-   Firefox.
-4. On the GST portal, register or update the DSC in Chrome. Allow the local
+   appears without a PIN, with the certificate authorities folded under More
+   certificates.
+4. Install certificate: macOS asks for your password; step 3 completes. Turn
+   on signing: Test in browser opens `https://127.0.0.1:1585/` without a
+   warning in Chrome and Firefox.
+5. Quit and reopen Swakshar: signing is still on. Turn it off, quit and
+   reopen: it stays off.
+6. On the GST portal, register or update the DSC in Chrome. Allow the local
    network prompt. The approval window shows the site, "DSC registration for
    PAN" and the matching certificate first. Sign: the portal succeeds.
-5. File a return with DSC. The approval window shows the document fingerprint.
+7. File a return with DSC. The approval window shows the document fingerprint.
    Sign: the portal issues an ARN.
-6. Press Cancel: the portal shows "Signing Cancelled"; Activity shows
+8. Press Cancel: the portal shows "Signing Cancelled"; Activity shows
    Declined.
-7. Enter a wrong PIN once: the window says so and stays open; the token's
+9. Enter a wrong PIN once: the window says so and stays open; the token's
    warning appears when it reports one.
-8. Plug two tokens: the certificate matching the PAN is preselected.
-9. Pull the token during a request: a clear error, nothing signed.
-10. Start a request with the token unplugged: the window says no suitable
+10. Plug two tokens: the certificate matching the PAN is preselected.
+11. Pull the token during a request: a clear error, nothing signed.
+12. Start a request with the token unplugged: the window says no suitable
     certificate. Plug it in and press Check tokens again: it appears.
-11. Settings, Add driver file: the picker opens in `/usr/local/lib`. A driver
+13. Settings, Add driver file: the picker opens in `/usr/local/lib`. A driver
     for the other processor, or one Swakshar already finds, is refused with a
     reason. Remove takes it off the list.
-12. Pause from the menu bar: the portal cannot connect. Resume: it can.
-13. Open Swakshar from Applications after setup: the main window appears.
-    Open it again while it runs: the window comes forward. With Start at
-    login on, logging in keeps it in the menu bar with no window.
-14. Repeat 4 to 6 in Edge and Brave.
+14. Turn signing off from the menu bar: the portal cannot connect. Turn it on:
+    it can.
+15. Open Swakshar from Applications after setup: the main window appears. Open
+    it again while it runs: the window comes forward. With Start at login on,
+    logging in keeps it in the menu bar with no window.
+16. Quit from the menu bar while a request waits: the page shows Signing
+    Cancelled, the windows close at once, and port 1585 is free within a
+    second.
+17. Repeat 6 to 8 in Edge and Brave.
 
 ## Command-line checks
 

@@ -8,6 +8,7 @@ mod broker;
 mod commands;
 mod error;
 mod pending;
+mod quit;
 mod server_task;
 mod settings;
 mod state;

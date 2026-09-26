@@ -28,10 +28,13 @@ pub(crate) struct Settings {
     pub(crate) start_at_login: bool,
     /// Guided setup finished.
     pub(crate) onboarding_complete: bool,
+    /// The user turned signing on; off on a fresh install.
+    pub(crate) signing_enabled: bool,
 }
 
 impl Default for Settings {
-    /// Automatic port, the August 2026 greeting, GST origins only.
+    /// Automatic port, the August 2026 greeting, GST origins only, and
+    /// signing off until the user turns it on.
     fn default() -> Self {
         Self {
             modules: Vec::new(),
@@ -40,6 +43,7 @@ impl Default for Settings {
             extra_origins: Vec::new(),
             start_at_login: false,
             onboarding_complete: false,
+            signing_enabled: false,
         }
     }
 }

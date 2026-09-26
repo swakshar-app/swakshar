@@ -41,7 +41,9 @@ first signed release is being prepared. Windows and Linux follow. See
 3. **Install the local certificate.** macOS asks for your password once. The
    certificate is valid only for `127.0.0.1` and `localhost`; its CA key is
    never saved, so it can never vouch for a real website.
-4. **Allow Swakshar on the portal.** Chrome, Edge and Brave ask once whether
+4. **Turn on signing.** New installs start with signing off, so nothing
+   listens on your computer until you choose. Swakshar remembers your choice.
+5. **Allow Swakshar on the portal.** Chrome, Edge and Brave ask once whether
    the GST site may connect to apps on this device. Choose Allow.
 
 Swakshar lives in the menu bar and keeps running when its window is closed.
