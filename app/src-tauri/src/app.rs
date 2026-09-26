@@ -63,13 +63,16 @@ pub(crate) fn run() -> Result<(), String> {
         ])
         .build(tauri::generate_context!())
         .map_err(|error| error.to_string())?
-        .run(|app, event| match event {
-            RunEvent::ExitRequested {
+        .run(|app, event| {
+            if let RunEvent::ExitRequested {
                 api, code: None, ..
-            } => api.prevent_exit(),
-            #[cfg(target_os = "macos")]
-            RunEvent::Reopen { .. } => windows::show(app, MAIN),
-            _ => {}
+            } = &event
+            {
+                api.prevent_exit();
+            }
+            if reopened(&event) {
+                windows::show(app, MAIN);
+            }
         });
     Ok(())
 }
@@ -86,4 +89,18 @@ fn setup(app: &mut App, show_window: bool) -> Result<(), Box<dyn std::error::Err
         windows::show(app.handle(), MAIN);
     }
     Ok(())
+}
+
+/// True when macOS asks the running app to reopen, because the user opened
+/// it again from Applications, Spotlight or the Dock.
+#[cfg(target_os = "macos")]
+fn reopened(event: &RunEvent) -> bool {
+    matches!(event, RunEvent::Reopen { .. })
+}
+
+/// Other systems have no reopen event; a second start reaches the running
+/// app through the single-instance plugin instead.
+#[cfg(not(target_os = "macos"))]
+fn reopened(_event: &RunEvent) -> bool {
+    false
 }
