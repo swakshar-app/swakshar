@@ -51,6 +51,8 @@ interface so PKCS#11 drivers keep working for every other brand.
 
 - One-click install of a token maker's driver from its official download,
   for brands without a native driver.
-- Windows and Linux releases, Windows signing through SignPath, an
-  `ubuntu-22.04-arm` build, and the in-app updater (`docs/RELEASING.md`,
-  Going public).
+- The in-app updater, first thing after going public: it downloads the new
+  version, quits the running app, replaces it and relaunches, so nobody has
+  to quit Swakshar from the menu bar before dragging a new copy over it.
+- Windows and Linux releases, Windows signing through SignPath and an
+  `ubuntu-22.04-arm` build (`docs/RELEASING.md`, Going public).
