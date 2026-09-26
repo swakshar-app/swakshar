@@ -5,6 +5,29 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## Updates ship in v0.1.0 from GitHub Releases; nothing else leaves the Mac
+
+`2026-09-27-02-15-00-IST`
+
+**Decision.** v0.1.0 includes `tauri-plugin-updater`, checking the latest
+published GitHub release's `latest.json` ten seconds after launch, hourly,
+and when the main window opens, on by default with a Settings switch.
+Updates download on the user's click and install on Restart now or Restart
+when idle, never during a request. Local notifications
+(`tauri-plugin-notification`) are on by default with a Settings switch. Bug
+reports use a diagnostic report the user copies; Swakshar sends no
+telemetry and uses no remote push. v0.1.0 ships only when the release
+process works end to end, including a release-candidate update. The App
+Store follows later. This supersedes "The in-app updater waits for the
+first public release"; `docs/DISTRIBUTION.md` holds the design.
+
+**Reasoning.** Owner's answers on 2026-09-27. A copy released without the
+updater can only be updated by downloading it again, so the updater has to
+be in the first release. GitHub Releases needs no other host, and
+`releases/latest` only ever points at a published release. A diagnostic
+report the user reviews helps forks and bug reports without breaking the
+promise that nothing leaves the Mac except the update check.
+
 ## The bundle identifier is app.swakshar.desktop
 
 `2026-09-27-01-42-00-IST`

@@ -17,11 +17,13 @@ Built and on `develop`:
 - Token drivers: users install their token maker's driver once, as they do
   today for other signers. Swakshar recognises the token on USB, names the
   driver it needs, and picks it up as soon as it is installed.
+- In-app updates, local notifications and a diagnostic report, as
+  `docs/DISTRIBUTION.md` describes (being built).
 
 Waiting on the owner:
 
-1. Apple signing secrets in GitHub (`docs/RELEASING.md`), then one manual
-   release run to confirm signing and notarization.
+1. The updater key in GitHub secrets, then a release-candidate update test
+   (`0.1.0-rc.1` updating itself to `0.1.0-rc.2`). Apple signing is done.
 2. The manual acceptance run on a real token and the real portal
    (`docs/TESTING.md`).
 3. Tag `v0.1.0`, install the draft assets on a clean Mac, publish.
@@ -73,9 +75,5 @@ sandbox feasibility spike. The steps and open questions are in
 
 - One-click install of a token maker's driver from its official download,
   for brands without a native driver.
-- The in-app updater and local notifications, as planned in
-  `docs/DISTRIBUTION.md`. Proposed for v0.1.0 with updates hosted on
-  swakshar.app, so early adopters never have to reinstall by hand; waiting
-  on the owner's decision.
 - Windows and Linux releases, Windows signing through SignPath and an
   `ubuntu-22.04-arm` build (`docs/RELEASING.md`, Going public).

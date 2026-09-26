@@ -19,65 +19,72 @@ macOS itself.
 ## In-app updates (direct download)
 
 Tauri's official `tauri-plugin-updater`, driven from Rust like the driver
-picker, so no window gains updater permissions.
+picker, so no window gains updater permissions. Ships in v0.1.0.
 
-1. **Check.** At launch and every 24 hours, a `GET` of
-   `https://swakshar.app/updates/latest.json`. The request carries only the
-   platform, architecture and current version in the URL; no install ID, no
-   token or certificate data. Settings gets "Check for updates
-   automatically" (on by default) and Help gets "Check now". This stays the
+1. **Check.** Ten seconds after launch, then every hour, and whenever the
+   main window opens if the last check is over fifteen minutes old. One
+   `GET` of `latest.json` from the latest published GitHub release; the URL
+   carries only platform, architecture and current version, no install ID,
+   token or certificate data. Settings has "Check for updates
+   automatically" (on by default) and Help has "Check now". This stays the
    only outbound request Swakshar makes, as `AGENTS.md` requires.
-2. **Tell.** Home shows a banner and the menu bar gains "Update to X.Y.Z".
-   Nothing downloads without the user's say-so.
-3. **Install.** On "Install and restart": download, verify the update's
-   signature against the public key built into the app, replace the app,
-   relaunch. Refused while a signature request is waiting. "Install when I
-   quit" is the other choice.
+2. **Tell.** Home shows "Swakshar X.Y.Z is available" with What's new (the
+   release notes carried in `latest.json`) and Download; the menu bar gains
+   "Update to X.Y.Z". Nothing downloads without the user's click.
+3. **Install.** Once downloaded: Restart now, or Restart when idle, which
+   waits until no request is waiting and no GST page has connected for five
+   minutes. Never while a request is waiting. Signing comes back as the user
+   left it.
 4. **Trust.** Two signatures guard every update: Tauri's (ed25519 key held
-   only in GitHub secrets) and Apple's (Developer ID plus notarization on the
-   `.app` inside). A tampered or unsigned update is rejected before it is
-   written.
+   only in GitHub secrets and the owner's password manager) and Apple's
+   (Developer ID plus notarization on the `.app` inside). A tampered or
+   unsigned update is rejected before it is written.
 
 What it needs:
 
-- An updater key pair: `pnpm tauri signer generate`. The private key and its
-  password go into GitHub secrets (`TAURI_SIGNING_PRIVATE_KEY`,
+- An updater key pair (owner): `pnpm tauri signer generate`. The private key
+  and its password go into GitHub secrets (`TAURI_SIGNING_PRIVATE_KEY`,
   `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`, names the release workflow already
-  reads) and the owner's password manager; the public key goes into
-  `tauri.conf.json`. **Losing the private key strands every install**: they
-  can only update by downloading again by hand.
-- `bundle.createUpdaterArtifacts: true`, so macOS releases also produce
-  `Swakshar.app.tar.gz` and its `.sig`, and the release workflow writes
-  `latest.json`.
-- Hosting on swakshar.app: `latest.json` and the update archives on a
-  static host (for example Cloudflare Pages or R2). The URL then never
-  depends on where the code lives or whether the repository is public.
-- A publish step: the release workflow uploads the archives and
-  `latest.json` only after the draft release is published, so nobody is
-  offered an update that is still being tested.
-
-**Ship it in v0.1.0.** A copy without the updater can only be updated by
-downloading again, so every early adopter would have to reinstall once.
-Hosting on swakshar.app removes the reason for waiting until the repository
-is public (the 2026-09-26 updater entry in `DECISION.md`).
+  reads) and the password manager; the public key goes into the app.
+  **Losing the private key strands every install**: they could only update
+  by downloading again by hand.
+- `bundle.createUpdaterArtifacts: true`, so releases also produce the update
+  archives and `.sig` files, and the release workflow writes `latest.json`
+  into the draft release.
+- Hosting: GitHub Releases. The app asks
+  `https://github.com/swakshar-app/swakshar/releases/latest/download/latest.json`,
+  which only resolves once the repository is public and always points at
+  the newest **published** release, so a draft under test is never offered.
+  A debug build can point at a local file with `SWAKSHAR_UPDATE_ENDPOINT` to
+  test the flow while the repository is private.
+- A release candidate test: install `0.1.0-rc.1`, publish `0.1.0-rc.2`,
+  and watch rc.1 update itself before `v0.1.0` ships.
 
 ## Notifications
 
 Tauri's official `tauri-plugin-notification` posts local macOS
 notifications; no server is involved. macOS asks the user's permission the
-first time.
+first time, and Settings has "Show notifications" (on by default).
 
 | When | Notification |
 |---|---|
-| An update is ready | "Swakshar X.Y.Z is ready. Install and restart?" |
+| An update is ready | "Swakshar X.Y.Z is ready. Restart to update." |
 | A signing certificate expires within 30 days (checked daily) | "Your DSC for NAME expires on DATE. Renew it with your CA." |
 | A signature request arrives while Swakshar's windows are hidden behind full-screen apps | "The GST portal wants your signature." |
 
-**No remote push.** Push through Apple's service would need a server that
-knows every install and its device token, which is exactly the tracking
-Swakshar promises not to do, and there is nothing server-side to announce
-that the update check does not already carry. Tauri's official notification
-plugin is used for local notifications only.
+**No remote push and no telemetry.** Push through Apple's service would need
+a server that knows every install and its device token, which is the
+tracking Swakshar promises not to do.
+
+## Diagnostics for bug reports
+
+Help gets "Copy diagnostic report" and "Report a problem", so people, and
+forks, can debug a machine without Swakshar ever sending anything itself.
+The report holds the app version, macOS version and architecture, the
+checklist, the driver list with load errors, and recent log lines; never
+names, PANs, token serials or the activity history. Report a problem opens
+a new GitHub issue in the browser; the user pastes and reviews the report
+before submitting.
 
 ## Mac App Store
 
@@ -103,8 +110,11 @@ plugin is used for local notifications only.
    questions (TLS and digital signatures only).
 7. **Review and release.**
 
-## Decisions the owner needs to make
+## Settled
 
-1. Host updates on swakshar.app, and ship the updater in v0.1.0.
-2. Update checks on by default, with the Settings switch to turn them off.
-3. Start the App Store spike after v0.1.0 ships.
+The owner's answers of 2026-09-27 are recorded in `DECISION.md`: the
+updater ships in v0.1.0, served from GitHub Releases, with checks on by
+default; v0.1.0 ships only once the whole release process works, updates
+included; notifications are local and can be turned off; diagnostics are
+copied by the user, never sent; the App Store is low priority, after
+v0.1.0.
