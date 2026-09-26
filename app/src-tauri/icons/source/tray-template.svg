@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <mask id="cut">
+      <rect width="1024" height="1024" fill="#fff"/>
+      <rect x="457" y="220" width="110" height="40" rx="20" fill="#000"/>
+      <rect x="360" y="518" width="304" height="26" fill="#000"/>
+      <circle cx="512" cy="660" r="30" fill="#000"/>
+      <rect x="501" y="670" width="22" height="210" fill="#000"/>
+    </mask>
+  </defs>
+  <g transform="translate(457 572) scale(1.53) rotate(45) translate(-512 -524)">
+    <g mask="url(#cut)" fill="#000">
+      <rect x="382" y="180" width="260" height="360" rx="56"/>
+      <path d="M382 538 H642 C642 660 566 770 512 868 C458 770 382 660 382 538 Z"/>
+    </g>
+  </g>
+</svg>

@@ -1,106 +1,44 @@
 /**
- * Generates every icon the app bundle needs from the vector mark in
- * `icon-art.ts`: PNG sizes, `icon.icns`, `icon.ico` and the menu bar
- * template. Run with `node scripts/generate-icons.ts`.
+ * Regenerates the bundle icons from the SVG masters in
+ * `app/src-tauri/icons/source` with Tauri's own `tauri icon` command, then
+ * keeps only the files the bundler and the tray use. Run with
+ * `pnpm run icons`.
  */
-import { mkdirSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { copyFileSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { renderAppIcon, renderTrayIcon } from "./icon-art.ts";
-import { encodePng } from "./png.ts";
-
-/** Output directory. */
+/** Icon directory next to `tauri.conf.json`. */
 const ICON_DIR = join(import.meta.dirname, "..", "app", "src-tauri", "icons");
-
-/** PNG files Tauri's bundler reads, with their pixel sizes. */
-const PNG_FILES: ReadonlyArray<readonly [string, number]> = [
-  ["32x32.png", 32],
-  ["128x128.png", 128],
-  ["128x128@2x.png", 256],
-  ["icon.png", 512],
-];
-
-/** ICNS entries (PNG payloads) and their pixel sizes. */
-const ICNS_ENTRIES: ReadonlyArray<readonly [string, number]> = [
-  ["icp4", 16],
-  ["icp5", 32],
-  ["ic07", 128],
-  ["ic08", 256],
-  ["ic09", 512],
-  ["ic10", 1024],
-  ["ic11", 32],
-  ["ic12", 64],
-  ["ic13", 256],
-  ["ic14", 512],
-];
-
-/** ICO sizes (PNG payloads). */
-const ICO_SIZES: readonly number[] = [16, 24, 32, 48, 64, 128, 256];
-
-/** Menu bar icon size in pixels; macOS scales it to the menu bar height. */
+/** App icon master: 1024 canvas, macOS grid, transparent margin. */
+const APP_SOURCE = join(ICON_DIR, "source", "app-icon.svg");
+/** Menu bar master: black on transparent, used as a template image. */
+const TRAY_SOURCE = join(ICON_DIR, "source", "tray-template.svg");
+/** Files from `tauri icon` that `tauri.conf.json` and the UI reference. */
+const APP_FILES: readonly string[] = ["32x32.png", "128x128.png", "128x128@2x.png", "icon.png", "icon.icns", "icon.ico"];
+/** Menu bar icon size in pixels (22 points at 2x). */
 const TRAY_SIZE = 44;
 
-/** Rendered PNGs by size, so each size renders once. */
-const cache = new Map<number, Buffer>();
-
-/** The app icon at `size` pixels, as PNG. */
-function appPng(size: number): Buffer {
-  const cached = cache.get(size);
-  if (cached !== undefined) {
-    return cached;
-  }
-  const png = encodePng(size, size, renderAppIcon(size));
-  cache.set(size, png);
-  return png;
-}
-
-/** Apple icon file: `icns` header, then typed PNG entries. */
-function icns(): Buffer {
-  const entries = ICNS_ENTRIES.map(([type, size]) => {
-    const data = appPng(size);
-    const header = Buffer.alloc(8);
-    header.write(type, 0, "ascii");
-    header.writeUInt32BE(data.length + 8, 4);
-    return Buffer.concat([header, data]);
+/** Runs `tauri icon` on `source` into a fresh temporary directory. */
+function tauriIcon(source: string, extra: readonly string[]): string {
+  const output = mkdtempSync(join(tmpdir(), "swakshar-icons-"));
+  execFileSync("pnpm", ["--filter", "swakshar-ui", "exec", "tauri", "icon", source, "--output", output, ...extra], {
+    stdio: ["ignore", "ignore", "inherit"],
   });
-  const body = Buffer.concat(entries);
-  const header = Buffer.alloc(8);
-  header.write("icns", 0, "ascii");
-  header.writeUInt32BE(body.length + 8, 4);
-  return Buffer.concat([header, body]);
+  return output;
 }
 
-/** Windows icon file: directory, entries, then PNG payloads. */
-function ico(): Buffer {
-  const images = ICO_SIZES.map((size) => appPng(size));
-  const directory = Buffer.alloc(6 + ICO_SIZES.length * 16);
-  directory.writeUInt16LE(0, 0);
-  directory.writeUInt16LE(1, 2);
-  directory.writeUInt16LE(ICO_SIZES.length, 4);
-  let offset = directory.length;
-  ICO_SIZES.forEach((size, index) => {
-    const entry = 6 + index * 16;
-    const length = images[index]?.length ?? 0;
-    directory.writeUInt8(size >= 256 ? 0 : size, entry);
-    directory.writeUInt8(size >= 256 ? 0 : size, entry + 1);
-    directory.writeUInt16LE(1, entry + 4);
-    directory.writeUInt16LE(32, entry + 6);
-    directory.writeUInt32LE(length, entry + 8);
-    directory.writeUInt32LE(offset, entry + 12);
-    offset += length;
-  });
-  return Buffer.concat([directory, ...images]);
-}
-
-/** Writes every icon file. */
+/** Writes the app icons and the menu bar template. */
 function main(): void {
-  mkdirSync(ICON_DIR, { recursive: true });
-  for (const [name, size] of PNG_FILES) {
-    writeFileSync(join(ICON_DIR, name), appPng(size));
+  const app = tauriIcon(APP_SOURCE, []);
+  for (const name of APP_FILES) {
+    copyFileSync(join(app, name), join(ICON_DIR, name));
   }
-  writeFileSync(join(ICON_DIR, "icon.icns"), icns());
-  writeFileSync(join(ICON_DIR, "icon.ico"), ico());
-  writeFileSync(join(ICON_DIR, "tray-template.png"), encodePng(TRAY_SIZE, TRAY_SIZE, renderTrayIcon(TRAY_SIZE)));
+  rmSync(app, { recursive: true, force: true });
+  const tray = tauriIcon(TRAY_SOURCE, ["--png", String(TRAY_SIZE)]);
+  copyFileSync(join(tray, `${String(TRAY_SIZE)}x${String(TRAY_SIZE)}.png`), join(ICON_DIR, "tray-template.png"));
+  rmSync(tray, { recursive: true, force: true });
   process.stdout.write(`icons written to ${ICON_DIR}\n`);
 }
 

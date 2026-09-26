@@ -5,6 +5,23 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## The app icon is a token that ends in a pen nib, drawn from SVG
+
+`2026-09-26-20-37-00-IST`
+
+**Decision.** The mark is a DSC token whose end is a fountain-pen nib,
+drawing a gold signature on the brand teal square. The masters are
+`app/src-tauri/icons/source/app-icon.svg` and `tray-template.svg`, and
+`pnpm run icons` builds every bundle icon and the menu bar template with
+Tauri's own `tauri icon`. The hand-rolled rasterizer and PNG, ICNS and ICO
+encoders in `scripts/` are removed.
+
+**Reasoning.** The first mark, a seal ring around a squiggle, read as a
+wave. The new one says what the app does, your token signs, and keeps its
+silhouette at 32 pixels, where the signature becomes an underline. Tauri's
+generator is the official tool for these formats, so the repository no longer
+maintains its own image encoders.
+
 ## Token drivers come from their makers; Swakshar guides the install
 
 `2026-09-26-20-36-00-IST`
