@@ -7,6 +7,7 @@ use rustls::ServerConfig;
 use swakshar_protocol::SIGNER_PORTS;
 use tokio::net::TcpListener;
 use tokio::sync::Semaphore;
+use tokio::task::JoinSet;
 use tokio_rustls::TlsAcceptor;
 
 use crate::broker::Broker;
@@ -40,6 +41,9 @@ pub async fn bind_signer_port(preferred: Option<u16>) -> Result<(TcpListener, u1
 }
 
 /// Accepts connections until the task is dropped or the socket fails.
+/// Connections live in a `JoinSet` owned by this future, so dropping it
+/// (turning signing off, quitting) closes every open connection as well as
+/// the port, and no page can send a request to a signer that is off.
 ///
 /// # Errors
 ///
@@ -58,14 +62,16 @@ pub async fn serve<B: Broker>(
         acceptor: TlsAcceptor::from(tls),
     });
     let slots = Arc::new(Semaphore::new(MAX_CONNECTIONS));
+    let mut connections = JoinSet::new();
     loop {
         let (tcp, _) = listener.accept().await?;
+        while connections.try_join_next().is_some() {}
         let Ok(permit) = Arc::clone(&slots).try_acquire_owned() else {
             log::warn!("too many open connections; refusing one");
             continue;
         };
         let shared = Arc::clone(&shared);
-        tokio::spawn(async move {
+        connections.spawn(async move {
             if let Err(error) = handle_connection(tcp, &shared).await {
                 log::debug!("connection ended: {error}");
             }

@@ -31,6 +31,7 @@ That decision is the asset to protect.
 | A website fingerprints the signer | No CORS headers anywhere; the status page answers top-level navigations only (Fetch Metadata) |
 | A compromised GST page asks for a signature | Every signature needs the user to press Sign in the approval window, which shows the site, the purpose and the exact document fingerprint |
 | Request flooding | One request at a time; frames capped at 16 KiB; 32 connections at most; handshake timeouts |
+| A page keeps a connection open after signing is turned off | Connections belong to the listener's `JoinSet`: turning signing off or quitting closes them with the port (`crates/server/src/listener.rs`) |
 | The page leaves mid-request | The request is abandoned and the window closes (`PendingGuard`) |
 | Wrong certificate | PAN hash matching, validity and class filters; mismatches flagged in red |
 | PIN lockout | Token PIN flags read before signing; last-try warning; no automatic retries |
@@ -38,7 +39,7 @@ That decision is the asset to protect.
 | A stolen CA key | There is none on disk: the CA key is generated in memory, signs one leaf, and is dropped. The CA is name-constrained to `127.0.0.1` and `localhost` |
 | A stolen leaf key | Only useful to someone who can already listen on the port; file mode 0600 |
 | Driver misbehaviour | Every signature is verified against the certificate before it is sent; fallback mechanism on mismatch |
-| XSS in the app's own UI | No remote content, strict CSP, per-window capabilities: the approval window can call only its three commands |
+| XSS in the app's own UI | No remote content, strict CSP, per-window capabilities: the approval window can call only its four commands |
 | Malicious dependency | Exact pins, committed lockfiles, a seven-day release-age gate, `cargo deny` in CI |
 | Tampered release | SHA-pinned actions, signed and notarized macOS builds, `SHA256SUMS`, build provenance once public |
 
@@ -61,3 +62,14 @@ Logs record origins and outcomes, never PINs, signatures or full PANs.
   approval window is the defence; it depends on the user reading it.
 - GSTN verifies the signature against the DSC registered to the PAN. Swakshar
   cannot help with anything after the reply.
+- Only browsers enforce `Origin`. Any program running as the user can
+  connect claiming a GST origin; it still needs the user to approve in the
+  window and to enter the token PIN, and such a program already runs as the
+  user.
+- Library validation is off so token drivers signed by other teams load
+  (`decisions/2026-09-25.md`). Drivers load only from known install
+  locations or files the user picked; a program able to change those
+  already runs as the user.
+- The PIN passes through the webview as a JavaScript string on its way to
+  Rust, and JavaScript strings cannot be wiped. The form clears it at once,
+  and it is useless without the physical token.
