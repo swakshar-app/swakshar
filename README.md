@@ -89,5 +89,4 @@ cargo build -p swakshar-cli --release        # target/release/swakshar
 
 ## Licence
 
-Dual licensed under [MIT](LICENSE-MIT) or [Apache 2.0](LICENSE-APACHE), at
-your option.
+[Apache License 2.0](LICENSE).

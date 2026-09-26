@@ -5,6 +5,19 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## Apache-2.0 is the only licence
+
+`2026-09-26-01-44-00-IST`
+
+**Decision.** Swakshar is licensed under the Apache License 2.0 alone.
+`LICENSE` holds the text and every manifest says `Apache-2.0`. This supersedes
+the licence in "Owner choices for the build"; the rest of that entry stands.
+
+**Reasoning.** Chosen by the owner on 2026-09-26. Apache-2.0 keeps what the
+dual licence was for: an explicit patent grant, and an OSI-approved licence
+that qualifies for SignPath's free signing. One licence is simpler to state,
+to comply with, and to accept contributions under.
+
 ## Signatures are pinned byte for byte to the Python signer
 
 `2026-09-26-01-43-00-IST`

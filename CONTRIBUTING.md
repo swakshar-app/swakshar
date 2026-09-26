@@ -39,3 +39,9 @@ or anything from a real person's token (names, PANs, serials, certificates).
 If the portal starts rejecting signatures, open an issue with the exact portal
 message, the date, the browser, and the frames from DevTools (Network, the
 `127.0.0.1` row, Messages) with the PAN masked.
+
+## Licence
+
+Swakshar is licensed under the [Apache License 2.0](LICENSE). By submitting a
+contribution you agree it is licensed under the same terms, as section 5 of
+the licence describes.

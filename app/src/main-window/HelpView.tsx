@@ -66,7 +66,7 @@ export function HelpView(): ReactElement {
         </dl>
       </Card>
       <Card title="About">
-        <p>Swakshar is open-source software (MIT or Apache 2.0). It signs only with your own DSC, only after you approve each request, and sends nothing anywhere else.</p>
+        <p>Swakshar is open-source software under the Apache License 2.0. It signs only with your own DSC, only after you approve each request, and sends nothing anywhere else.</p>
         <p className="muted">Not affiliated with, endorsed by, or supported by GSTN, the GST Council, Infosys, eMudhra, or any Certifying Authority.</p>
       </Card>
     </div>
