@@ -47,6 +47,41 @@ interface so PKCS#11 drivers keep working for every other brand.
   software installed, and the signature is byte-identical to the vendor
   driver's for the same content and time.
 
+## v0.3.0: a signing test page on swakshar.app
+
+A public page, `https://swakshar.app/test`, in the spirit of eMudhra's
+emBridge test tool: it checks a computer end to end without the GST portal.
+It finds the local signer on the portal's ports, checks the greeting, sends a
+test request, verifies the returned signature in the browser and shows the
+certificate that signed.
+
+- The page is static and sends nothing anywhere; the signature is checked in
+  the browser and discarded.
+- Swakshar answers `https://swakshar.app` for test requests only: content
+  that starts with `swakshar-test:` and a random value, never a PAN or a
+  document fingerprint. The approval window labels them as a test.
+- The allowed origin, the test content rule and the approval label get a
+  `DECISION.md` entry and a `THREAT_MODEL.md` row before this ships.
+
+## Mac App Store (feasibility first)
+
+Publish on the Mac App Store alongside the notarized download. The store
+requires the App Sandbox, so this starts as a spike that answers:
+
+- Token access: a sandboxed app cannot load vendor PKCS#11 files from
+  `/usr/local/lib`. The store build would sign through macOS CryptoTokenKit
+  (`com.apple.security.smartcard`), which reaches tokens whose makers ship a
+  CryptoTokenKit extension (the HYP2003 installer includes one), or through
+  the v0.2.0 native driver over USB (`com.apple.security.device.usb`).
+- The local signer needs `com.apple.security.network.server`, which the
+  sandbox allows.
+- Local certificate trust: whether a sandboxed app can install its loopback
+  CA must be proven; if not, the store build walks the user through
+  Keychain Access instead.
+- Release side: an App ID, Mac App Distribution and Mac Installer
+  Distribution certificates, a provisioning profile, an App Store Connect
+  record, and a privacy policy on swakshar.app.
+
 ## Later
 
 - One-click install of a token maker's driver from its official download,
