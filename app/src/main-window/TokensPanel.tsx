@@ -20,8 +20,28 @@ function CertTags({ cert }: { readonly cert: CertView }): ReactElement {
   );
 }
 
-/** One token with its certificates. */
+/** Certificates as cards. */
+function CertList({ certs }: { readonly certs: readonly CertView[] }): ReactElement {
+  return (
+    <ul className="certs">
+      {certs.map((cert) => (
+        <li key={`${cert.holder}-${cert.validUntil}-${cert.issuer}`} className="cert">
+          <div>
+            <p className="cert-holder">{cert.holder}</p>
+            <p className="muted">Issued by {cert.issuer}, valid until {cert.validUntil}</p>
+          </div>
+          <CertTags cert={cert} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** One token: its signing certificates first; the certificate authorities and
+ * any encryption certificates it also carries stay folded away. */
 function TokenCard({ token }: { readonly token: TokenView }): ReactElement {
+  const signing = token.certificates.filter((cert) => cert.signing);
+  const others = token.certificates.filter((cert) => !cert.signing);
   return (
     <div className="token">
       <div className="token-head">
@@ -32,17 +52,16 @@ function TokenCard({ token }: { readonly token: TokenView }): ReactElement {
         {token.pinFinalTry ? <Tag tone="warn">One PIN try left</Tag> : null}
       </div>
       {token.certificates.length === 0 ? <p className="muted">No certificates on this token.</p> : null}
-      <ul className="certs">
-        {token.certificates.map((cert) => (
-          <li key={`${cert.holder}-${cert.validUntil}-${cert.issuer}`} className="cert">
-            <div>
-              <p className="cert-holder">{cert.holder}</p>
-              <p className="muted">Issued by {cert.issuer}, valid until {cert.validUntil}</p>
-            </div>
-            <CertTags cert={cert} />
-          </li>
-        ))}
-      </ul>
+      {token.certificates.length > 0 && signing.length === 0 ? <p className="muted">No signing certificate on this token.</p> : null}
+      <CertList certs={signing} />
+      {others.length === 0 ? null : (
+        <details className="details">
+          <summary>
+            {others.length === 1 ? "1 more certificate" : `${String(others.length)} more certificates`}, for certificate authorities or encryption
+          </summary>
+          <CertList certs={others} />
+        </details>
+      )}
     </div>
   );
 }

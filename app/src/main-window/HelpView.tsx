@@ -6,16 +6,27 @@ import type { ReactElement } from "react";
 import { mainApi } from "../api/commands";
 import type { DoctorCheck } from "../api/types";
 import { useAction, usePolling } from "../components/hooks";
+import { Icon, type IconName } from "../components/Icon";
 import { Button, Card, Notice, Tag, type Tone } from "../components/ui";
 
 /** How often the checklist refreshes. */
 const DOCTOR_INTERVAL_MS = 6000;
 
-/** Tone per check status. */
-const CHECK_TONES: Record<DoctorCheck["status"], Tone> = { pass: "success", warn: "warn", fail: "danger" };
+/** Icon per check status. */
+const CHECK_ICONS: Record<DoctorCheck["status"], IconName> = { pass: "check", warn: "alert", fail: "close" };
 
-/** Label per check status. */
-const CHECK_LABELS: Record<DoctorCheck["status"], string> = { pass: "OK", warn: "Check", fail: "Fix" };
+/** Spoken label per check status. */
+const CHECK_LABELS: Record<DoctorCheck["status"], string> = { pass: "Passed", warn: "Needs a look", fail: "Needs fixing" };
+
+/** How many checks pass, as a header tag. */
+function Summary({ checks }: { readonly checks: readonly DoctorCheck[] }): ReactElement | null {
+  if (checks.length === 0) {
+    return null;
+  }
+  const passed = checks.filter((check) => check.status === "pass").length;
+  const tone: Tone = passed === checks.length ? "success" : "warn";
+  return <Tag tone={tone}>{`${String(passed)} of ${String(checks.length)} pass`}</Tag>;
+}
 
 /** Portal messages and what they usually mean. */
 const PORTAL_ERRORS: ReadonlyArray<readonly [string, string]> = [
@@ -31,13 +42,15 @@ export function HelpView(): ReactElement {
   const action = useAction();
   return (
     <div className="page">
-      <Card title="Checklist">
+      <Card title="Checklist" actions={<Summary checks={doctor.data ?? []} />}>
         {doctor.error === null ? null : <Notice tone="danger">{doctor.error}</Notice>}
         <ul className="checks">
           {(doctor.data ?? []).map((check) => (
-            <li key={check.label} className="check">
-              <Tag tone={CHECK_TONES[check.status]}>{CHECK_LABELS[check.status]}</Tag>
-              <div>
+            <li key={check.label} className={`check check-${check.status}`}>
+              <span className="check-mark" role="img" aria-label={CHECK_LABELS[check.status]}>
+                <Icon name={CHECK_ICONS[check.status]} size={16} />
+              </span>
+              <div className="check-text">
                 <p className="check-label">{check.label}</p>
                 <p className="muted">{check.detail}</p>
               </div>

@@ -3,7 +3,9 @@
  */
 import "./styles/base.css";
 import "./styles/components.css";
+import "./styles/controls.css";
 import "./styles/layout.css";
+import "./styles/sections.css";
 import "./styles/approve.css";
 
 import { getCurrentWindow } from "@tauri-apps/api/window";
