@@ -134,7 +134,7 @@ Cargo.toml  Cargo.lock  rust-toolchain.toml  deny.toml  clippy.toml
 package.json  pnpm-workspace.yaml  pnpm-lock.yaml  .nvmrc  .oxlintrc.json
 crates/  protocol  cms  token  tls  server  cli
 app/     src/ (React UI)  src-tauri/ (Tauri shell, capabilities, icons/source SVGs)
-docs/    PROTOCOL  ARCHITECTURE  THREAT_MODEL  TESTING  RELEASING  ROADMAP
+docs/    PROTOCOL  ARCHITECTURE  THREAT_MODEL  TESTING  RELEASING  ROADMAP  DISTRIBUTION
 decisions/  archived DECISION.md entries
 fixtures/   reference CMS and reply from a throwaway identity
 scripts/ check-line-limit.ts  bump-version.ts  generate-icons.ts
