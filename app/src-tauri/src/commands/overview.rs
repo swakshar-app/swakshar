@@ -38,6 +38,8 @@ pub(crate) struct OverviewView {
     pub(crate) greeting_version: String,
     /// App version.
     pub(crate) app_version: String,
+    /// In-app update state.
+    pub(crate) update: crate::updates::UpdateView,
 }
 
 /// Signer state.
@@ -148,6 +150,7 @@ pub(crate) async fn overview(app: &AppHandle) -> CommandResult<OverviewView> {
         status_page_seen: diagnostics.status_page_seen,
         greeting_version: settings.greeting_version,
         app_version: app.package_info().version.to_string(),
+        update: crate::updates::view(app),
     })
 }
 

@@ -9,6 +9,7 @@ import { Notice } from "../components/ui";
 import { SetupSteps } from "./SetupSteps";
 import { StatusHeader } from "./StatusHeader";
 import { TokensPanel } from "./TokensPanel";
+import { UpdateBanner } from "./UpdateBanner";
 
 /** How often the status refreshes. */
 const OVERVIEW_INTERVAL_MS = 3000;
@@ -25,6 +26,7 @@ export function HomeView(): ReactElement {
   return (
     <div className="page">
       <StatusHeader overview={overview.data} onChange={overview.refresh} />
+      <UpdateBanner update={overview.data.update} onChange={overview.refresh} />
       {overview.data.onboardingComplete ? null : (
         <SetupSteps overview={overview.data} tokens={tokens.data} onChange={overview.refresh} onTokensChange={tokens.refresh} />
       )}

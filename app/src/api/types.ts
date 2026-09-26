@@ -23,6 +23,17 @@ export interface EventView {
   readonly at: number;
 }
 
+/** In-app update state. */
+export interface UpdateView {
+  readonly state: "unavailable" | "idle" | "checking" | "available" | "downloading" | "ready" | "failed";
+  readonly version: string | null;
+  readonly notes: string | null;
+  readonly progress: number | null;
+  readonly error: string | null;
+  readonly lastChecked: number | null;
+  readonly restartWhenIdle: boolean;
+}
+
 /** Home view status. */
 export interface Overview {
   readonly server: ServerView;
@@ -34,6 +45,7 @@ export interface Overview {
   readonly statusPageSeen: boolean;
   readonly greetingVersion: string;
   readonly appVersion: string;
+  readonly update: UpdateView;
 }
 
 /** One token driver. */
@@ -137,6 +149,8 @@ export interface Settings {
   readonly startAtLogin: boolean;
   readonly onboardingComplete: boolean;
   readonly signingEnabled: boolean;
+  readonly updateChecks: boolean;
+  readonly notifications: boolean;
 }
 
 /** One finished request. */

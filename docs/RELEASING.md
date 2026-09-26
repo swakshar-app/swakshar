@@ -13,8 +13,22 @@ public and on a plan that has them):
 | `APPLE_API_ISSUER` | App Store Connect issuer ID |
 | `APPLE_API_KEY` | App Store Connect key ID |
 | `APPLE_API_PRIVATE_KEY` | Contents of `AuthKey_<id>.p8` |
+| `TAURI_SIGNING_PRIVATE_KEY` | Contents of the updater private key file |
+| `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | Its password |
 
-The updater is not enabled yet; its keys come with the first public release.
+The updater key signs every update; the app carries its public key. Create
+it once, on the owner's Mac:
+
+```sh
+pnpm tauri signer generate -w ~/.tauri/swakshar-updater.key
+```
+
+Store the private key file and its password in the password manager and in
+the two secrets above; losing them strands every install on its current
+version. Paste the public key (`~/.tauri/swakshar-updater.key.pub`) into
+`plugins.updater.pubkey` in `app/src-tauri/tauri.conf.json` and set
+`bundle.createUpdaterArtifacts` to `true`. Until then the app reports
+"Updates are not set up in this build".
 
 ## Cutting a release
 
@@ -24,6 +38,10 @@ pnpm install && cargo update -w        # refresh lockfiles for the new version
 git commit -am "chore(release): 0.2.0"
 git tag v0.2.0 && git push origin develop v0.2.0
 ```
+
+Before the first release, prove updates end to end: tag `v0.1.0-rc.1`,
+install it, publish its draft, tag and publish `v0.1.0-rc.2`, and watch rc.1
+offer, download and restart into rc.2.
 
 `.github/workflows/release.yml` then:
 

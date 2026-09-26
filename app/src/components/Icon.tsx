@@ -20,7 +20,8 @@ export type IconName =
   | "external"
   | "close"
   | "refresh"
-  | "plus";
+  | "plus"
+  | "download";
 
 /** Path data per icon. */
 const PATHS: Record<IconName, readonly string[]> = {
@@ -39,6 +40,7 @@ const PATHS: Record<IconName, readonly string[]> = {
   close: ["M6 6l12 12", "M18 6 6 18"],
   refresh: ["M20 11a8 8 0 1 0-2.3 5.7", "M20 4v7h-7"],
   plus: ["M12 5v14", "M5 12h14"],
+  download: ["M12 4v11", "M7 10l5 5 5-5", "M5 20h14"],
 };
 
 /** One icon. Decorative: screen readers skip it; pair it with text. */

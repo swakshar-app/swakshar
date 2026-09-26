@@ -58,6 +58,14 @@ export function SettingsView(): ReactElement {
           <input type="checkbox" checked={settings.startAtLogin} onChange={(event) => update({ startAtLogin: event.target.checked })} />
           <span>Start Swakshar when you log in</span>
         </label>
+        <label className="field field-inline">
+          <input type="checkbox" checked={settings.updateChecks} onChange={(event) => update({ updateChecks: event.target.checked })} />
+          <span>Check for updates automatically</span>
+        </label>
+        <label className="field field-inline">
+          <input type="checkbox" checked={settings.notifications} onChange={(event) => update({ notifications: event.target.checked })} />
+          <span>Show notifications</span>
+        </label>
       </Card>
       <Card title="Connection">
         <label className="field">

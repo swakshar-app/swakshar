@@ -2,9 +2,11 @@
 //! window's capability allows only its own subset.
 
 pub(crate) mod approve;
+pub(crate) mod diagnostics;
 pub(crate) mod doctor;
 pub(crate) mod drivers;
 pub(crate) mod history;
 pub(crate) mod overview;
 pub(crate) mod settings;
 pub(crate) mod trust;
+pub(crate) mod updates;

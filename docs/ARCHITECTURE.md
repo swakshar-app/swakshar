@@ -63,11 +63,22 @@ with "signing canceled", stops the listener so the port closes at once,
 hides the windows, then exits; a three second deadline ends the process if a
 token driver holds up the rest of the teardown.
 
+## Updates, notifications and diagnostics
+
+`updates.rs` checks the latest published release's `latest.json` ten
+seconds after launch, hourly, and when the main window opens after fifteen
+minutes; `update_install.rs` downloads on the user's click and installs on
+Restart now or once idle (no waiting request, no GST connection for five
+minutes). `notify.rs` posts local notifications when Settings allows: an
+update, a DSC expiring within 30 days (checked daily), a request whose
+window lacks focus. `commands/diagnostics.rs` builds the report users copy
+into bug reports; nothing is sent.
+
 ## Windows and permissions
 
 | Window | Commands it may call |
 |---|---|
-| `main` | overview, tokens, drivers, doctor, settings, trust, activity, pause |
+| `main` | overview, tokens, drivers, doctor, settings, trust, activity, pause, updates, diagnostics |
 | `approve` | `get_pending_request`, `refresh_request`, `approve_request`, `cancel_request` |
 
 `build.rs` declares every command; `capabilities/*.json` grants each window

@@ -8,6 +8,8 @@ import type { DoctorCheck } from "../api/types";
 import { useAction, usePolling } from "../components/hooks";
 import { Icon, type IconName } from "../components/Icon";
 import { Button, Card, Notice, Tag, type Tone } from "../components/ui";
+import { DiagnosticsCard } from "./DiagnosticsCard";
+import { UpdatesCard } from "./UpdatesCard";
 
 /** How often the checklist refreshes. */
 const DOCTOR_INTERVAL_MS = 6000;
@@ -78,6 +80,8 @@ export function HelpView(): ReactElement {
           ))}
         </dl>
       </Card>
+      <UpdatesCard />
+      <DiagnosticsCard />
       <Card title="About">
         <p>Swakshar is open-source software under the Apache License 2.0. It signs only with your own DSC, only after you approve each request, and sends nothing anywhere else.</p>
         <p className="muted">Not affiliated with, endorsed by, or supported by GSTN, the GST Council, Infosys, eMudhra, or any Certifying Authority.</p>

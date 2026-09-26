@@ -22,6 +22,10 @@ allow = [
   "Unicode-3.0",
   "Zlib",
 ]
+# Mozilla's root certificate list, which the updater's HTTPS client trusts.
+exceptions = [
+  { crate = "webpki-root-certs", allow = ["CDLA-Permissive-2.0"] },
+]
 
 [bans]
 multiple-versions = "warn"

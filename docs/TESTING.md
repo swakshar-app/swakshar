@@ -78,7 +78,16 @@ Run in order on Apple Silicon, then on Intel if available.
 16. Quit from the menu bar while a request waits: the page shows Signing
     Cancelled, the windows close at once, and port 1585 is free within a
     second.
-17. Repeat 6 to 8 in Edge and Brave.
+17. Help, Report a problem: the report lists versions, the checklist and
+    drivers, shows the home folder as `~`, and contains no name, PAN or token
+    serial.
+18. Settings: turn off Show notifications; a request behind a full-screen app
+    then shows no notification. Turn it back on: it does.
+19. Updates (after the updater key is set up): an older build offers the newer
+    published release on Home and in the menu bar; What's new shows its notes;
+    Download shows progress; Restart now relaunches into the new version with
+    signing as it was; Restart when idle waits for a quiet moment.
+20. Repeat 6 to 8 in Edge and Brave.
 
 ## Command-line checks
 

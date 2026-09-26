@@ -14,6 +14,7 @@ import type {
   Overview,
   PendingView,
   Settings,
+  UpdateView,
 } from "./types";
 
 /** Event carrying a new request to the approval window. */
@@ -47,6 +48,16 @@ export const mainApi = {
   installTrust: (): Promise<Overview> => invoke<Overview>("install_trust"),
   /** Removes the local certificate's trust. */
   removeTrust: (): Promise<Overview> => invoke<Overview>("remove_trust"),
+  /** Checks for an update now. */
+  checkForUpdate: (): Promise<UpdateView> => invoke<UpdateView>("check_for_update"),
+  /** Starts downloading the offered update. */
+  downloadUpdate: (): Promise<UpdateView> => invoke<UpdateView>("download_update"),
+  /** Restarts into the downloaded update now, or when Swakshar is idle. */
+  restartToUpdate: (whenIdle: boolean): Promise<UpdateView> => invoke<UpdateView>("restart_to_update", { whenIdle }),
+  /** A diagnostic report for bug reports; never sent anywhere. */
+  diagnosticReport: (): Promise<string> => invoke<string>("diagnostic_report"),
+  /** Opens a new GitHub issue in the browser. */
+  openIssuePage: (): Promise<void> => invoke<void>("open_issue_page"),
   /** Recent requests, newest first. */
   activity: (): Promise<ActivityEntry[]> => invoke<ActivityEntry[]>("get_activity"),
   /** Deletes the history. */

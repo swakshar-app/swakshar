@@ -6,12 +6,14 @@ use tauri::{App, RunEvent};
 use tauri_plugin_autostart::MacosLauncher;
 
 use crate::commands::{
-    approve, doctor, drivers, history, overview, settings as settings_commands, trust,
+    approve, diagnostics, doctor, drivers, history, overview, settings as settings_commands, trust,
+    updates as update_commands,
 };
 use crate::settings::Settings;
 use crate::state::AppState;
+use crate::updates::Updates;
 use crate::windows::{self, MAIN};
-use crate::{server_task, tray};
+use crate::{notify, server_task, tray, updates};
 
 /// Argument the login item passes, so a start at login stays in the menu bar.
 const LOGIN_ARG: &str = "--at-login";
@@ -39,7 +41,10 @@ pub(crate) fn run() -> Result<(), String> {
         ))
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(AppState::new(data_dir, token, settings))
+        .manage(Updates::default())
         .setup(move |app| setup(app, show_window, signing))
         .on_window_event(windows::on_event)
         .invoke_handler(tauri::generate_handler![
@@ -57,6 +62,11 @@ pub(crate) fn run() -> Result<(), String> {
             settings_commands::save_settings,
             drivers::add_driver,
             drivers::remove_driver,
+            update_commands::check_for_update,
+            update_commands::download_update,
+            update_commands::restart_to_update,
+            diagnostics::diagnostic_report,
+            diagnostics::open_issue_page,
             trust::install_trust,
             trust::remove_trust,
             history::get_activity,
@@ -97,6 +107,8 @@ fn setup(
     if show_window {
         windows::show(app.handle(), MAIN);
     }
+    updates::spawn_schedule(app.handle());
+    notify::spawn_expiry_watch(app.handle());
     Ok(())
 }
 

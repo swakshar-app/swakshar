@@ -42,6 +42,8 @@ That decision is the asset to protect.
 | XSS in the app's own UI | No remote content, strict CSP, per-window capabilities: the approval window can call only its four commands |
 | Malicious dependency | Exact pins, committed lockfiles, a seven-day release-age gate, `cargo deny` in CI |
 | Tampered release | SHA-pinned actions, signed and notarized macOS builds, `SHA256SUMS`, build provenance once public |
+| Tampered or malicious update | The updater verifies each archive against the public key built into the app (private key only in GitHub secrets), over HTTPS, and the app inside is Apple-signed and notarized; nothing installs without the user's click |
+| The update check leaking who uses Swakshar | The request carries platform, architecture and version only; it can be turned off in Settings |
 
 ## Data kept on disk
 

@@ -30,11 +30,15 @@ pub(crate) struct Settings {
     pub(crate) onboarding_complete: bool,
     /// The user turned signing on; off on a fresh install.
     pub(crate) signing_enabled: bool,
+    /// Check for updates automatically.
+    pub(crate) update_checks: bool,
+    /// Show local notifications.
+    pub(crate) notifications: bool,
 }
 
 impl Default for Settings {
-    /// Automatic port, the August 2026 greeting, GST origins only, and
-    /// signing off until the user turns it on.
+    /// Automatic port, the August 2026 greeting, GST origins only, signing
+    /// off until the user turns it on, update checks and notifications on.
     fn default() -> Self {
         Self {
             modules: Vec::new(),
@@ -44,6 +48,8 @@ impl Default for Settings {
             start_at_login: false,
             onboarding_complete: false,
             signing_enabled: false,
+            update_checks: true,
+            notifications: true,
         }
     }
 }

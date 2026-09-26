@@ -7,12 +7,15 @@ mod attached;
 mod broker;
 mod commands;
 mod error;
+mod notify;
 mod pending;
 mod quit;
 mod server_task;
 mod settings;
 mod state;
 mod tray;
+mod update_install;
+mod updates;
 mod views;
 mod windows;
 

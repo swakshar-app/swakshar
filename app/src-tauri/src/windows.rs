@@ -34,6 +34,9 @@ pub(crate) fn show(app: &AppHandle, label: &str) {
         }
     }
     announce(app, label, true);
+    if label == MAIN {
+        crate::updates::check_if_stale(app);
+    }
 }
 
 /// Hides a window.

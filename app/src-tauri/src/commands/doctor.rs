@@ -23,7 +23,13 @@ pub(crate) struct DoctorCheck {
 /// Runs every check.
 #[tauri::command]
 pub(crate) async fn run_doctor(app: AppHandle) -> CommandResult<Vec<DoctorCheck>> {
-    let status = overview(&app).await?;
+    let (status, tokens) = gather(&app).await?;
+    Ok(checks(&status, &tokens))
+}
+
+/// The status and token views the checks read.
+pub(crate) async fn gather(app: &AppHandle) -> CommandResult<(OverviewView, InventoryView)> {
+    let status = overview(app).await?;
     let state = app.state::<AppState>();
     let usb = crate::attached::scan();
     let inventory = state
@@ -31,14 +37,19 @@ pub(crate) async fn run_doctor(app: AppHandle) -> CommandResult<Vec<DoctorCheck>
         .inventory(state.settings().module_paths())
         .await?;
     let tokens = inventory_view(&inventory, &usb.await.unwrap_or_default(), unix_now());
-    Ok(vec![
-        driver_check(&tokens),
-        token_check(&tokens),
-        certificate_check(&tokens),
-        trust_check(&status),
-        signer_check(&status),
-        portal_check(&status),
-    ])
+    Ok((status, tokens))
+}
+
+/// Every check, in order.
+pub(crate) fn checks(status: &OverviewView, tokens: &InventoryView) -> Vec<DoctorCheck> {
+    vec![
+        driver_check(tokens),
+        token_check(tokens),
+        certificate_check(tokens),
+        trust_check(status),
+        signer_check(status),
+        portal_check(status),
+    ]
 }
 
 /// Builds a check.

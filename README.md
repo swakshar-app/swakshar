@@ -21,8 +21,9 @@ Swakshar is that signer:
   matches the PAN, then waits for you to press Sign.
 - It signs on your USB token through the token's own driver. The private key
   never leaves the token and the PIN is never stored.
-- It answers only GST portal pages, only on `127.0.0.1`, and sends nothing
-  anywhere else. No telemetry.
+- It answers only GST portal pages, only on `127.0.0.1`. The one request it
+  makes to the internet is the update check, which you can turn off. No
+  telemetry.
 
 ## Status
 

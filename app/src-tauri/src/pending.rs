@@ -165,6 +165,7 @@ pub(crate) async fn run(app: &AppHandle, portal: PortalRequest) -> String {
         log::warn!("could not notify the approval window: {error}");
     }
     windows::show(app, APPROVE);
+    crate::notify::nudge_if_unseen(app, id);
     match timeout(APPROVAL_TIMEOUT, receiver).await {
         Ok(Ok(reply)) => reply,
         Ok(Err(_)) => REPLY_CANCELED.to_owned(),
