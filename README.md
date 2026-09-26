@@ -27,7 +27,8 @@ Swakshar is that signer:
 ## Status
 
 Pre-release. The desktop app and the command-line tool build on macOS; the
-first signed release is being prepared. Windows and Linux follow.
+first signed release is being prepared. Windows and Linux follow. See
+[docs/ROADMAP.md](docs/ROADMAP.md) for what comes next.
 
 ## First run
 

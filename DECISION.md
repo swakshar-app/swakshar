@@ -5,6 +5,22 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## OpenSC is not bundled; a native driver is planned for v0.2.0
+
+`2026-09-26-22-14-00-IST`
+
+**Decision.** Swakshar does not bundle OpenSC. A native Rust driver for the
+ePass2003 family, HYP2003 included, is planned for v0.2.0 as
+`docs/ROADMAP.md` describes, gated on documentation or permission from the
+token makers. This settles the OpenSC question the driver entry below left
+open.
+
+**Reasoning.** Tested with a CA-issued HYP2003 (USB `0x2CCF:0x080A`):
+OpenSC 0.27.1 identifies the chip as an ePass2003 but cannot read its
+certificates or key ("Unsupported card"), because the token uses the
+vendor's own storage layout. Bundling OpenSC would add a binary to the app
+without helping the tokens people actually hold.
+
 ## The app icon is a token that ends in a pen nib, drawn from SVG
 
 `2026-09-26-20-37-00-IST`
