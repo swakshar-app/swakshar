@@ -1,6 +1,6 @@
 //! The two windows: `main` (setup, activity, settings, help) and `approve`.
 
-use tauri::{AppHandle, Manager as _, Window, WindowEvent};
+use tauri::{AppHandle, Emitter as _, Manager as _, Window, WindowEvent};
 
 use crate::pending::{self, Outcome};
 use crate::state::{AppState, lock};
@@ -9,6 +9,19 @@ use crate::state::{AppState, lock};
 pub(crate) const MAIN: &str = "main";
 /// Approval window label.
 pub(crate) const APPROVE: &str = "approve";
+/// Event telling a window whether it is on screen, so its views poll only
+/// while someone can see them.
+const EVENT_VISIBILITY: &str = "window-visibility";
+
+/// Tells the window labelled `label` it was shown or hidden.
+fn announce(app: &AppHandle, label: &str, visible: bool) {
+    if let Err(error) = app.emit_to(label, EVENT_VISIBILITY, visible) {
+        log::warn!(
+            "could not tell {label} it is {}: {error}",
+            if visible { "shown" } else { "hidden" }
+        );
+    }
+}
 
 /// Shows, restores and focuses a window.
 pub(crate) fn show(app: &AppHandle, label: &str) {
@@ -20,6 +33,7 @@ pub(crate) fn show(app: &AppHandle, label: &str) {
             log::warn!("could not bring {label} forward: {error}");
         }
     }
+    announce(app, label, true);
 }
 
 /// Hides a window.
@@ -29,6 +43,7 @@ pub(crate) fn hide(app: &AppHandle, label: &str) {
     {
         log::warn!("could not hide {label}: {error}");
     }
+    announce(app, label, false);
 }
 
 /// Closing a window hides it; closing the approval window cancels its request.
@@ -55,4 +70,5 @@ pub(crate) fn on_event(window: &Window, event: &WindowEvent) {
     if let Err(error) = window.hide() {
         log::warn!("could not hide {}: {error}", window.label());
     }
+    announce(app, window.label(), false);
 }

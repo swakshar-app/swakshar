@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { errorText } from "../api/commands";
+import { useWindowVisible } from "./visibility";
 
 /** Latest polled value. */
 export interface Polled<T> {
@@ -12,12 +13,20 @@ export interface Polled<T> {
   readonly refresh: () => void;
 }
 
-/** Calls `load` now and every `intervalMs`; `load` must be a stable function. */
+/**
+ * Calls `load` now and every `intervalMs` while the window is on screen, and
+ * again as soon as it comes back; `load` must be a stable function. A hidden
+ * window stops polling, so a closed Swakshar does not keep reading the token.
+ */
 export function usePolling<T>(load: () => Promise<T>, intervalMs: number): Polled<T> {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const runNow = useRef<() => void>(() => undefined);
+  const visible = useWindowVisible();
   useEffect(() => {
+    if (!visible) {
+      return undefined;
+    }
     let active = true;
     const run = (): void => {
       load().then(
@@ -42,7 +51,7 @@ export function usePolling<T>(load: () => Promise<T>, intervalMs: number): Polle
       window.clearInterval(timer);
       runNow.current = () => undefined;
     };
-  }, [load, intervalMs]);
+  }, [load, intervalMs, visible]);
   const refresh = useCallback(() => runNow.current(), []);
   return { data, error, refresh };
 }

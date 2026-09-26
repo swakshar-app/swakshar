@@ -5,6 +5,7 @@
   "windows": ["main"],
   "permissions": [
     "core:event:default",
+    "core:window:allow-is-visible",
     "allow-get-overview",
     "allow-list-tokens",
     "allow-open-status-page",
