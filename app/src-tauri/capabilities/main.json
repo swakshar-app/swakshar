@@ -13,6 +13,8 @@
     "allow-run-doctor",
     "allow-get-settings",
     "allow-save-settings",
+    "allow-add-driver",
+    "allow-remove-driver",
     "allow-install-trust",
     "allow-remove-trust",
     "allow-get-activity",

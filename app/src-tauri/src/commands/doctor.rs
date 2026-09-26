@@ -25,11 +25,12 @@ pub(crate) struct DoctorCheck {
 pub(crate) async fn run_doctor(app: AppHandle) -> CommandResult<Vec<DoctorCheck>> {
     let status = overview(&app).await?;
     let state = app.state::<AppState>();
+    let usb = crate::attached::scan();
     let inventory = state
         .token
         .inventory(state.settings().module_paths())
         .await?;
-    let tokens = inventory_view(&inventory, unix_now());
+    let tokens = inventory_view(&inventory, &usb.await.unwrap_or_default(), unix_now());
     Ok(vec![
         driver_check(&tokens),
         token_check(&tokens),
@@ -80,8 +81,11 @@ fn token_check(tokens: &InventoryView) -> DoctorCheck {
         "fail",
         if count > 0 {
             format!("{count} connected.")
-        } else {
+        } else if tokens.attached.is_empty() {
             "Plug in your DSC token.".to_owned()
+        } else {
+            "A token is plugged in, but no driver can reach it yet. Home shows what it needs."
+                .to_owned()
         },
     )
 }

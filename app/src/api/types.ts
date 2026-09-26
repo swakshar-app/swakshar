@@ -69,10 +69,20 @@ export interface TokenView {
   readonly certificates: readonly CertView[];
 }
 
-/** Drivers and tokens. */
+/** A token plugged in over USB, and what it still needs. */
+export interface AttachedView {
+  readonly maker: string | null;
+  readonly product: string | null;
+  readonly family: string | null;
+  readonly state: "ready" | "missing" | "other-architecture" | "failed" | "not-seen";
+  readonly detail: string | null;
+}
+
+/** Drivers, tokens, and tokens plugged in over USB. */
 export interface InventoryView {
   readonly modules: readonly ModuleView[];
   readonly tokens: readonly TokenView[];
+  readonly attached: readonly AttachedView[];
 }
 
 /** A certificate the user may sign with. */

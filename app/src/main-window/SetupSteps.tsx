@@ -8,6 +8,7 @@ import type { InventoryView, Overview } from "../api/types";
 import { useAction } from "../components/hooks";
 import { Icon } from "../components/Icon";
 import { Button, Card, Notice } from "../components/ui";
+import { TokenGuide } from "./TokenGuide";
 
 /** Number of setup steps. */
 const STEP_COUNT = 4;
@@ -28,8 +29,13 @@ function Step(props: { readonly index: number; readonly title: string; readonly 
 }
 
 /** The four setup steps with their actions. */
-export function SetupSteps(props: { readonly overview: Overview; readonly tokens: InventoryView | null; readonly onChange: () => void }): ReactElement {
-  const { overview, tokens, onChange } = props;
+export function SetupSteps(props: {
+  readonly overview: Overview;
+  readonly tokens: InventoryView | null;
+  readonly onChange: () => void;
+  readonly onTokensChange: () => void;
+}): ReactElement {
+  const { overview, tokens, onChange, onTokensChange } = props;
   const action = useAction();
   const hasToken = (tokens?.tokens.length ?? 0) > 0;
   const hasCertificate = tokens?.tokens.some((token) => token.certificates.some((cert) => cert.valid && cert.signing)) ?? false;
@@ -45,7 +51,8 @@ export function SetupSteps(props: { readonly overview: Overview; readonly tokens
     <Card title="Set up Swakshar">
       <ol className="steps">
         <Step index={1} title="Connect your DSC token" done={hasToken} current={firstOpen === 1}>
-          <p>Plug in your token. Swakshar looks for the drivers of common Indian tokens (ePass2003, HYP2003, SafeNet, ProxKey, TrustKey, mToken). If yours is elsewhere, add its driver path in Settings.</p>
+          <p>Plug in your token. Swakshar recognises common Indian tokens (ePass2003, HYP2003, SafeNet, ProxKey, TrustKey, mToken) and says what, if anything, it still needs.</p>
+          <TokenGuide tokens={tokens} onChange={onTokensChange} />
         </Step>
         <Step index={2} title="Check your certificate" done={hasCertificate} current={firstOpen === 2}>
           <p>A valid signing certificate must be on the token. No PIN is needed to read it; it is listed below.</p>

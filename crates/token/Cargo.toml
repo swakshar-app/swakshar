@@ -13,6 +13,7 @@ const-oid = { workspace = true }
 cryptoki = { workspace = true }
 der = { workspace = true }
 log = { workspace = true }
+nusb = { workspace = true }
 secrecy = { workspace = true }
 sha2 = { workspace = true }
 swakshar-cms = { workspace = true }

@@ -3,6 +3,7 @@
 
 pub(crate) mod approve;
 pub(crate) mod doctor;
+pub(crate) mod drivers;
 pub(crate) mod history;
 pub(crate) mod overview;
 pub(crate) mod settings;

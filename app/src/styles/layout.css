@@ -218,3 +218,43 @@
 .glossary dd {
   color: var(--text-muted);
 }
+
+.guides {
+  display: grid;
+  gap: 10px;
+}
+
+.guide {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--warn);
+  border-radius: var(--radius-small);
+  background: var(--warn-soft);
+}
+
+.guide-idle {
+  border-color: var(--border);
+  background: var(--surface-sunken);
+}
+
+.guide-body {
+  display: grid;
+  gap: 8px;
+}
+
+.guide-title {
+  font-weight: 600;
+}
+
+.driver-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.driver-row code {
+  overflow-wrap: anywhere;
+}

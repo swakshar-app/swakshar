@@ -7,6 +7,7 @@ import { errorText, mainApi } from "../api/commands";
 import type { Settings } from "../api/types";
 import { useAction } from "../components/hooks";
 import { Button, Card, Notice } from "../components/ui";
+import { DriversCard } from "./DriversCard";
 import { LocalCertificateCard } from "./LocalCertificateCard";
 
 /** Ports the GST portal tries. */
@@ -24,7 +25,6 @@ function lines(text: string): string[] {
 export function SettingsView(): ReactElement {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [origins, setOrigins] = useState("");
-  const [modules, setModules] = useState("");
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const action = useAction();
@@ -33,7 +33,6 @@ export function SettingsView(): ReactElement {
       (value) => {
         setSettings(value);
         setOrigins(value.extraOrigins.join("\n"));
-        setModules(value.modules.join("\n"));
       },
       (reason: unknown) => setLoadError(errorText(reason)),
     );
@@ -47,7 +46,7 @@ export function SettingsView(): ReactElement {
   };
   const save = (): void => {
     void action.run(async () => {
-      const next = await mainApi.saveSettings({ ...settings, extraOrigins: lines(origins), modules: lines(modules) });
+      const next = await mainApi.saveSettings({ ...settings, extraOrigins: lines(origins) });
       setSettings(next);
       setSaved(true);
     });
@@ -81,13 +80,7 @@ export function SettingsView(): ReactElement {
           <small className="muted">GST portal sites are always allowed. Add others only if you know why, one per line.</small>
         </label>
       </Card>
-      <Card title="Token drivers">
-        <label className="field">
-          <span>Extra driver files</span>
-          <textarea rows={3} value={modules} placeholder="/usr/local/lib/your-token-pkcs11.dylib" onChange={(event) => { setSaved(false); setModules(event.target.value); }} />
-          <small className="muted">Full paths to PKCS#11 driver files, one per line. Common drivers are found automatically.</small>
-        </label>
-      </Card>
+      <DriversCard modules={settings.modules} onModules={(modules) => setSettings({ ...settings, modules })} />
       <LocalCertificateCard />
       <div className="row">
         <Button variant="primary" onClick={save} disabled={action.busy}>Save settings</Button>

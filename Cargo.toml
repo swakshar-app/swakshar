@@ -33,6 +33,7 @@ cryptoki = "=0.12.1"
 der = { version = "=0.7.10", features = ["alloc", "derive", "oid", "std"] }
 futures-util = { version = "=0.3.34", default-features = false, features = ["sink", "std"] }
 log = "=0.4.34"
+nusb = "=0.2.7"
 rcgen = "=0.14.10"
 ring = "=0.17.14"
 rpassword = "=7.5.4"
@@ -55,6 +56,7 @@ zeroize = "=1.9.0"
 tauri = { version = "=2.11.5", features = ["image-png", "tray-icon"] }
 tauri-build = { version = "=2.6.3", features = [] }
 tauri-plugin-autostart = "=2.5.1"
+tauri-plugin-dialog = "=2.7.3"
 tauri-plugin-log = "=2.9.1"
 tauri-plugin-opener = "=2.5.5"
 tauri-plugin-single-instance = "=2.4.4"

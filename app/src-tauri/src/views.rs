@@ -2,7 +2,11 @@
 
 use serde::Serialize;
 use swakshar_protocol::{RequestKind, SignRequest, format_date_utc, mask_pan};
-use swakshar_token::{ArchSupport, Candidate, Inventory, PanMatch, TokenCertificate, TokenEntry};
+use swakshar_token::{
+    ArchSupport, Candidate, Inventory, PanMatch, TokenCertificate, TokenEntry, UsbToken,
+};
+
+use crate::attached::{AttachedView, attached_views};
 
 use crate::state::mask_serial;
 
@@ -77,6 +81,8 @@ pub(crate) struct InventoryView {
     pub(crate) modules: Vec<ModuleView>,
     /// Connected tokens.
     pub(crate) tokens: Vec<TokenView>,
+    /// Tokens plugged in over USB, with what each still needs.
+    pub(crate) attached: Vec<AttachedView>,
 }
 
 /// One driver.
@@ -167,8 +173,8 @@ pub(crate) fn pending_view(
     }
 }
 
-/// Drivers (found or added) and tokens.
-pub(crate) fn inventory_view(inventory: &Inventory, now: i64) -> InventoryView {
+/// Drivers (found or added), tokens, and tokens plugged in over USB.
+pub(crate) fn inventory_view(inventory: &Inventory, usb: &[UsbToken], now: i64) -> InventoryView {
     InventoryView {
         modules: inventory
             .modules
@@ -189,6 +195,7 @@ pub(crate) fn inventory_view(inventory: &Inventory, now: i64) -> InventoryView {
             .iter()
             .map(|token| token_view(token, now))
             .collect(),
+        attached: attached_views(usb, inventory),
     }
 }
 

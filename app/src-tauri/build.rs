@@ -15,6 +15,8 @@ const COMMANDS: &[&str] = &[
     "refresh_request",
     "get_settings",
     "save_settings",
+    "add_driver",
+    "remove_driver",
     "install_trust",
     "remove_trust",
     "get_activity",

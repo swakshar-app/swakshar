@@ -26,9 +26,9 @@ export function HomeView(): ReactElement {
     <div className="page">
       <StatusHeader overview={overview.data} onChange={overview.refresh} />
       {overview.data.onboardingComplete ? null : (
-        <SetupSteps overview={overview.data} tokens={tokens.data} onChange={overview.refresh} />
+        <SetupSteps overview={overview.data} tokens={tokens.data} onChange={overview.refresh} onTokensChange={tokens.refresh} />
       )}
-      <TokensPanel tokens={tokens.data} error={tokens.error} />
+      <TokensPanel tokens={tokens.data} error={tokens.error} showGuide={overview.data.onboardingComplete} onChange={tokens.refresh} />
     </div>
   );
 }

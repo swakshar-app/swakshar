@@ -39,6 +39,10 @@ export const mainApi = {
   settings: (): Promise<Settings> => invoke<Settings>("get_settings"),
   /** Validates, saves and applies settings. */
   saveSettings: (settings: Settings): Promise<Settings> => invoke<Settings>("save_settings", { settings }),
+  /** Opens a file picker and adds the chosen driver; `null` when cancelled. */
+  addDriver: (): Promise<Settings | null> => invoke<Settings | null>("add_driver"),
+  /** Removes a driver the user added. */
+  removeDriver: (path: string): Promise<Settings> => invoke<Settings>("remove_driver", { path }),
   /** Trusts the local certificate; macOS shows its own prompt. */
   installTrust: (): Promise<Overview> => invoke<Overview>("install_trust"),
   /** Removes the local certificate's trust. */

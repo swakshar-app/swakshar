@@ -6,7 +6,7 @@
 |---|---|---|
 | `swakshar-protocol` | Parse requests, render greeting and replies, origin rules, PAN masking, dates. Pure | none |
 | `swakshar-cms` | Build and inspect the `signtype=1` CMS; base64url; `DigestInfo`; RSA SHA-1 verification | RustCrypto `cms`/`der`, ring |
-| `swakshar-token` | PKCS#11 through cryptoki: driver discovery, certificates, PAN matching, the signing thread | cms, protocol |
+| `swakshar-token` | PKCS#11 through cryptoki: driver discovery, tokens on USB and what each still needs, certificates, PAN matching, the signing thread | cms, protocol, nusb |
 | `swakshar-tls` | Per-install CA and loopback leaf; macOS trust store | rcgen |
 | `swakshar-server` | Loopback `wss://` server: TLS, Origin and Host checks, greeting, one request at a time | protocol, rustls, tungstenite |
 | `swakshar-cli` | `swakshar` binary: doctor, setup, serve, selftest, probe | all of the above |
@@ -58,11 +58,13 @@ them (`TokenService`). Everything else talks to it through a channel.
 
 | Window | Commands it may call |
 |---|---|
-| `main` | overview, tokens, doctor, settings, trust, activity, pause |
+| `main` | overview, tokens, drivers, doctor, settings, trust, activity, pause |
 | `approve` | `get_pending_request`, `refresh_request`, `approve_request`, `cancel_request` |
 
 `build.rs` declares every command; `capabilities/*.json` grants each window
-its subset. The CSP allows only the app's own assets and Tauri IPC.
+its subset. The CSP allows only the app's own assets and Tauri IPC. The
+driver file picker is opened by `add_driver` in Rust, so no window holds a
+dialog permission.
 
 ## Files on disk
 

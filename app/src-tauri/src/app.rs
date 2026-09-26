@@ -5,7 +5,9 @@ use swakshar_token::TokenService;
 use tauri::{App, RunEvent};
 use tauri_plugin_autostart::MacosLauncher;
 
-use crate::commands::{approve, doctor, history, overview, settings as settings_commands, trust};
+use crate::commands::{
+    approve, doctor, drivers, history, overview, settings as settings_commands, trust,
+};
 use crate::settings::Settings;
 use crate::state::AppState;
 use crate::windows::{self, MAIN};
@@ -31,6 +33,7 @@ pub(crate) fn run() -> Result<(), String> {
             None,
         ))
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .manage(AppState::new(data_dir, token, settings))
         .setup(move |app| setup(app, show_setup))
         .on_window_event(windows::on_event)
@@ -47,6 +50,8 @@ pub(crate) fn run() -> Result<(), String> {
             approve::refresh_request,
             settings_commands::get_settings,
             settings_commands::save_settings,
+            drivers::add_driver,
+            drivers::remove_driver,
             trust::install_trust,
             trust::remove_trust,
             history::get_activity,

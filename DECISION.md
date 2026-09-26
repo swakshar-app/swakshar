@@ -5,6 +5,30 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## Token drivers come from their makers; Swakshar guides the install
+
+`2026-09-26-20-36-00-IST`
+
+**Decision.** Swakshar does not ship vendor PKCS#11 drivers. It lists USB
+devices with `nusb` (pure Rust, no vendor code), recognises Feitian,
+Hypersecu and SafeNet tokens by their public vendor IDs and any other token
+by the smart card interface class, and tells the user which driver is
+missing, built for the other processor, failing, or not seeing the token.
+Installed drivers are picked up on the next scan. Drivers in unusual places
+are added with a native file picker that `tauri-plugin-dialog` opens from
+Rust, so no window gains a dialog permission. Bundling OpenSC, which is open
+source and has its own ePass2003 support, is the route to a token that works
+with nothing installed; it waits until OpenSC is verified with real
+ePass2003 and HYP2003 tokens.
+
+**Reasoning.** Vendor drivers are proprietary and redistributing them needs
+each vendor's permission. The clean-room rule bars vendor binaries from the
+repository. Anything inside the bundle is signed with Swakshar's Developer
+ID and notarized as ours, which would vouch for closed code nobody here can
+audit, and vendors ship driver fixes for new macOS releases that a bundled
+copy would miss. Naming the token and the exact driver it needs removes the
+guesswork, which is where users got stuck.
+
 ## cargo-deny fails on what we can act on
 
 `2026-09-26-15-23-00-IST`

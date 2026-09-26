@@ -6,6 +6,7 @@ import type { ReactElement } from "react";
 import type { CertView, InventoryView, ModuleView, TokenView } from "../api/types";
 import { Icon } from "../components/Icon";
 import { Card, Notice, Tag } from "../components/ui";
+import { TokenGuide } from "./TokenGuide";
 
 /** Tags describing a certificate's state. */
 function CertTags({ cert }: { readonly cert: CertView }): ReactElement {
@@ -67,12 +68,19 @@ function Drivers({ modules }: { readonly modules: readonly ModuleView[] }): Reac
 }
 
 /** The tokens card. */
-export function TokensPanel({ tokens, error }: { readonly tokens: InventoryView | null; readonly error: string | null }): ReactElement {
+export function TokensPanel(props: {
+  readonly tokens: InventoryView | null;
+  readonly error: string | null;
+  readonly showGuide: boolean;
+  readonly onChange: () => void;
+}): ReactElement {
+  const { tokens, error, showGuide, onChange } = props;
   return (
     <Card title="Your tokens">
       {error === null ? null : <Notice tone="danger">{error}</Notice>}
       {tokens === null ? <p className="muted">Looking for tokens.</p> : null}
-      {tokens !== null && tokens.tokens.length === 0 ? <p className="muted">No token connected. Plug in your DSC token.</p> : null}
+      {showGuide ? <TokenGuide tokens={tokens} onChange={onChange} /> : null}
+      {!showGuide && tokens !== null && tokens.tokens.length === 0 ? <p className="muted">No token connected yet.</p> : null}
       {tokens?.tokens.map((token) => <TokenCard key={`${token.name}-${token.serial}`} token={token} />)}
       {tokens === null ? null : <Drivers modules={tokens.modules} />}
     </Card>

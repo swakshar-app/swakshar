@@ -31,9 +31,11 @@ first signed release is being prepared. Windows and Linux follow.
 
 ## First run
 
-1. **Connect your DSC token.** Common Indian tokens are detected: ePass2003,
-   HYP2003, SafeNet eToken, Watchdata ProxKey, TrustKey, mToken. Other drivers
-   can be added in Settings.
+1. **Connect your DSC token.** Swakshar recognises the token on USB, even
+   before its driver is installed, and says which driver it needs. Drivers
+   for ePass2003, HYP2003, SafeNet eToken, Watchdata ProxKey, TrustKey and
+   mToken are found automatically once installed; others can be added in
+   Settings. Drivers come from your token's supplier, not from Swakshar.
 2. **Check your certificate.** Listed without a PIN.
 3. **Install the local certificate.** macOS asks for your password once. The
    certificate is valid only for `127.0.0.1` and `localhost`; its CA key is
