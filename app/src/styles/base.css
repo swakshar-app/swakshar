@@ -21,6 +21,7 @@
   --neutral-soft: #eceeea;
   --radius: 12px;
   --radius-small: 8px;
+  --control-height: 36px;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Noto Sans", sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
