@@ -66,7 +66,10 @@ Run in order on Apple Silicon, then on Intel if available.
     for the other processor, or one Swakshar already finds, is refused with a
     reason. Remove takes it off the list.
 12. Pause from the menu bar: the portal cannot connect. Resume: it can.
-13. Repeat 4 to 6 in Edge and Brave.
+13. Open Swakshar from Applications after setup: the main window appears.
+    Open it again while it runs: the window comes forward. With Start at
+    login on, logging in keeps it in the menu bar with no window.
+14. Repeat 4 to 6 in Edge and Brave.
 
 ## Command-line checks
 

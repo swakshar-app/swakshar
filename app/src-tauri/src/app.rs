@@ -13,11 +13,15 @@ use crate::state::AppState;
 use crate::windows::{self, MAIN};
 use crate::{server_task, tray};
 
+/// Argument the login item passes, so a start at login stays in the menu bar.
+const LOGIN_ARG: &str = "--at-login";
+
 /// Builds and runs the app until the user quits from the tray.
 pub(crate) fn run() -> Result<(), String> {
     let data_dir = data_dir().ok_or("could not find a per-user data directory")?;
     let settings = Settings::load(&data_dir);
-    let show_setup = !settings.onboarding_complete;
+    let at_login = std::env::args().any(|arg| arg == LOGIN_ARG);
+    let show_window = !settings.onboarding_complete || !at_login;
     let token = TokenService::spawn().map_err(|error| error.to_string())?;
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
@@ -30,12 +34,12 @@ pub(crate) fn run() -> Result<(), String> {
         )
         .plugin(tauri_plugin_autostart::init(
             MacosLauncher::LaunchAgent,
-            None,
+            Some(vec![LOGIN_ARG]),
         ))
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .manage(AppState::new(data_dir, token, settings))
-        .setup(move |app| setup(app, show_setup))
+        .setup(move |app| setup(app, show_window))
         .on_window_event(windows::on_event)
         .invoke_handler(tauri::generate_handler![
             overview::get_overview,
@@ -59,24 +63,26 @@ pub(crate) fn run() -> Result<(), String> {
         ])
         .build(tauri::generate_context!())
         .map_err(|error| error.to_string())?
-        .run(|_app, event| {
-            if let RunEvent::ExitRequested {
+        .run(|app, event| match event {
+            RunEvent::ExitRequested {
                 api, code: None, ..
-            } = event
-            {
-                api.prevent_exit();
-            }
+            } => api.prevent_exit(),
+            #[cfg(target_os = "macos")]
+            RunEvent::Reopen { .. } => windows::show(app, MAIN),
+            _ => {}
         });
     Ok(())
 }
 
-/// Menu bar only (no Dock icon), tray, signer, and the setup window on first run.
-fn setup(app: &mut App, show_setup: bool) -> Result<(), Box<dyn std::error::Error>> {
+/// Menu bar only (no Dock icon), tray and signer. The main window opens when
+/// the user starts the app, or until setup is done; a start at login stays in
+/// the menu bar.
+fn setup(app: &mut App, show_window: bool) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(target_os = "macos")]
     app.set_activation_policy(tauri::ActivationPolicy::Accessory);
     tray::create(app)?;
     server_task::start(app.handle());
-    if show_setup {
+    if show_window {
         windows::show(app.handle(), MAIN);
     }
     Ok(())
