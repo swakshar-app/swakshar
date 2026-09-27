@@ -1,0 +1,21 @@
+name: Documentation
+description: Something in the README, docs or in-app help is missing, wrong or unclear.
+labels: ["documentation"]
+body:
+  - type: input
+    id: where
+    attributes:
+      label: Which page or section
+      placeholder: "README, First run; docs/TESTING.md; Help, Browsers"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is missing, wrong or unclear
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested wording (optional)
