@@ -12,6 +12,17 @@ updates:
     groups:
       cargo:
         patterns: ["*"]
+    # cms 0.2.3, the newest stable release, needs the 0.7 line of these
+    # RustCrypto formats; they move together once cms 0.3 is stable.
+    ignore:
+      - dependency-name: "der"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "x509-cert"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "spki"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "const-oid"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
     commit-message:
       prefix: chore(deps)
 
@@ -25,6 +36,10 @@ updates:
     groups:
       npm:
         patterns: ["*"]
+    # Types follow the Node major pinned in .nvmrc.
+    ignore:
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: chore(deps)
 
