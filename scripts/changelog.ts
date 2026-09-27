@@ -25,3 +25,30 @@ export function sectionFor(changelog: string, version: string): string | null {
   }
   return null;
 }
+
+/** Marker of a list item. */
+const BULLET = "- ";
+
+/**
+ * Joins lines that the changelog wraps at 80 columns, so each bullet and
+ * paragraph is one line. The update card and GitHub then wrap the text to
+ * their own width instead of breaking mid-sentence.
+ */
+export function unwrap(notes: string): string {
+  const lines: string[] = [];
+  let joinable = false;
+  for (const raw of notes.split("\n")) {
+    const line = raw.trim();
+    const last = lines.at(-1);
+    if (line === "") {
+      lines.push("");
+      joinable = false;
+    } else if (joinable && last !== undefined && !line.startsWith(BULLET)) {
+      lines[lines.length - 1] = `${last} ${line}`;
+    } else {
+      lines.push(line);
+      joinable = true;
+    }
+  }
+  return lines.join("\n");
+}
