@@ -59,7 +59,7 @@ jobs:
         run: |
           id="$(gh api --method POST "repos/${GITHUB_REPOSITORY}/releases" \
             -f tag_name="${GITHUB_REF_NAME}" \
-            -f name="Swakshar ${GITHUB_REF_NAME}" \
+            -f name="${GITHUB_REF_NAME}" \
             -F body=@"${RUNNER_TEMP}/notes.md" \
             -F draft=true --jq '.id')"
           echo "id=${id}" >> "${GITHUB_OUTPUT}"
