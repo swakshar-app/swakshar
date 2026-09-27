@@ -52,7 +52,8 @@ so this happens right after going public and before telling anyone.
 
 `.github/workflows/release.yml` then:
 
-1. creates a draft GitHub release for the tag;
+1. creates a draft GitHub release for the tag, titled with the bare tag
+   (`v0.1.1`);
 2. builds on `macos-15` (universal, signed, notarized), `windows-2025` (x64)
    and `ubuntu-22.04` (x64), uploading every bundle to the draft. On macOS
    the app is notarized and stapled by Tauri, then the disk image is
