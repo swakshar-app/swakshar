@@ -52,7 +52,8 @@ What it needs:
   by downloading again by hand.
 - `bundle.createUpdaterArtifacts: true`, so releases also produce the update
   archives and `.sig` files, and the release workflow writes `latest.json`
-  into the draft release.
+  into the draft release, linking each archive by its release download
+  address rather than the rate-limited GitHub API.
 - Hosting: GitHub Releases. The app asks
   `https://github.com/swakshar-app/swakshar/releases/latest/download/latest.json`,
   which only resolves once the repository is public and always points at
