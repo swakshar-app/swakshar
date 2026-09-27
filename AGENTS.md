@@ -38,9 +38,13 @@ publishes the whole history.
   passing the gates on its own, with a conventional subject line and a short
   body only when the reason is not obvious.
 
-## Verification belongs to the owner
+## Test first; the owner verifies the product
 
-- Do not run tests, the app, browsers or QA flows unless the owner asks.
+- Test-driven, as the owner asked on 2026-09-27: write the failing test
+  first, then the code, so a break shows up at build time. Every change ships
+  with its tests, and `cargo test --workspace --locked` plus `pnpm run check`
+  (which runs Vitest) pass before each commit.
+- Do not run the app, browsers or QA flows unless the owner asks.
 - Never install binaries, start or stop servers, or launch the app.
 - End every task with the exact commands the owner should run to verify it.
 - Never claim a check passed if it did not run. Reporting CI results is fine.
@@ -146,6 +150,7 @@ scripts/ check-line-limit.ts  bump-version.ts  generate-icons.ts
 ```sh
 cargo fmt --all --check
 cargo clippy --workspace --all-targets --locked -- -D warnings
+cargo test --workspace --locked
 pnpm run check
 ```
 
