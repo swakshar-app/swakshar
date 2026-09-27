@@ -5,6 +5,18 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## Releases are titled with the bare tag
+
+`2026-09-27-17-40-00-IST`
+
+**Decision.** From v0.1.1 on, a release's title is its tag alone, such as
+`v0.1.1`, not `Swakshar v0.1.1`. v0.1.0 keeps the title it was published
+with.
+
+**Reasoning.** Asked for by the owner on 2026-09-27. The repository already
+names the app, so the product name in every title is noise in the releases
+list.
+
 ## Releases stay on 0.1.x until the owner calls for 0.2.0
 
 `2026-09-27-17-28-00-IST`
