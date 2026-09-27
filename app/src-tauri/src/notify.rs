@@ -5,6 +5,7 @@
 use std::time::Duration;
 
 use swakshar_protocol::format_date_utc;
+use swakshar_token::CertSummary;
 use tauri::{AppHandle, Manager as _};
 use tauri_plugin_notification::NotificationExt as _;
 
@@ -52,28 +53,35 @@ async fn announce_expiring(app: &AppHandle) {
     let Ok(inventory) = state.token.inventory(state.settings().module_paths()).await else {
         return;
     };
-    let now = unix_now();
-    for certificate in inventory
+    let summaries: Vec<CertSummary> = inventory
         .tokens
         .iter()
         .flat_map(|token| &token.certificates)
-        .map(|certificate| &certificate.summary)
+        .map(|certificate| certificate.summary.clone())
+        .collect();
+    for message in expiry_messages(&summaries, unix_now()) {
+        post(app, "Your DSC expires soon", &message);
+    }
+}
+
+/// One message per valid signing certificate expiring within
+/// `EXPIRY_WARNING_SECONDS` of `now`.
+fn expiry_messages(summaries: &[CertSummary], now: i64) -> Vec<String> {
+    summaries
+        .iter()
         .filter(|summary| {
             summary.signing
                 && summary.valid_at(now)
                 && summary.not_after - now < EXPIRY_WARNING_SECONDS
         })
-    {
-        post(
-            app,
-            "Your DSC expires soon",
-            &format!(
+        .map(|summary| {
+            format!(
                 "The certificate for {} expires on {}. Renew it with your CA.",
-                certificate.subject_cn,
-                format_date_utc(certificate.not_after)
-            ),
-        );
-    }
+                summary.subject_cn,
+                format_date_utc(summary.not_after)
+            )
+        })
+        .collect()
 }
 
 /// After a request opens the approval window, notifies when that window
@@ -98,3 +106,7 @@ pub(crate) fn nudge_if_unseen(app: &AppHandle, id: u64) {
         }
     });
 }
+
+#[cfg(test)]
+#[path = "notify_tests.rs"]
+mod tests;
