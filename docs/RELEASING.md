@@ -25,10 +25,11 @@ pnpm tauri signer generate -w ~/.tauri/swakshar-updater.key
 
 Store the private key file and its password in the password manager and in
 the two secrets above; losing them strands every install on its current
-version. Paste the public key (`~/.tauri/swakshar-updater.key.pub`) into
-`plugins.updater.pubkey` in `app/src-tauri/tauri.conf.json` and set
-`bundle.createUpdaterArtifacts` to `true`. Until then the app reports
-"Updates are not set up in this build".
+version. The public key (`~/.tauri/swakshar-updater.key.pub`) is in
+`plugins.updater.pubkey` in `app/src-tauri/tauri.conf.json`, and
+`bundle.createUpdaterArtifacts` is on, so release builds fail without the
+two secrets. Replacing the key means shipping one release signed with the
+old key that carries the new public key.
 
 ## Cutting a release
 

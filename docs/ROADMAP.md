@@ -22,8 +22,8 @@ Built and on `develop`:
 
 Waiting on the owner:
 
-1. The updater key in GitHub secrets and its public key in the app. Apple
-   signing is done.
+1. The updater key's two GitHub secrets (its public key is in the app, and
+   Apple signing is done).
 2. The manual acceptance run on a real token and the real portal
    (`docs/TESTING.md`).
 3. Make the repository public, tag `v0.1.0`, install the draft assets on a
