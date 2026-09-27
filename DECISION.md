@@ -5,6 +5,33 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## Updater links point at release downloads
+
+`2026-09-27-18-40-00-IST`
+
+**Decision.** The release workflow rewrites `latest.json` after the builds
+so each platform links to `github.com/<repo>/releases/download/<tag>/<file>`
+instead of the `api.github.com` asset links tauri-action writes for drafts.
+It fails the release when a link names a file the release does not have.
+
+**Reasoning.** The API links work, but anonymous GitHub API calls are
+limited to 60 an hour per network address, so an office full of Macs
+updating together could be refused. Release downloads have no such limit.
+Signatures are untouched: they cover the files, not the links.
+
+## Dependabot's glib alert is accepted until Tauri moves on
+
+`2026-09-27-18-41-00-IST`
+
+**Decision.** GHSA-wrw7-89jp-8q8g (unsound `glib::VariantStrIter`, fixed in
+glib 0.20) is dismissed as a tolerable risk. Revisit when Tauri's Linux
+stack moves past gtk-rs 0.18.
+
+**Reasoning.** glib 0.18 reaches Swakshar only on Linux, through Tauri's
+GTK tray and window stack; macOS and Windows builds do not contain it.
+Swakshar never calls the affected iterator, and the fix needs a GTK
+upgrade only Tauri can make.
+
 ## Swakshar shows in the Dock while a window is open
 
 `2026-09-27-17-55-00-IST`
