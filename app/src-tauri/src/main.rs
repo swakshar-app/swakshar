@@ -6,6 +6,7 @@ mod app;
 mod attached;
 mod broker;
 mod commands;
+mod dock;
 mod error;
 mod notify;
 mod pending;

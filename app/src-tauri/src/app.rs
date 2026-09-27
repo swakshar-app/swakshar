@@ -13,7 +13,7 @@ use crate::settings::Settings;
 use crate::state::AppState;
 use crate::updates::Updates;
 use crate::windows::{self, MAIN};
-use crate::{notify, server_task, tray, updates};
+use crate::{dock, notify, server_task, tray, updates};
 
 /// Argument the login item passes, so a start at login stays in the menu bar.
 const LOGIN_ARG: &str = "--at-login";
@@ -88,16 +88,14 @@ pub(crate) fn run() -> Result<(), String> {
     Ok(())
 }
 
-/// Menu bar only (no Dock icon), tray, and the signer when the user left it
-/// on. The main window opens when the user starts the app, or until setup is
-/// done; a start at login stays in the menu bar.
+/// Tray, and the signer when the user left it on. The main window opens,
+/// with a Dock icon, when the user starts the app or until setup is done; a
+/// start at login stays in the menu bar.
 fn setup(
     app: &mut App,
     show_window: bool,
     signing: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    #[cfg(target_os = "macos")]
-    app.set_activation_policy(tauri::ActivationPolicy::Accessory);
     tray::create(app)?;
     if signing {
         server_task::start(app.handle());
@@ -106,6 +104,8 @@ fn setup(
     }
     if show_window {
         windows::show(app.handle(), MAIN);
+    } else {
+        dock::refresh(app.handle(), false);
     }
     updates::spawn_schedule(app.handle());
     notify::spawn_expiry_watch(app.handle());

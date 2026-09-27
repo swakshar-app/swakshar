@@ -28,6 +28,7 @@ pub(crate) fn show(app: &AppHandle, label: &str) {
     let Some(window) = app.get_webview_window(label) else {
         return;
     };
+    crate::dock::refresh(app, true);
     for result in [window.unminimize(), window.show(), window.set_focus()] {
         if let Err(error) = result {
             log::warn!("could not bring {label} forward: {error}");
@@ -47,6 +48,7 @@ pub(crate) fn hide(app: &AppHandle, label: &str) {
         log::warn!("could not hide {label}: {error}");
     }
     announce(app, label, false);
+    crate::dock::refresh(app, false);
 }
 
 /// Closing a window hides it; closing the approval window cancels its request.
@@ -74,4 +76,5 @@ pub(crate) fn on_event(window: &Window, event: &WindowEvent) {
         log::warn!("could not hide {}: {error}", window.label());
     }
     announce(app, window.label(), false);
+    crate::dock::refresh(app, false);
 }
