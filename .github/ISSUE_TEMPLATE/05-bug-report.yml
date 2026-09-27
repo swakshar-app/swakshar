@@ -1,5 +1,5 @@
-name: Bug report
-description: Something in Swakshar does not work as it should.
+name: Something else is broken
+description: A problem in Swakshar that none of the other forms covers.
 labels: ["bug"]
 body:
   - type: markdown
