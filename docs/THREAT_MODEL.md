@@ -31,7 +31,7 @@ That decision is the asset to protect.
 | A website fingerprints the signer | No CORS headers anywhere; the status page answers top-level navigations only (Fetch Metadata) |
 | A compromised GST page asks for a signature | Every signature needs the user to press Sign in the approval window, which shows the site, the purpose and the exact document fingerprint |
 | Request flooding | One request at a time; frames capped at 16 KiB; 32 connections at most; handshake timeouts |
-| A page keeps a connection open after signing is turned off | Connections belong to the listener's `JoinSet`: turning signing off or quitting closes them with the port (`crates/server/src/listener.rs`) |
+| A page keeps a connection open after signing is turned off | Connections belong to the listener's `JoinSet`: turning signing off or quitting closes the port at once, answers a waiting request "signing canceled", closes idle pages, and cuts off the rest after one second (`crates/server/src/listener.rs`, `stop.rs`) |
 | The page leaves mid-request | The request is abandoned and the window closes (`PendingGuard`) |
 | Wrong certificate | PAN hash matching, validity and class filters; mismatches flagged in red |
 | PIN lockout | Token PIN flags read before signing; last-try warning; no automatic retries |
