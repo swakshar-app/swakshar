@@ -1,15 +1,20 @@
 /**
  * The main window: a sidebar with four sections.
  */
-import { type ReactElement, useEffect, useState } from "react";
+import { type ReactElement, useState } from "react";
 
 import logo from "../../src-tauri/icons/128x128.png";
 import { mainApi } from "../api/commands";
+import { usePolling } from "../components/hooks";
 import { Icon, type IconName } from "../components/Icon";
 import { ActivityView } from "./ActivityView";
 import { HelpView } from "./HelpView";
 import { HomeView } from "./HomeView";
 import { SettingsView } from "./SettingsView";
+import { UpdateToast } from "./UpdateToast";
+
+/** How often the shell refreshes the version and update state. */
+const SHELL_INTERVAL_MS = 3000;
 
 /** Sections of the main window. */
 type Section = "home" | "activity" | "settings" | "help";
@@ -39,13 +44,8 @@ function SectionView({ section }: { readonly section: Section }): ReactElement {
 /** Sidebar plus the selected section. */
 export function MainApp(): ReactElement {
   const [section, setSection] = useState<Section>("home");
-  const [version, setVersion] = useState<string | null>(null);
-  useEffect(() => {
-    mainApi.overview().then(
-      (overview) => setVersion(overview.appVersion),
-      () => undefined,
-    );
-  }, []);
+  const overview = usePolling(mainApi.overview, SHELL_INTERVAL_MS);
+  const version = overview.data?.appVersion ?? null;
   return (
     <div className="shell">
       <nav className="sidebar" aria-label="Sections">
@@ -70,6 +70,7 @@ export function MainApp(): ReactElement {
       <main className="content">
         <SectionView section={section} />
       </main>
+      {overview.data === null ? null : <UpdateToast update={overview.data.update} onChange={overview.refresh} />}
     </div>
   );
 }
