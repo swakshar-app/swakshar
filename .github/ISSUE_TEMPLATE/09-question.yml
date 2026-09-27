@@ -1,0 +1,19 @@
+name: Question
+description: Not sure how something works, or whether Swakshar fits your setup.
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The README and Help in the app answer most setup questions. **Never paste a PAN, a name, a serial, a certificate or a PIN.**
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+    validations:
+      required: true
+  - type: input
+    id: context
+    attributes:
+      label: Your setup (optional)
+      placeholder: "Swakshar 0.1.0, macOS 26.3, HYP2003, Chrome"
