@@ -151,6 +151,7 @@ export interface Settings {
   readonly signingEnabled: boolean;
   readonly updateChecks: boolean;
   readonly notifications: boolean;
+  readonly keepInDock: boolean;
 }
 
 /** One finished request. */

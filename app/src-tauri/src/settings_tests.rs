@@ -3,13 +3,15 @@
 
 use super::Settings;
 
-/// A fresh install: signing off, updates and notifications on.
+/// A fresh install: signing off, updates and notifications on, and in the
+/// Dock only while a window is open.
 #[test]
 fn fresh_install_defaults() {
     let settings = Settings::default();
     assert!(!settings.signing_enabled);
     assert!(settings.update_checks);
     assert!(settings.notifications);
+    assert!(!settings.keep_in_dock);
     assert!(!settings.onboarding_complete);
     assert!(settings.validate().is_ok());
 }
@@ -24,6 +26,7 @@ fn older_files_gain_the_new_defaults() {
     assert!(!settings.signing_enabled);
     assert!(settings.update_checks);
     assert!(settings.notifications);
+    assert!(!settings.keep_in_dock);
 }
 
 /// Saved and loaded settings are identical.
@@ -33,6 +36,7 @@ fn round_trips_through_disk() {
     let settings = Settings {
         signing_enabled: true,
         notifications: false,
+        keep_in_dock: true,
         extra_origins: vec!["https://example.gov.in".to_owned()],
         ..Settings::default()
     };

@@ -34,11 +34,14 @@ pub(crate) struct Settings {
     pub(crate) update_checks: bool,
     /// Show local notifications.
     pub(crate) notifications: bool,
+    /// Stay in the macOS Dock and app switcher with every window closed.
+    pub(crate) keep_in_dock: bool,
 }
 
 impl Default for Settings {
     /// Automatic port, the August 2026 greeting, GST origins only, signing
-    /// off until the user turns it on, update checks and notifications on.
+    /// off until the user turns it on, update checks and notifications on,
+    /// in the Dock only while a window is open.
     fn default() -> Self {
         Self {
             modules: Vec::new(),
@@ -50,6 +53,7 @@ impl Default for Settings {
             signing_enabled: false,
             update_checks: true,
             notifications: true,
+            keep_in_dock: false,
         }
     }
 }
