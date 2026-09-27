@@ -137,3 +137,7 @@ fn valid_origin(origin: &str) -> bool {
                 .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, '.' | '-' | ':'))
     })
 }
+
+#[cfg(test)]
+#[path = "settings_tests.rs"]
+mod tests;
