@@ -4,6 +4,11 @@ What changed in each release, newest first. The release workflow publishes
 each version's section as its release notes, and the in-app update card shows
 it under See changes.
 
+## 0.1.3
+
+- The update card shows what changed as a tidy list instead of raw text
+  broken mid-sentence.
+
 ## 0.1.2
 
 - Restart after an update opens Swakshar again. Before, pressing Restart
