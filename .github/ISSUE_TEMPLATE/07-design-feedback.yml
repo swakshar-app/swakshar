@@ -1,0 +1,35 @@
+name: Design or wording
+description: Something looks off, reads badly, or is hard to find in the app.
+labels: ["design"]
+body:
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where in the app
+      options:
+        - Home and setup
+        - The approval window
+        - Activity
+        - Settings
+        - Help
+        - The menu bar
+        - The update card or notifications
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What feels wrong
+      description: Screenshots help; crop or blur any name, PAN, serial or certificate first.
+    validations:
+      required: true
+  - type: textarea
+    id: better
+    attributes:
+      label: What would be better
+  - type: input
+    id: system
+    attributes:
+      label: Swakshar version, light or dark mode
+      placeholder: "0.1.0, dark mode"
