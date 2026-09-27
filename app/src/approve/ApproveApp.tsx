@@ -6,23 +6,15 @@ import { type FormEvent, type ReactElement, useCallback, useEffect, useState } f
 
 import logo from "../../src-tauri/icons/128x128.png";
 import { approveApi, errorText } from "../api/commands";
-import { formatCountdown, hostOf } from "../components/format";
+import { formatCountdown } from "../components/format";
 import { Icon } from "../components/Icon";
 import { Button, Notice } from "../components/ui";
 import { CertificateChoice } from "./CertificateChoice";
+import { heading } from "./heading";
 import { type Message, messageFor } from "./messages";
 import { PinField } from "./PinField";
 import { RequestSummary } from "./RequestSummary";
 import { useClock, useRequest } from "./useRequest";
-
-/** Suffix every GST portal host ends with. */
-const GST_SUFFIX = ".gst.gov.in";
-
-/** Heading naming who asks: the GST portal, or the site's own host. */
-function heading(origin: string): string {
-  const host = hostOf(origin);
-  return host === "gst.gov.in" || host.endsWith(GST_SUFFIX) ? "The GST portal wants your signature" : `${host} wants your signature`;
-}
 
 /** Shown after a successful signature, until the window hides. */
 function Signed({ holder }: { readonly holder: string }): ReactElement {
