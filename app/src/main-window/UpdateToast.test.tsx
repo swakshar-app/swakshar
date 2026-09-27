@@ -37,6 +37,14 @@ describe("UpdateToast", () => {
     expect(api.downloadUpdate).toHaveBeenCalledOnce();
   });
 
+  it("shows wrapped changelog bullets as whole list items", () => {
+    const notes = "- Restart opens Swakshar again.\n  Before, it stayed closed.\n- Faster updates.";
+    render(<UpdateToast update={updateView({ state: "available", version: "0.1.3", notes })} onChange={() => undefined} />);
+    fireEvent.click(screen.getByRole("button", { name: "See changes" }));
+    const items = screen.getAllByRole("listitem").map((item) => item.textContent);
+    expect(items).toEqual(["Restart opens Swakshar again. Before, it stayed closed.", "Faster updates."]);
+  });
+
   it("shows download progress", () => {
     render(<UpdateToast update={updateView({ state: "downloading", version: "0.1.1", progress: 40 })} onChange={() => undefined} />);
     expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBe("40");

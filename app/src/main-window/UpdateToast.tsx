@@ -10,6 +10,7 @@ import type { UpdateView } from "../api/types";
 import { useAction } from "../components/hooks";
 import { Icon } from "../components/Icon";
 import { Button, Notice } from "../components/ui";
+import { noteBlocks } from "./releaseNotes";
 
 /** States the card appears in. */
 const SHOWN: ReadonlySet<UpdateView["state"]> = new Set(["available", "downloading", "ready", "failed"]);
@@ -30,6 +31,25 @@ function text(update: UpdateView): { readonly title: string; readonly detail: st
     default:
       return { title: `Swakshar ${version} is available`, detail: "Download it now; you choose when to restart." };
   }
+}
+
+/** Release notes as paragraphs and list items. */
+function Notes(props: { readonly text: string }): ReactElement {
+  return (
+    <div className="notes">
+      {noteBlocks(props.text).map((block, index) =>
+        block.kind === "paragraph" ? (
+          <p key={index}>{block.text}</p>
+        ) : (
+          <ul key={index}>
+            {block.items.map((item, itemIndex) => (
+              <li key={itemIndex}>{item}</li>
+            ))}
+          </ul>
+        ),
+      )}
+    </div>
+  );
 }
 
 /** The card, or nothing. */
@@ -62,7 +82,7 @@ export function UpdateToast(props: { readonly update: UpdateView; readonly onCha
           <div className="progress-fill" style={{ width: `${String(update.progress)}%` }} />
         </div>
       ) : null}
-      {notesOpen && notes !== null ? <p className="notes">{notes}</p> : null}
+      {notesOpen && notes !== null ? <Notes text={notes} /> : null}
       <div className="toast-actions">
         {notes === null ? null : <Button onClick={() => setNotesOpen(!notesOpen)}>{notesOpen ? "Hide changes" : "See changes"}</Button>}
         {update.state === "available" || update.state === "failed" ? (
