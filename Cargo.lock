@@ -4217,7 +4217,7 @@ dependencies = [
 name = "swakshar-cms"
 version = "0.1.0"
 dependencies = [
- "base64 0.22.1",
+ "base64 0.23.1",
  "cms",
  "const-oid 0.9.6",
  "der",

@@ -26,7 +26,7 @@ swakshar-server = { path = "crates/server" }
 swakshar-tls = { path = "crates/tls" }
 swakshar-token = { path = "crates/token" }
 
-base64 = "=0.22.1"
+base64 = "=0.23.1"
 cms = "=0.2.3"
 const-oid = { version = "=0.9.6", features = ["db"] }
 cryptoki = "=0.12.1"
