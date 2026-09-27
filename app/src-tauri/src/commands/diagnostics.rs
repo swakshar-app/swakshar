@@ -95,7 +95,7 @@ pub(crate) async fn diagnostic_report(app: AppHandle) -> CommandResult<String> {
     }
     let _ = writeln!(report, "\nRecent log");
     report.push_str(&recent_log(&app));
-    Ok(redact_home(&report))
+    Ok(redact(&report, std::env::var("HOME").ok().as_deref()))
 }
 
 /// Opens a new GitHub issue in the browser.
@@ -127,9 +127,13 @@ fn recent_log(app: &AppHandle) -> String {
         return "  (no log folder)\n".to_owned();
     };
     let file = dir.join(format!("{}.log", app.package_info().name));
-    let text = fs::read_to_string(&file).unwrap_or_default();
+    tail_lines(&fs::read_to_string(&file).unwrap_or_default(), LOG_LINES)
+}
+
+/// The last `count` lines of `text`, each indented by two spaces.
+fn tail_lines(text: &str, count: usize) -> String {
     let lines: Vec<&str> = text.lines().collect();
-    let start = lines.len().saturating_sub(LOG_LINES);
+    let start = lines.len().saturating_sub(count);
     lines
         .get(start..)
         .unwrap_or_default()
@@ -139,9 +143,13 @@ fn recent_log(app: &AppHandle) -> String {
 }
 
 /// Replaces the home folder with `~`, which also hides the user name.
-fn redact_home(text: &str) -> String {
-    match std::env::var("HOME") {
-        Ok(home) if !home.is_empty() => text.replace(&home, "~"),
+fn redact(text: &str, home: Option<&str>) -> String {
+    match home {
+        Some(home) if !home.is_empty() => text.replace(home, "~"),
         _ => text.to_owned(),
     }
 }
+
+#[cfg(test)]
+#[path = "diagnostics_tests.rs"]
+mod tests;
