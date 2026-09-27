@@ -13,7 +13,7 @@ use crate::settings::Settings;
 use crate::state::AppState;
 use crate::updates::Updates;
 use crate::windows::{self, MAIN};
-use crate::{dock, notify, server_task, tray, updates};
+use crate::{dock, notify, relaunch, server_task, tray, updates};
 
 /// Argument the login item passes, so a start at login stays in the menu bar.
 const LOGIN_ARG: &str = "--at-login";
@@ -23,7 +23,8 @@ pub(crate) fn run() -> Result<(), String> {
     let data_dir = data_dir().ok_or("could not find a per-user data directory")?;
     let settings = Settings::load(&data_dir);
     let at_login = std::env::args().any(|arg| arg == LOGIN_ARG);
-    let show_window = !settings.onboarding_complete || !at_login;
+    let after_update = relaunch::take(&data_dir);
+    let show_window = relaunch::shows_window(settings.onboarding_complete, at_login, after_update);
     let signing = settings.signing_enabled;
     let token = TokenService::spawn().map_err(|error| error.to_string())?;
     tauri::Builder::default()

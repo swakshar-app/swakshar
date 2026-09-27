@@ -8,6 +8,7 @@ use std::time::Duration;
 use tauri::{AppHandle, Manager as _};
 
 use crate::notify;
+use crate::relaunch;
 use crate::server_task;
 use crate::state::{AppState, lock, unix_now};
 use crate::update_rules::is_idle;
@@ -114,7 +115,8 @@ fn idle(app: &AppHandle) -> bool {
     is_idle(waiting, last, unix_now())
 }
 
-/// Replaces the app with the downloaded update, frees the port, relaunches.
+/// Replaces the app with the downloaded update, frees the port, relaunches
+/// with the main window open.
 fn install_and_restart(app: &AppHandle) -> Result<(), String> {
     let Phase::Ready(update, bytes) = lock(&app.state::<Updates>().phase).clone() else {
         return Err("The update has not finished downloading.".to_owned());
@@ -123,5 +125,8 @@ fn install_and_restart(app: &AppHandle) -> Result<(), String> {
         .install(bytes.as_slice())
         .map_err(|error| error.to_string())?;
     server_task::stop(app);
+    if let Err(error) = relaunch::mark(&app.state::<AppState>().data_dir) {
+        log::warn!("the updated app may start hidden: {error}");
+    }
     app.restart()
 }

@@ -11,6 +11,7 @@ mod error;
 mod notify;
 mod pending;
 mod quit;
+mod relaunch;
 mod server_task;
 mod settings;
 mod state;
