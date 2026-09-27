@@ -4,6 +4,14 @@ What changed in each release, newest first. The release workflow publishes
 each version's section as its release notes, and the in-app update card shows
 it under See changes.
 
+## 0.1.1
+
+- Swakshar shows in the Dock and the app switcher, with its own menu bar,
+  while one of its windows is open, and goes back to the menu bar alone
+  when you close them.
+- Settings can keep Swakshar in the Dock with its windows closed; clicking
+  the icon opens it.
+
 ## 0.1.0
 
 The first release: a signer for the GST portal that uses your own DSC token
