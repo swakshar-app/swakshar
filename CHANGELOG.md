@@ -8,6 +8,9 @@ it under See changes.
 
 - The update card shows what changed as a tidy list instead of raw text
   broken mid-sentence.
+- Quitting is orderly however you quit: from the menu bar, with Command-Q,
+  from the Dock or by logging out. A GST page waiting for your signature is
+  told it was cancelled instead of seeing the connection drop.
 
 ## 0.1.2
 
