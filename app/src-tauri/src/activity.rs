@@ -114,3 +114,7 @@ impl ActivityLog {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "activity_tests.rs"]
+mod tests;
