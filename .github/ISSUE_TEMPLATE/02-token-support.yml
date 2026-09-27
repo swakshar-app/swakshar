@@ -1,0 +1,67 @@
+name: Token not recognised or not supported
+description: Swakshar does not see your DSC token, or cannot find its driver.
+labels: ["token support"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Never paste a PAN, a name, a token serial, a certificate or a PIN.** The USB IDs asked for below identify the maker, not you.
+  - type: input
+    id: model
+    attributes:
+      label: Token model and maker
+      description: As printed on the token.
+      placeholder: "HYP2003 by Hypersecu, ePass2003 by Feitian, eToken 5110 by SafeNet"
+    validations:
+      required: true
+  - type: input
+    id: usb
+    attributes:
+      label: USB vendor and product ID
+      description: Apple menu, About This Mac, More Info, System Report, USB, then select the token.
+      placeholder: "Vendor ID 0x2ccf, Product ID 0x080a"
+    validations:
+      required: true
+  - type: input
+    id: ca
+    attributes:
+      label: Certifying Authority that issued the DSC
+      placeholder: "eMudhra, Capricorn, XtraTrust, Vsign"
+  - type: dropdown
+    id: shown
+    attributes:
+      label: What does Swakshar's Home show?
+      options:
+        - Nothing; it does not see the token at all
+        - It names the token and says a driver is missing
+        - It says the driver is built for a different processor
+        - It says the driver did not start
+        - It says a driver is installed but does not see the token
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: driver
+    attributes:
+      label: Driver you installed
+      description: Where you got it, its version, and the path of its .dylib file if you know it (for example /usr/local/lib/...).
+  - type: input
+    id: system
+    attributes:
+      label: Swakshar version, macOS version and Mac
+      placeholder: "0.1.0, macOS 26.3 on Apple silicon"
+    validations:
+      required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: Diagnostic report
+      description: Help, Report a problem, Create diagnostic report, Copy report. Its Drivers and Plugged in over USB sections help most.
+      render: text
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: This issue contains no PAN, name, token serial, certificate or PIN.
+          required: true
