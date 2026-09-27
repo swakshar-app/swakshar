@@ -128,5 +128,6 @@ fn install_and_restart(app: &AppHandle) -> Result<(), String> {
     if let Err(error) = relaunch::mark(&app.state::<AppState>().data_dir) {
         log::warn!("the updated app may start hidden: {error}");
     }
-    app.restart()
+    app.request_restart();
+    Ok(())
 }
