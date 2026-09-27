@@ -12,13 +12,12 @@ use tauri_plugin_updater::{Update, UpdaterExt as _};
 
 use crate::notify;
 use crate::state::{AppState, lock, unix_now};
+use crate::update_rules::{download_percent, is_stale};
 
 /// Wait after launch before the first check, so start-up stays quick.
 const FIRST_CHECK_DELAY: Duration = Duration::from_secs(10);
 /// Time between automatic checks.
 const CHECK_INTERVAL: Duration = Duration::from_secs(60 * 60);
-/// Opening the main window checks again when the last check is this old.
-const STALE_AFTER: Duration = Duration::from_secs(15 * 60);
 /// Debug builds only: a manifest URL to test updates against.
 const ENDPOINT_OVERRIDE: &str = "SWAKSHAR_UPDATE_ENDPOINT";
 
@@ -99,12 +98,12 @@ pub(crate) fn view(app: &AppHandle) -> UpdateView {
         ),
         Phase::Checking => ("checking", None, None, None),
         Phase::Available(update) => ("available", Some(update), None, None),
-        Phase::Downloading(update, received, total) => {
-            let percent = total
-                .filter(|total| *total > 0)
-                .map(|total| u8::try_from(received.saturating_mul(100) / total).unwrap_or(100));
-            ("downloading", Some(update), percent, None)
-        }
+        Phase::Downloading(update, received, total) => (
+            "downloading",
+            Some(update),
+            download_percent(received, total),
+            None,
+        ),
         Phase::Ready(update, _) => ("ready", Some(update), Some(100), None),
         Phase::Failed(update, error) => ("failed", Some(update), None, Some(error)),
     };
@@ -135,13 +134,13 @@ pub(crate) fn spawn_schedule(app: &AppHandle) {
     });
 }
 
-/// Checks in the background when the last check is older than
-/// `STALE_AFTER`; called when the main window opens.
+/// Checks in the background when the last check is stale; called when the
+/// main window opens.
 pub(crate) fn check_if_stale(app: &AppHandle) {
-    let stale = lock(&app.state::<Updates>().last_check)
+    let since = lock(&app.state::<Updates>().last_check)
         .as_ref()
-        .is_none_or(|(at, _, _)| at.elapsed() > STALE_AFTER);
-    if stale && app.state::<AppState>().settings().update_checks {
+        .map(|(at, _, _)| at.elapsed());
+    if is_stale(since) && app.state::<AppState>().settings().update_checks {
         let app = app.clone();
         tauri::async_runtime::spawn(async move { check(&app).await });
     }

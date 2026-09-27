@@ -10,12 +10,11 @@ use tauri::{AppHandle, Manager as _};
 use crate::notify;
 use crate::server_task;
 use crate::state::{AppState, lock, unix_now};
+use crate::update_rules::is_idle;
 use crate::updates::{Phase, Updates};
 
 /// How often a queued restart looks for an idle moment.
 const IDLE_POLL: Duration = Duration::from_secs(30);
-/// Idle means no GST page has connected for this long.
-const IDLE_AFTER_SECONDS: i64 = 5 * 60;
 
 /// Starts downloading the offered update in the background. The plugin
 /// verifies the signature against the key built into the app.
@@ -108,11 +107,11 @@ fn watch_for_idle(app: &AppHandle) {
 fn idle(app: &AppHandle) -> bool {
     let state = app.state::<AppState>();
     let waiting = lock(&state.pending).is_some();
-    let recent = lock(&state.diagnostics)
+    let last = lock(&state.diagnostics)
         .last_connection
         .as_ref()
-        .is_some_and(|(_, at)| unix_now() - *at < IDLE_AFTER_SECONDS);
-    !waiting && !recent
+        .map(|(_, at)| *at);
+    is_idle(waiting, last, unix_now())
 }
 
 /// Replaces the app with the downloaded update, frees the port, relaunches.

@@ -15,6 +15,7 @@ mod settings;
 mod state;
 mod tray;
 mod update_install;
+mod update_rules;
 mod updates;
 mod views;
 mod windows;
