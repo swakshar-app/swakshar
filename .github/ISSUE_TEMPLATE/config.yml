@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/swakshar-app/swakshar/security/advisories/new
+    about: Report it privately here, never in a public issue. See SECURITY.md.
+  - name: First-run guide
+    url: https://github.com/swakshar-app/swakshar#first-run
+    about: Setup steps, browsers and what the portal's messages mean.
