@@ -5,6 +5,24 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## Swakshar shows in the Dock while a window is open
+
+`2026-09-27-17-55-00-IST`
+
+**Decision.** On macOS Swakshar is a regular app, with a Dock icon, a place
+in the app switcher and its own menu bar, while its main or approval window
+is open or minimized, and a menu bar only app once they are all closed.
+Settings has "Keep Swakshar in the Dock when its windows are closed", off by
+default, which keeps it regular. Ships in 0.1.1.
+
+**Reasoning.** The owner found on 2026-09-27 that an open Swakshar window
+had no Dock icon and no Command-Tab entry: the app set the accessory policy
+at launch and kept it. Showing while open matches how people find windows
+on a Mac; going back to the menu bar keeps a signer that runs all day out
+of the way. Quit from the app menu or the Dock goes through macOS directly
+rather than the tray's orderly quit, so a waiting page sees its connection
+close instead of a cancel reply; the port still closes with the process.
+
 ## Releases are titled with the bare tag
 
 `2026-09-27-17-40-00-IST`
