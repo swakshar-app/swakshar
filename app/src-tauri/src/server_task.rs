@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 
-use swakshar_server::{bind_signer_port, serve, tls_config};
+use swakshar_server::{Stopper, bind_signer_port, serve, stop_pair, tls_config};
 use swakshar_tls::{ensure_identity, tls_dir};
 use tauri::async_runtime::JoinHandle;
 use tauri::{AppHandle, Manager as _};
@@ -32,6 +32,8 @@ pub(crate) struct ServerControl {
     pub(crate) state: ServerState,
     /// Accept loop, aborted on pause.
     task: Option<JoinHandle<()>>,
+    /// Tells the accept loop to stop.
+    stopper: Option<Stopper>,
     /// Bumped on every start and stop; a launch that finishes after a newer
     /// start or stop discards itself instead of replacing the current state.
     generation: u64,
@@ -47,15 +49,16 @@ pub(crate) fn start(app: &AppHandle) {
             let state = app.state::<AppState>();
             let mut control = lock(&state.server);
             if control.generation != generation {
-                if let Ok((_, task)) = launched {
+                if let Ok((_, task, _)) = launched {
                     task.abort();
                 }
                 return;
             }
             match launched {
-                Ok((port, task)) => {
+                Ok((port, task, stopper)) => {
                     control.state = ServerState::Running(port);
                     control.task = Some(task);
+                    control.stopper = Some(stopper);
                 }
                 Err(error) => {
                     log::error!("the signer could not start: {error}");
@@ -111,6 +114,7 @@ fn transition(app: &AppHandle, state: ServerState) -> u64 {
         if let Some(task) = control.task.take() {
             task.abort();
         }
+        control.stopper = None;
         control.state = state;
         control.generation += 1;
         control.generation
@@ -120,7 +124,7 @@ fn transition(app: &AppHandle, state: ServerState) -> u64 {
 }
 
 /// Loads or mints the certificate, binds a port and spawns the accept loop.
-async fn launch(app: &AppHandle) -> Result<(u16, JoinHandle<()>), String> {
+async fn launch(app: &AppHandle) -> Result<(u16, JoinHandle<()>, Stopper), String> {
     let state = app.state::<AppState>();
     let settings = state.settings();
     let dir = tls_dir(&state.data_dir);
@@ -136,11 +140,12 @@ async fn launch(app: &AppHandle) -> Result<(u16, JoinHandle<()>), String> {
         .map_err(|error| error.to_string())?;
     let broker = Arc::new(UiBroker::new(app.clone()));
     let server_settings = settings.server_settings();
+    let (stopper, signal) = stop_pair();
     let task = tauri::async_runtime::spawn(async move {
-        if let Err(error) = serve(listener, port, tls, server_settings, broker).await {
+        if let Err(error) = serve(listener, port, tls, server_settings, broker, signal).await {
             log::error!("the signer stopped: {error}");
         }
     });
     log::info!("listening on wss://127.0.0.1:{port}");
-    Ok((port, task))
+    Ok((port, task, stopper))
 }

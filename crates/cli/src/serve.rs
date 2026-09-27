@@ -8,7 +8,7 @@ use swakshar_protocol::{
     SUPPORTED_SIGNTYPE, SignRequest, mask_pan,
 };
 use swakshar_server::{
-    Broker, PortalRequest, ServerEvent, ServerSettings, bind_signer_port, tls_config,
+    Broker, PortalRequest, ServerEvent, ServerSettings, bind_signer_port, stop_pair, tls_config,
 };
 use swakshar_tls::{TlsError, TrustStatus, data_dir, ensure_identity, tls_dir, trust_status};
 use swakshar_token::{TokenService, candidates, criteria_for, portal_reply};
@@ -44,10 +44,15 @@ pub(crate) async fn serve(options: Options) -> Result<(), CliError> {
         turn: Mutex::new(()),
     });
     println!("Listening on wss://127.0.0.1:{port} for the GST portal. Press Ctrl-C to stop.");
+    let (stopper, signal) = stop_pair();
+    let server = swakshar_server::serve(listener, port, tls, settings, broker, signal);
+    tokio::pin!(server);
     tokio::select! {
-        served = swakshar_server::serve(listener, port, tls, settings, broker) => Ok(served?),
+        served = &mut server => Ok(served?),
         stopped = tokio::signal::ctrl_c() => {
             stopped?;
+            stopper.stop();
+            server.await?;
             println!("Stopped.");
             Ok(())
         }

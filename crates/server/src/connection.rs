@@ -21,6 +21,7 @@ use crate::http::{
 use crate::session::{SessionContext, run_session};
 use crate::settings::ServerSettings;
 use crate::status_page::status_page;
+use crate::stop::StopSignal;
 
 /// Time allowed for the TLS handshake and the request head.
 const HANDSHAKE_TIMEOUT: Duration = Duration::from_secs(15);
@@ -35,6 +36,8 @@ pub(crate) struct Shared<B> {
     pub(crate) broker: Arc<B>,
     /// TLS acceptor for the loopback certificate.
     pub(crate) acceptor: TlsAcceptor,
+    /// Fires when the signer stops.
+    pub(crate) stop: StopSignal,
 }
 
 /// Serves one TCP connection from start to finish.
@@ -94,6 +97,7 @@ async fn upgrade<B: Broker>(
         greeting_version: &shared.settings.greeting_version,
         origin,
         broker: shared.broker.as_ref(),
+        stop: shared.stop.clone(),
     };
     run_session(socket, &context).await
 }

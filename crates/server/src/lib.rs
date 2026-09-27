@@ -12,8 +12,10 @@ mod listener;
 mod session;
 mod settings;
 mod status_page;
+mod stop;
 
 pub use broker::{Broker, PortalRequest, ServerEvent};
 pub use error::ServerError;
 pub use listener::{bind_signer_port, serve};
 pub use settings::{ServerSettings, tls_config};
+pub use stop::{StopSignal, Stopper, stop_pair};
