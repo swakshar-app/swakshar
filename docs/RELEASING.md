@@ -58,7 +58,10 @@ so this happens right after going public and before telling anyone.
    and `ubuntu-22.04` (x64), uploading every bundle to the draft. On macOS
    the app is notarized and stapled by Tauri, then the disk image is
    notarized and stapled too and replaces the first upload;
-3. writes `SHA256SUMS` and, when the repository is public, attests build
+3. points the download links in `latest.json` at the release's own
+   downloads (`scripts/updater-manifest.ts`) instead of the GitHub API links
+   tauri-action writes, which count against the anonymous API limit;
+4. writes `SHA256SUMS` and, when the repository is public, attests build
    provenance over it.
 
 Before installing, check the macOS image the way Gatekeeper will:
