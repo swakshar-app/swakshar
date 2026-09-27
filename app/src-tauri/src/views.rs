@@ -269,3 +269,7 @@ fn token_name(token: &TokenEntry) -> String {
         name
     }
 }
+
+#[cfg(test)]
+#[path = "views_tests.rs"]
+mod tests;
