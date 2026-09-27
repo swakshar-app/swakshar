@@ -1,12 +1,12 @@
 /**
- * Prints a version's release notes from CHANGELOG.md, and fails when there
- * are none, so a release cannot ship without notes:
+ * Prints a version's release notes from CHANGELOG.md, one line per bullet,
+ * and fails when there are none, so a release cannot ship without notes:
  * `node scripts/release-notes.ts 0.1.0`.
  */
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { sectionFor } from "./changelog.ts";
+import { sectionFor, unwrap } from "./changelog.ts";
 
 /** The changelog at the repository root. */
 const CHANGELOG = join(import.meta.dirname, "..", "CHANGELOG.md");
@@ -20,7 +20,7 @@ async function main(): Promise<void> {
     process.exitCode = 1;
     return;
   }
-  process.stdout.write(`${notes}\n`);
+  process.stdout.write(`${unwrap(notes)}\n`);
 }
 
 await main();
