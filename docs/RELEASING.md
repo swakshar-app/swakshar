@@ -33,6 +33,10 @@ old key that carries the new public key.
 
 ## Cutting a release
 
+Versions stay on 0.1.x (0.1.1, 0.1.2, and so on) until the owner calls for
+0.2.0; see `DECISION.md`. Add the version's section to `CHANGELOG.md` first,
+or the release stops at its first step.
+
 ```sh
 node scripts/bump-version.ts 0.2.0     # Cargo.toml, tauri.conf.json, package.json
 pnpm install && cargo update -w        # refresh lockfiles for the new version

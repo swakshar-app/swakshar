@@ -5,6 +5,19 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## Releases stay on 0.1.x until the owner calls for 0.2.0
+
+`2026-09-27-17-28-00-IST`
+
+**Decision.** v0.1.0 is the first release. Every release after it bumps
+the patch number only (0.1.1, 0.1.2, and so on) until the owner asks for
+0.2.0. Roadmap items labelled v0.2.0 or later ship in 0.1.x patches when
+they are ready, unless the owner decides otherwise.
+
+**Reasoning.** Asked for by the owner on 2026-09-27 at the first release.
+One stable line keeps the updater path simple and signals to users that
+Swakshar is still settling in.
+
 ## Dependencies stay current within seven days, with two holds
 
 `2026-09-27-17-14-00-IST`
