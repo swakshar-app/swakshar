@@ -5,6 +5,21 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## The first update test is 0.1.0 to 0.1.1, before announcing
+
+`2026-09-27-11-24-00-IST`
+
+**Decision.** The end-to-end update test publishes `v0.1.0`, installs it
+from the release, publishes `v0.1.1`, and confirms 0.1.0 updates itself,
+all right after the repository goes public and before the release is
+announced. This replaces the release-candidate test in the entry below.
+
+**Reasoning.** `releases/latest` serves only the newest published,
+non-prerelease release of a public repository, so release candidates are
+never offered, and the Windows installer format rejects most pre-release
+version numbers. Two real versions published quietly test exactly what
+users will run.
+
 ## Updates ship in v0.1.0 from GitHub Releases; nothing else leaves the Mac
 
 `2026-09-27-02-15-00-IST`

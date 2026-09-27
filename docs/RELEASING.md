@@ -39,9 +39,11 @@ git commit -am "chore(release): 0.2.0"
 git tag v0.2.0 && git push origin develop v0.2.0
 ```
 
-Before the first release, prove updates end to end: tag `v0.1.0-rc.1`,
-install it, publish its draft, tag and publish `v0.1.0-rc.2`, and watch rc.1
-offer, download and restart into rc.2.
+Prove updates end to end before announcing the first release: publish
+`v0.1.0`, install it from the release on a clean Mac, then publish `v0.1.1`
+and watch 0.1.0 offer, download and restart into it. `releases/latest` only
+serves the newest published, non-prerelease release of a public repository,
+so this happens right after going public and before telling anyone.
 
 `.github/workflows/release.yml` then:
 

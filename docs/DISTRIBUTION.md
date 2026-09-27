@@ -57,10 +57,13 @@ What it needs:
   `https://github.com/swakshar-app/swakshar/releases/latest/download/latest.json`,
   which only resolves once the repository is public and always points at
   the newest **published** release, so a draft under test is never offered.
-  A debug build can point at a local file with `SWAKSHAR_UPDATE_ENDPOINT` to
-  test the flow while the repository is private.
-- A release candidate test: install `0.1.0-rc.1`, publish `0.1.0-rc.2`,
-  and watch rc.1 update itself before `v0.1.0` ships.
+  A debug build can point at any HTTPS test manifest with
+  `SWAKSHAR_UPDATE_ENDPOINT` to try the flow while the repository is
+  private; the updater refuses plain HTTP.
+- An update test before announcing: publish `v0.1.0`, install it, publish
+  `v0.1.1`, and watch 0.1.0 update itself. Release candidates cannot stand
+  in for this: `releases/latest` skips pre-releases and the Windows
+  installer format rejects most pre-release versions.
 
 ## Notifications
 

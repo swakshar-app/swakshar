@@ -22,11 +22,15 @@ Built and on `develop`:
 
 Waiting on the owner:
 
-1. The updater key in GitHub secrets, then a release-candidate update test
-   (`0.1.0-rc.1` updating itself to `0.1.0-rc.2`). Apple signing is done.
+1. The updater key in GitHub secrets and its public key in the app. Apple
+   signing is done.
 2. The manual acceptance run on a real token and the real portal
    (`docs/TESTING.md`).
-3. Tag `v0.1.0`, install the draft assets on a clean Mac, publish.
+3. Make the repository public, tag `v0.1.0`, install the draft assets on a
+   clean Mac, and publish without announcing.
+4. Publish `v0.1.1` and confirm 0.1.0 offers, downloads and restarts into
+   it (`docs/RELEASING.md`).
+5. Announce.
 
 ## v0.2.0: no driver install for ePass2003 and HYP2003 tokens
 
