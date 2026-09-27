@@ -5,6 +5,25 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## Every exit runs one orderly shutdown
+
+`2026-09-28-00-30-00-IST`
+
+**Decision.** The server stops through a `Stopper`: the port closes at
+once, a waiting request is answered "signing canceled", idle pages get a
+close frame, and connections left after one second are cut off. The app
+runs `quit::on_exit` on Tauri's exit event, so Quit in the menu bar,
+Command-Q, Quit in the Dock, logging out and restarts into an update all
+answer the waiting page and wait up to two seconds for open pages to
+receive their reply.
+
+**Reasoning.** The owner asked on 2026-09-27 for Command-Q and Quit in the
+Dock to be as clean as the menu bar's Quit. macOS ends those through
+`applicationWillTerminate`, which Tauri reports only as its exit event, so
+the shutdown has to live there. Working on it showed the menu bar's Quit
+was not clean either: stopping aborted every connection, so the cancel
+reply could be lost before it was written.
+
 ## Updater links point at release downloads
 
 `2026-09-27-18-40-00-IST`
