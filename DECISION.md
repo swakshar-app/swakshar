@@ -5,6 +5,23 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## Dependencies stay current within seven days, with two holds
+
+`2026-09-27-17-14-00-IST`
+
+**Decision.** Every dependency moves to its newest release that is at least
+seven days old, through Dependabot's cooldown and the lockfile gate. Two
+holds: `der`, `x509-cert`, `spki` and `const-oid` stay on the lines
+`cms` 0.2.3 needs until a stable `cms` 0.3 exists, and `@types/node` stays
+on the Node major in `.nvmrc`. Dependabot ignores those updates.
+
+**Reasoning.** The owner wants dependencies current. `cms` 0.2.3 is the
+newest stable `cms` and depends on `der` 0.7, so the newer formats cannot
+be mixed in, which is why the grouped update failed to compile. Types for a
+newer Node than the one CI runs would let code use APIs that do not exist
+at run time. The byte-for-byte parity tests catch any change in what gets
+signed when these do move.
+
 ## The first update test is 0.1.0 to 0.1.1, before announcing
 
 `2026-09-27-11-24-00-IST`
