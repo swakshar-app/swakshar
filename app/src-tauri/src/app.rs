@@ -13,12 +13,13 @@ use crate::settings::Settings;
 use crate::state::AppState;
 use crate::updates::Updates;
 use crate::windows::{self, MAIN};
-use crate::{dock, notify, relaunch, server_task, tray, updates};
+use crate::{dock, notify, quit, relaunch, server_task, tray, updates};
 
 /// Argument the login item passes, so a start at login stays in the menu bar.
 const LOGIN_ARG: &str = "--at-login";
 
-/// Builds and runs the app until the user quits from the tray.
+/// Builds and runs the app until the user quits; every exit runs the orderly
+/// shutdown in [`quit::on_exit`].
 pub(crate) fn run() -> Result<(), String> {
     let data_dir = data_dir().ok_or("could not find a per-user data directory")?;
     let settings = Settings::load(&data_dir);
@@ -81,6 +82,9 @@ pub(crate) fn run() -> Result<(), String> {
             } = &event
             {
                 api.prevent_exit();
+            }
+            if matches!(event, RunEvent::Exit) {
+                quit::on_exit(app);
             }
             if reopened(&event) {
                 windows::show(app, MAIN);

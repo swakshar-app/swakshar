@@ -1,6 +1,7 @@
 //! Starting, pausing and resuming the loopback signer.
 
 use std::sync::Arc;
+use std::time::Duration;
 
 use swakshar_server::{Stopper, bind_signer_port, serve, stop_pair, tls_config};
 use swakshar_tls::{ensure_identity, tls_dir};
@@ -30,10 +31,13 @@ pub(crate) enum ServerState {
 pub(crate) struct ServerControl {
     /// Current state.
     pub(crate) state: ServerState,
-    /// Accept loop, aborted on pause.
+    /// Accept loop of the running signer.
     task: Option<JoinHandle<()>>,
     /// Tells the accept loop to stop.
     stopper: Option<Stopper>,
+    /// Accept loop of a stopped signer, still letting its open pages
+    /// receive their last reply.
+    draining: Option<JoinHandle<()>>,
     /// Bumped on every start and stop; a launch that finishes after a newer
     /// start or stop discards itself instead of replacing the current state.
     generation: u64,
@@ -70,9 +74,23 @@ pub(crate) fn start(app: &AppHandle) {
     });
 }
 
-/// Stops accepting connections and frees the port.
+/// Stops accepting connections and frees the port. Open pages get their
+/// last reply and a close frame in the background.
 pub(crate) fn stop(app: &AppHandle) {
     transition(app, ServerState::Paused);
+}
+
+/// Stops the signer and waits, up to `deadline`, for open pages to receive
+/// their last reply. Blocks, so call it from the main thread or a plain
+/// thread, never from async code.
+pub(crate) fn stop_and_wait(app: &AppHandle, deadline: Duration) {
+    transition(app, ServerState::Paused);
+    let draining = lock(&app.state::<AppState>().server).draining.take();
+    if let Some(task) = draining
+        && tauri::async_runtime::block_on(tokio::time::timeout(deadline, task)).is_err()
+    {
+        log::warn!("open pages did not close within {deadline:?}");
+    }
 }
 
 /// Turns signing on or off at the user's request and remembers the choice,
@@ -106,15 +124,18 @@ pub(crate) fn current(app: &AppHandle) -> ServerState {
     lock(&app.state::<AppState>().server).state.clone()
 }
 
-/// Aborts any accept loop, moves to `state`, and returns the new generation.
+/// Stops any accept loop, moves to `state`, and returns the new generation.
+/// A stopped loop closes its port at once and drains on its own.
 fn transition(app: &AppHandle, state: ServerState) -> u64 {
     let generation = {
         let app_state = app.state::<AppState>();
         let mut control = lock(&app_state.server);
-        if let Some(task) = control.task.take() {
-            task.abort();
+        if let Some(stopper) = control.stopper.take() {
+            stopper.stop();
         }
-        control.stopper = None;
+        if let Some(task) = control.task.take() {
+            control.draining = Some(task);
+        }
         control.state = state;
         control.generation += 1;
         control.generation
