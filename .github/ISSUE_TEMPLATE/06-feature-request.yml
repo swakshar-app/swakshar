@@ -1,0 +1,35 @@
+name: Feature request
+description: Something Swakshar should do that it does not do yet.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What you are trying to do, and what gets in the way today.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help
+      description: How you imagine it working. Sketches welcome, without personal details.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Signing and the approval window
+        - Tokens and drivers
+        - Setup and the local certificate
+        - Updates and notifications
+        - Other portals (MCA, Income Tax, PDF signing)
+        - Windows or Linux
+        - Something else
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you do today instead
+      description: Workarounds or other tools you use for this.
