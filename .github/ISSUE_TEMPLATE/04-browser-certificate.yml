@@ -1,0 +1,57 @@
+name: Browser or local certificate
+description: The status page shows a warning, the browser blocks the connection, or the local certificate will not install.
+labels: ["browser and certificate"]
+body:
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options:
+        - Chrome
+        - Edge
+        - Brave
+        - Firefox
+        - Safari
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: problem
+    attributes:
+      label: What went wrong?
+      options:
+        - The status page (https://127.0.0.1:1585) shows a certificate warning
+        - The browser never asked to allow access to apps on this device
+        - I denied the local network prompt and cannot undo it
+        - Install certificate fails or macOS never asks for my password
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did and what the browser or Swakshar showed.
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Swakshar version, browser version, macOS version
+      placeholder: "0.1.0, Chrome 142, macOS 26.3"
+    validations:
+      required: true
+  - type: dropdown
+    id: managed
+    attributes:
+      label: Is this a managed (office or school) computer?
+      options:
+        - "No"
+        - "Yes"
+        - Not sure
+  - type: textarea
+    id: report
+    attributes:
+      label: Diagnostic report
+      description: Help, Report a problem, Create diagnostic report, Copy report. Its Local certificate and Checklist lines help most.
+      render: text
