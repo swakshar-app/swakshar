@@ -1,7 +1,8 @@
 # Contributing
 
 Thank you for helping. Read [AGENTS.md](AGENTS.md) first: it holds the rules
-every change follows, for people and tools alike.
+every change follows, for people and tools alike. Everyone taking part
+follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## The short version
 
