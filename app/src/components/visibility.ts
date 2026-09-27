@@ -1,7 +1,7 @@
 /**
  * Whether this window is on screen. The app announces every show and hide,
- * the window asks once at start (a start at login never shows it), and the
- * page's own visibility covers minimising. Views poll only while visible.
+ * the window asks once when first used (a start at login never shows it), and
+ * the page's own visibility covers minimising. Views poll only while visible.
  */
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -10,8 +10,13 @@ import { useSyncExternalStore } from "react";
 /** Event the app sends when it shows or hides this window. */
 const EVENT_VISIBILITY = "window-visibility";
 
+/** Global the Tauri shell injects; missing in tests and plain browsers. */
+const TAURI_INTERNALS = "__TAURI_INTERNALS__";
+
 /** Last show or hide the app announced; unknown until the first answer. */
 let shown = false;
+/** Listening has started. */
+let started = false;
 /** Components waiting for changes. */
 const listeners = new Set<() => void>();
 
@@ -22,23 +27,38 @@ function notify(): void {
   }
 }
 
-getCurrentWindow()
-  .isVisible()
-  .then(
-    (visible) => {
-      shown = visible;
-      notify();
-    },
-    () => undefined,
-  );
-void listen<boolean>(EVENT_VISIBILITY, (event) => {
-  shown = event.payload;
-  notify();
-});
-document.addEventListener("visibilitychange", notify);
+/**
+ * Starts listening on first use, not on import. Outside the app shell there
+ * is no window to ask, so the page's own visibility decides.
+ */
+function start(): void {
+  if (started) {
+    return;
+  }
+  started = true;
+  document.addEventListener("visibilitychange", notify);
+  if (!(TAURI_INTERNALS in window)) {
+    shown = true;
+    return;
+  }
+  getCurrentWindow()
+    .isVisible()
+    .then(
+      (visible) => {
+        shown = visible;
+        notify();
+      },
+      () => undefined,
+    );
+  void listen<boolean>(EVENT_VISIBILITY, (event) => {
+    shown = event.payload;
+    notify();
+  });
+}
 
 /** Registers a subscriber. */
 function subscribe(listener: () => void): () => void {
+  start();
   listeners.add(listener);
   return () => {
     listeners.delete(listener);
