@@ -10,6 +10,9 @@ it under See changes.
   installed the update but left Swakshar closed until you opened it.
   Updating from 0.1.1 to this version can still leave it closed once;
   open it from Applications.
+- Updates download from the release itself rather than GitHub's API, so
+  several Macs on one office network are no longer at risk of being turned
+  away.
 
 ## 0.1.1
 
