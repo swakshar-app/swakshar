@@ -1,0 +1,65 @@
+name: Bug report
+description: Something in Swakshar does not work as it should.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. **Never paste a PAN, a name, a token or certificate serial, a certificate or a PIN.** This page is public. The diagnostic report below already leaves those out.
+  - type: input
+    id: version
+    attributes:
+      label: Swakshar version
+      description: Shown at the bottom of the sidebar and in Help, Updates.
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: macOS version and Mac
+      placeholder: "macOS 26.3 on Apple silicon"
+    validations:
+      required: true
+  - type: input
+    id: token
+    attributes:
+      label: Token model
+      description: As printed on the token, or as Swakshar shows it on Home.
+      placeholder: "HYP2003, ePass2003, SafeNet eToken 5110"
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options:
+        - Chrome
+        - Edge
+        - Brave
+        - Firefox
+        - Safari
+        - Other or not relevant
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: portal
+    attributes:
+      label: GST portal message
+      description: The exact words the portal showed, if any.
+  - type: textarea
+    id: report
+    attributes:
+      label: Diagnostic report
+      description: In Swakshar, open Help, Report a problem, press Create diagnostic report, then Copy report. Read it before pasting.
+      render: text
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: This issue contains no PAN, name, token or certificate serial, certificate or PIN.
+          required: true
