@@ -34,11 +34,15 @@ frames you captured from your own sessions, and ASN.1 dumps of signatures your
 own token produced. Never contribute decompiled vendor code, vendor binaries,
 or anything from a real person's token (names, PANs, serials, certificates).
 
-## Reporting a portal change
+## Reporting problems
 
-If the portal starts rejecting signatures, open an issue with the exact portal
-message, the date, the browser, and the frames from DevTools (Network, the
-`127.0.0.1` row, Messages) with the PAN masked.
+Open an issue and pick the form that fits: signing failures on the GST
+portal, tokens Swakshar does not recognise, install and update problems,
+browser and certificate trouble, and so on. Each form asks for exactly what
+helps, including the diagnostic report from Help, Report a problem. Never
+post a PAN, name, serial, certificate or PIN; security problems go to
+[private vulnerability reporting](https://github.com/swakshar-app/swakshar/security/advisories/new),
+never a public issue.
 
 ## Licence
 
