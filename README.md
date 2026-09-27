@@ -47,10 +47,10 @@ first signed release is being prepared. Windows and Linux follow. See
 5. **Allow Swakshar on the portal.** Chrome, Edge and Brave ask once whether
    the GST site may connect to apps on this device. Choose Allow.
 
-Swakshar lives in the menu bar and keeps running when its window is closed.
-To update it, choose **Quit Swakshar** from its menu bar icon first, then
-drag the new version into Applications; macOS cannot replace an app that is
-still running. In-app updates replace this step once releases are public.
+Swakshar lives in the menu bar and keeps running when its windows are
+closed. While a window is open it also shows in the Dock and the app
+switcher; Settings can keep it in the Dock all the time. When a new version
+is out, Swakshar offers to download it and restarts when you choose.
 
 ## Browsers
 
