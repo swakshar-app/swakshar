@@ -37,6 +37,9 @@ pub(crate) fn save_settings(app: AppHandle, settings: Settings) -> CommandResult
             log::warn!("could not change start at login: {error}");
         }
     }
+    if settings.keep_in_dock != previous.keep_in_dock {
+        crate::dock::refresh(&app, false);
+    }
     let network_changed = settings.preferred_port != previous.preferred_port
         || settings.greeting_version != previous.greeting_version
         || settings.extra_origins != previous.extra_origins
