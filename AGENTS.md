@@ -9,9 +9,8 @@ Swakshar is an open-source desktop app that answers the GST portal's local
 signer requests with the user's own DSC token, after the user approves each
 request. Tauri 2 shell, Rust core, TypeScript UI.
 
-The repository is private now and becomes public when the work is complete.
-**Treat every commit as public from the first one**: flipping visibility
-publishes the whole history.
+The repository is public: every commit, issue and release is visible to
+everyone, so nothing private goes into any of them.
 
 ## Read first
 
