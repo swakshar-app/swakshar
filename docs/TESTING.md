@@ -4,8 +4,10 @@
 
 ```sh
 cargo test --workspace --locked
-pnpm run check
+pnpm run check       # typecheck, lint, Vitest, build, line limit
 ```
+
+New code is written test first; a change without tests does not land.
 
 | Area | What the tests pin down |
 |---|---|
@@ -13,8 +15,10 @@ pnpm run check
 | `cms` | Layout (one signer, one certificate, three signed attributes in DER order, attached content); the signer sees exactly the encoded attributes; out-of-range times; base64url; byte-for-byte parity with the reference CMS |
 | `token` | CCA fields (PAN hash, classes, key usage) from generated certificates; PAN-first ranking across tokens; filters; Mach-O slice detection; what a plugged-in token still needs; the reply frame matches the reference line for line; only canonical DER certificates are embedded |
 | `tls` | Minting, reuse, renewal near expiry, name and basic constraints, key file mode |
-| `server` | HTTP routing (origins, host, navigation-only status page); a full greeting, request and reply over an in-memory WebSocket |
+| `server` | HTTP routing (origins, host, navigation-only status page); a full greeting, request and reply over an in-memory WebSocket; stopping the server closes open connections |
 | `cli` | The portal's greeting check |
+| `app` (Rust) | Settings defaults, older settings files and validation; update progress, idle and staleness rules; the diagnostic report's home redaction and log trimming; which certificates earn an expiry notification |
+| UI (Vitest) | Formatting; approval messages and the request heading (look-alike GST domains refused); token guide wording; the Home headline; the update card's states and buttons; window visibility outside the app shell |
 
 ## Reference fixtures
 
