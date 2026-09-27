@@ -204,6 +204,34 @@ jobs:
       id-token: write
       attestations: write
     steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      # tauri-action links a draft's latest.json to GitHub API asset URLs,
+      # which count against the anonymous API limit; point them at the
+      # release downloads before the checksums are written.
+      - name: Point latest.json at the release downloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          dir="${RUNNER_TEMP}/manifest"
+          gh release download "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" \
+            --pattern latest.json --dir "${dir}"
+          gh release view "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" \
+            --json assets > "${dir}/assets.json"
+          mkdir "${dir}/out"
+          node scripts/updater-manifest.ts "${dir}/latest.json" "${dir}/assets.json" \
+            "${GITHUB_REPOSITORY}" "${GITHUB_REF_NAME}" > "${dir}/out/latest.json"
+          gh release upload "${GITHUB_REF_NAME}" "${dir}/out/latest.json" \
+            --repo "${GITHUB_REPOSITORY}" --clobber
+
       - name: Download the draft release assets
         env:
           GH_TOKEN: ${{ github.token }}
