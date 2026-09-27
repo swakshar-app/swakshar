@@ -23,4 +23,5 @@ tokio-tungstenite = { workspace = true }
 workspace = true
 
 [dev-dependencies]
+rcgen = { workspace = true }
 tokio = { workspace = true, features = ["io-util", "macros", "rt"] }

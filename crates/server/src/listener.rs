@@ -79,3 +79,7 @@ pub async fn serve<B: Broker>(
         });
     }
 }
+
+#[cfg(test)]
+#[path = "listener_tests.rs"]
+mod tests;

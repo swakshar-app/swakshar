@@ -4242,6 +4242,7 @@ version = "0.1.0"
 dependencies = [
  "futures-util",
  "log",
+ "rcgen",
  "rustls",
  "rustls-pki-types",
  "swakshar-protocol",
