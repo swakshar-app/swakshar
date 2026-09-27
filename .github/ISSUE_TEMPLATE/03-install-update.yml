@@ -1,0 +1,54 @@
+name: Install, update or macOS warning
+description: Swakshar will not install, open or update, or macOS shows a security warning.
+labels: ["install and update"]
+body:
+  - type: dropdown
+    id: problem
+    attributes:
+      label: What went wrong?
+      options:
+        - macOS says Swakshar cannot be opened or could not be verified
+        - Swakshar will not open, or closes straight away
+        - The item is in use when replacing Swakshar in Applications
+        - An update was not offered
+        - An update failed to download or install
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, and the exact words of any warning. A screenshot of the warning helps, as long as it shows no personal details.
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Where did you get Swakshar?
+      options:
+        - GitHub Releases (.dmg)
+        - An in-app update
+        - Built from source
+        - Somewhere else
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Swakshar version (from, and to if updating), macOS version and Mac
+      placeholder: "0.1.0 to 0.1.1, macOS 26.3 on Apple silicon"
+    validations:
+      required: true
+  - type: textarea
+    id: checks
+    attributes:
+      label: Gatekeeper check (optional)
+      description: For warnings, run `spctl -a -t open --context context:primary-signature -v ~/Downloads/Swakshar_*.dmg` and paste the result.
+      render: text
+  - type: textarea
+    id: report
+    attributes:
+      label: Diagnostic report
+      description: "If Swakshar opens: Help, Report a problem, Create diagnostic report, Copy report."
+      render: text
