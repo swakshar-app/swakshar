@@ -4,6 +4,13 @@ What changed in each release, newest first. The release workflow publishes
 each version's section as its release notes, and the in-app update card shows
 it under See changes.
 
+## 0.1.2
+
+- Restart after an update opens Swakshar again. Before, pressing Restart
+  installed the update but left Swakshar closed until you opened it.
+  Updating from 0.1.1 to this version can still leave it closed once;
+  open it from Applications.
+
 ## 0.1.1
 
 - Swakshar shows in the Dock and the app switcher, with its own menu bar,
