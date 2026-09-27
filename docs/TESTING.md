@@ -88,9 +88,10 @@ Run in order on Apple Silicon, then on Intel if available.
 18. Settings: turn off Show notifications; a request behind a full-screen app
     then shows no notification. Turn it back on: it does.
 19. Updates (after the updater key is set up): an older build offers the newer
-    published release on Home and in the menu bar; What's new shows its notes;
-    Download shows progress; Restart now relaunches into the new version with
-    signing as it was; Restart when idle waits for a quiet moment.
+    published release in the update card and the menu bar; See changes shows
+    its notes; Download shows progress; Restart relaunches into the new
+    version with signing as it was; Restart when idle waits for a quiet
+    moment; Dismiss hides the card until the next step.
 20. Repeat 6 to 8 in Edge and Brave.
 
 ## Command-line checks
