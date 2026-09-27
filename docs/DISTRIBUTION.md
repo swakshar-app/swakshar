@@ -28,9 +28,11 @@ picker, so no window gains updater permissions. Ships in v0.1.0.
    token or certificate data. Settings has "Check for updates
    automatically" (on by default) and Help has "Check now". This stays the
    only outbound request Swakshar makes, as `AGENTS.md` requires.
-2. **Tell.** Home shows "Swakshar X.Y.Z is available" with What's new (the
-   release notes carried in `latest.json`) and Download; the menu bar gains
-   "Update to X.Y.Z". Nothing downloads without the user's click.
+2. **Tell.** A card at the bottom right of the main window, on every page,
+   shows "Swakshar X.Y.Z is available" with See changes (the release notes
+   carried in `latest.json`) and Download; the menu bar gains "Update to
+   X.Y.Z". Nothing downloads without the user's click. The card can be
+   dismissed until the update reaches its next step.
 3. **Install.** Once downloaded: Restart now, or Restart when idle, which
    waits until no request is waiting and no GST page has connected for five
    minutes. Never while a request is waiting. Signing comes back as the user
