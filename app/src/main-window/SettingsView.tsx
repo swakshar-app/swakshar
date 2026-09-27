@@ -1,11 +1,13 @@
 /**
- * Settings: start at login, port, greeting version, extra sites and drivers.
+ * Settings: start at login, updates, notifications, the Dock, port, greeting
+ * version, extra sites and drivers.
  */
 import { type ReactElement, useEffect, useState } from "react";
 
 import { errorText, mainApi } from "../api/commands";
 import type { Settings } from "../api/types";
 import { useAction } from "../components/hooks";
+import { onMac } from "../components/platform";
 import { Button, Card, Notice } from "../components/ui";
 import { DriversCard } from "./DriversCard";
 import { LocalCertificateCard } from "./LocalCertificateCard";
@@ -66,6 +68,12 @@ export function SettingsView(): ReactElement {
           <input type="checkbox" checked={settings.notifications} onChange={(event) => update({ notifications: event.target.checked })} />
           <span>Show notifications</span>
         </label>
+        {onMac() ? (
+          <label className="field field-inline">
+            <input type="checkbox" checked={settings.keepInDock} onChange={(event) => update({ keepInDock: event.target.checked })} />
+            <span>Keep Swakshar in the Dock when its windows are closed</span>
+          </label>
+        ) : null}
       </Card>
       <Card title="Connection">
         <label className="field">
