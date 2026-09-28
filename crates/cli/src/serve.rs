@@ -2,6 +2,7 @@
 
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::time::Duration;
 
 use swakshar_protocol::{
     DEFAULT_GREETING_VERSION, OriginPolicy, REPLY_CANCELED, REPLY_FAILED, RequestKind,
@@ -19,6 +20,9 @@ use crate::error::CliError;
 use crate::prompt::{choose, confirm};
 use crate::signing::{Signed, sign_interactively};
 use crate::unix_now;
+
+/// Longest Ctrl-C waits for the token thread to close the driver.
+const TOKEN_DEADLINE: Duration = Duration::from_secs(2);
 
 /// Serves the portal until Ctrl-C.
 pub(crate) async fn serve(options: Options) -> Result<(), CliError> {
@@ -38,8 +42,9 @@ pub(crate) async fn serve(options: Options) -> Result<(), CliError> {
             .unwrap_or_else(|| DEFAULT_GREETING_VERSION.to_owned()),
         origins: OriginPolicy::new(&options.allow_origins),
     };
+    let service = TokenService::spawn()?;
     let broker = Arc::new(TerminalBroker {
-        service: TokenService::spawn()?,
+        service: service.clone(),
         modules: options.modules,
         turn: Mutex::new(()),
     });
@@ -53,6 +58,9 @@ pub(crate) async fn serve(options: Options) -> Result<(), CliError> {
             stopped?;
             stopper.stop();
             server.await?;
+            if !service.shutdown(TOKEN_DEADLINE) {
+                log::warn!("the token driver was still busy after {TOKEN_DEADLINE:?}");
+            }
             println!("Stopped.");
             Ok(())
         }
