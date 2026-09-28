@@ -4,6 +4,12 @@ What changed in each release, newest first. The release workflow publishes
 each version's section as its release notes, and the in-app update card shows
 it under See changes.
 
+## 0.1.4
+
+- Fixes a crash when quitting. If Swakshar was checking your token at the
+  moment you quit, macOS could report that it quit unexpectedly. It now
+  finishes that check and closes the token driver before it exits.
+
 ## 0.1.3
 
 - The update card shows what changed as a tidy list instead of raw text
