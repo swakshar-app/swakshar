@@ -27,9 +27,11 @@ Swakshar is that signer:
 
 ## Status
 
-Pre-release. The desktop app and the command-line tool build on macOS; the
-first signed release is being prepared. Windows and Linux follow. See
-[docs/ROADMAP.md](docs/ROADMAP.md) for what comes next.
+Released for macOS: download the `.dmg` from the
+[latest release](https://github.com/swakshar-app/swakshar/releases/latest). It
+is signed and notarized, works on Apple silicon and Intel, and updates itself
+after asking you. Windows and Linux builds are attached to each release but
+are not signed yet. See [docs/ROADMAP.md](docs/ROADMAP.md) for what comes next.
 
 ## First run
 
