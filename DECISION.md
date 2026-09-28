@@ -5,6 +5,24 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## The token driver is closed before the process exits
+
+`2026-09-28-13-30-00-IST`
+
+**Decision.** Every exit shuts the token thread down after the signer
+stops: the thread finishes the driver call it is in, drops queued jobs,
+calls `C_Finalize` on every module and signals when done. The exit waits up
+to two seconds for it; the menu bar Quit's forced exit moves from three to
+five seconds so it never cuts that wait short. The command line does the
+same on Ctrl-C.
+
+**Reasoning.** Two crash reports from 0.1.3 on 2026-09-28 showed the same
+thing: Command-Q ran `exit`, which ran the vendor driver's teardown on the
+main thread while the token thread was inside `C_GetSlotList`, and the
+token thread crashed with SIGSEGV. The fix only changes our own shutdown
+order; nothing inside the driver was examined beyond the crash reports'
+stack traces.
+
 ## Every exit runs one orderly shutdown
 
 `2026-09-28-00-30-00-IST`
