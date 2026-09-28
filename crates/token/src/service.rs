@@ -1,8 +1,11 @@
 //! Handle to the token thread, usable from async and blocking code.
 
 use std::path::PathBuf;
-use std::sync::mpsc::{Sender, channel};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc::{RecvTimeoutError, Sender, channel};
 use std::thread;
+use std::time::Duration;
 
 use tokio::sync::oneshot;
 
@@ -18,6 +21,8 @@ const THREAD_NAME: &str = "swakshar-token";
 pub struct TokenService {
     /// Queue of jobs for the thread.
     jobs: Sender<Job>,
+    /// Set by [`TokenService::shutdown`]; the thread starts no new job.
+    stopping: Arc<AtomicBool>,
 }
 
 impl TokenService {
@@ -28,11 +33,31 @@ impl TokenService {
     /// Returns [`TokenError::ServiceStopped`] when the thread cannot start.
     pub fn spawn() -> Result<Self, TokenError> {
         let (jobs, receiver) = channel();
+        let stopping = Arc::new(AtomicBool::new(false));
+        let flag = Arc::clone(&stopping);
         thread::Builder::new()
             .name(THREAD_NAME.to_owned())
-            .spawn(move || Actor::default().run(&receiver))
+            .spawn(move || Actor::default().run(&receiver, &flag))
             .map_err(|_| TokenError::ServiceStopped)?;
-        Ok(Self { jobs })
+        Ok(Self { jobs, stopping })
+    }
+
+    /// Stops the token thread before the process exits: it finishes the
+    /// driver call it is in, starts no other, finalizes every module and
+    /// ends. Waits up to `deadline` and returns false if the thread was still
+    /// busy. Without this, a driver's own teardown at exit can run while a
+    /// call is in flight and crash the process. Safe to call twice.
+    #[must_use]
+    pub fn shutdown(&self, deadline: Duration) -> bool {
+        self.stopping.store(true, Ordering::Release);
+        let (done, finished) = channel();
+        if self.jobs.send(Job::Shutdown { done }).is_err() {
+            return true;
+        }
+        !matches!(
+            finished.recv_timeout(deadline),
+            Err(RecvTimeoutError::Timeout)
+        )
     }
 
     /// Lists modules, tokens and certificates. No PIN is needed.
@@ -100,3 +125,7 @@ impl TokenService {
         self.jobs.send(job).map_err(|_| TokenError::ServiceStopped)
     }
 }
+
+#[cfg(test)]
+#[path = "service_tests.rs"]
+mod tests;

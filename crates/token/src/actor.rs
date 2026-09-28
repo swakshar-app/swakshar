@@ -2,7 +2,8 @@
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use std::sync::mpsc::Receiver;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc::{Receiver, Sender};
 
 use cryptoki::context::Pkcs11;
 use swakshar_cms::{BuildError, SignedDataInput, build_signed_data};
@@ -33,6 +34,11 @@ pub(crate) enum Job {
         /// Where to send the result.
         reply: oneshot::Sender<Result<SignedOutput, TokenError>>,
     },
+    /// Close every module and end the thread.
+    Shutdown {
+        /// Told once every module is closed.
+        done: Sender<()>,
+    },
 }
 
 /// State owned by the token thread.
@@ -43,10 +49,18 @@ pub(crate) struct Actor {
 }
 
 impl Actor {
-    /// Serves jobs until every sender is dropped.
-    pub(crate) fn run(mut self, jobs: &Receiver<Job>) {
+    /// Serves jobs until a shutdown or until every sender is dropped, then
+    /// closes every module. Once `stopping` is set, queued jobs are dropped
+    /// unanswered instead of starting another driver call.
+    pub(crate) fn run(mut self, jobs: &Receiver<Job>, stopping: &AtomicBool) {
+        let mut done = None;
         for job in jobs {
             match job {
+                Job::Shutdown { done: sender } => {
+                    done = Some(sender);
+                    break;
+                }
+                _ if stopping.load(Ordering::Acquire) => break,
                 Job::Inventory {
                     extra_modules,
                     reply,
@@ -56,6 +70,20 @@ impl Actor {
                 Job::Sign { job, reply } => {
                     let _ = reply.send(self.sign(*job));
                 }
+            }
+        }
+        self.close();
+        if let Some(done) = done {
+            let _ = done.send(());
+        }
+    }
+
+    /// Finalizes every loaded module, so the driver's own teardown at process
+    /// exit never runs while a call is still in flight on this thread.
+    fn close(&mut self) {
+        for (path, pkcs11) in self.contexts.drain() {
+            if let Err(error) = pkcs11.finalize() {
+                log::warn!("closing {} failed: {error}", path.display());
             }
         }
     }
@@ -138,3 +166,7 @@ impl Actor {
         })
     }
 }
+
+#[cfg(test)]
+#[path = "actor_tests.rs"]
+mod tests;
