@@ -64,8 +64,12 @@ idle pages get a close frame, and whatever is left after one second is cut
 off. Every exit, whether Quit in the menu bar, Command-Q, Quit in the Dock,
 logging out or a restart into an update, reaches `quit::on_exit` on
 Tauri's exit event: it answers a waiting page, stops the listener and waits
-up to two seconds for open pages to receive their last reply. Quit from the
-menu bar hides the windows first, and a three second deadline ends the
+up to two seconds for open pages to receive their last reply, then shuts the
+token thread down (`TokenService::shutdown`): the thread finishes the driver
+call it is in, starts no queued job and finalizes every module, within two
+seconds. Otherwise the process exit runs the driver's own teardown while a
+call is still in flight on the token thread, which crashes. Quit from the
+menu bar hides the windows first, and a five second deadline ends the
 process if a token driver holds up the rest of the teardown.
 
 ## Updates, notifications and diagnostics
