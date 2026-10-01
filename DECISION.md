@@ -5,6 +5,28 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## The exit path cannot panic its way out of a relaunch
+
+`2026-10-02-00-20-00-IST`
+
+**Decision.** Supersedes "The token driver is closed before the process
+exits". The token thread stops after its current driver call and leaves
+the driver loaded; nothing calls `C_Finalize` or unloads it. The wait for
+open pages is built inside the async runtime. Every exit step runs under
+`quit::guarded`, which logs a panic and continues, and a panic hook writes
+every panic to the log. Ships in 0.1.6.
+
+**Reasoning.** On 2026-10-01 the restart into 0.1.5 left Swakshar closed and
+the first Command-Q of 0.1.5 aborted. One cause: `stop_and_wait` built a
+tokio timeout before entering the runtime, which panics on the main thread
+with "there is no reactor running", whenever the signer had run in that
+session. In the restart it ended the process before the relaunch; in
+Command-Q it aborted inside macOS's termination callback. The bundled app
+has no stderr, so the panic left no trace; the hook fixes that. Finalizing
+the vendor driver had already shown it can take over two seconds, and its
+teardown ran again at exit, so it is left alone: the crash it was meant to
+prevent only needs no call in flight.
+
 ## Backend events are subscribed per window
 
 `2026-10-01-23-10-00-IST`
