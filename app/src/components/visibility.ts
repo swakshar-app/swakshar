@@ -29,7 +29,9 @@ function notify(): void {
 
 /**
  * Starts listening on first use, not on import. Outside the app shell there
- * is no window to ask, so the page's own visibility decides.
+ * is no window to ask, so the page's own visibility decides. Only events sent
+ * to this window count: a plain `listen` hears every window's, and the
+ * approval window hiding after a signature would stop the main window too.
  */
 function start(): void {
   if (started) {
@@ -41,19 +43,22 @@ function start(): void {
     shown = true;
     return;
   }
-  getCurrentWindow()
-    .isVisible()
-    .then(
-      (visible) => {
-        shown = visible;
-        notify();
-      },
-      () => undefined,
-    );
-  void listen<boolean>(EVENT_VISIBILITY, (event) => {
-    shown = event.payload;
-    notify();
-  });
+  const current = getCurrentWindow();
+  current.isVisible().then(
+    (visible) => {
+      shown = visible;
+      notify();
+    },
+    () => undefined,
+  );
+  void listen<boolean>(
+    EVENT_VISIBILITY,
+    (event) => {
+      shown = event.payload;
+      notify();
+    },
+    { target: current.label },
+  );
 }
 
 /** Registers a subscriber. */
