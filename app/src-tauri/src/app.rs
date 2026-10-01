@@ -17,6 +17,10 @@ use crate::{dock, notify, quit, relaunch, server_task, tray, updates};
 
 /// Argument the login item passes, so a start at login stays in the menu bar.
 const LOGIN_ARG: &str = "--at-login";
+/// cryptoki logs every mechanism a driver lists that it has no name for as
+/// an error, about twenty per signature. They are harmless and would read as
+/// failures in the diagnostic report, so this logger is muted.
+const CRYPTOKI_MECHANISM_LOG: &str = "cryptoki::mechanism";
 
 /// Builds and runs the app until the user quits; every exit runs the orderly
 /// shutdown in [`quit::on_exit`].
@@ -35,6 +39,7 @@ pub(crate) fn run() -> Result<(), String> {
         .plugin(
             tauri_plugin_log::Builder::new()
                 .level(log::LevelFilter::Info)
+                .level_for(CRYPTOKI_MECHANISM_LOG, log::LevelFilter::Off)
                 .build(),
         )
         .plugin(tauri_plugin_autostart::init(
