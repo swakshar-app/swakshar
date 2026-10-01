@@ -9,6 +9,7 @@ mod commands;
 mod dock;
 mod error;
 mod notify;
+mod panics;
 mod pending;
 mod quit;
 mod relaunch;
@@ -24,6 +25,7 @@ mod windows;
 
 /// Starts the app and reports a fatal start-up error.
 fn main() {
+    panics::log_panics();
     if let Err(error) = app::run() {
         eprintln!("Swakshar could not start: {error}");
         std::process::exit(1);
