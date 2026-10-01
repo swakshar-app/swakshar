@@ -3,7 +3,8 @@
  * only its own subset; calling another window's command is refused.
  */
 import { invoke } from "@tauri-apps/api/core";
-import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+
+import { listenHere, type UnlistenFn } from "./events";
 
 import type {
   ActivityEntry,
@@ -76,11 +77,9 @@ export const approveApi = {
   /** Declines the request. */
   cancel: (id: number): Promise<void> => invoke<void>("cancel_request", { id }),
   /** Subscribes to new requests. */
-  onRequest: (handler: (view: PendingView) => void): Promise<UnlistenFn> =>
-    listen<PendingView>(EVENT_SIGN_REQUEST, (event) => handler(event.payload)),
+  onRequest: (handler: (view: PendingView) => void): Promise<UnlistenFn> => listenHere<PendingView>(EVENT_SIGN_REQUEST, handler),
   /** Subscribes to finished requests. */
-  onFinished: (handler: (view: FinishedView) => void): Promise<UnlistenFn> =>
-    listen<FinishedView>(EVENT_SIGN_FINISHED, (event) => handler(event.payload)),
+  onFinished: (handler: (view: FinishedView) => void): Promise<UnlistenFn> => listenHere<FinishedView>(EVENT_SIGN_FINISHED, handler),
 };
 
 /** Turns a rejected command into a sentence for the UI. */

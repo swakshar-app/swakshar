@@ -3,9 +3,10 @@
  * the window asks once when first used (a start at login never shows it), and
  * the page's own visibility covers minimising. Views poll only while visible.
  */
-import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useSyncExternalStore } from "react";
+
+import { listenHere } from "../api/events";
 
 /** Event the app sends when it shows or hides this window. */
 const EVENT_VISIBILITY = "window-visibility";
@@ -29,9 +30,7 @@ function notify(): void {
 
 /**
  * Starts listening on first use, not on import. Outside the app shell there
- * is no window to ask, so the page's own visibility decides. Only events sent
- * to this window count: a plain `listen` hears every window's, and the
- * approval window hiding after a signature would stop the main window too.
+ * is no window to ask, so the page's own visibility decides.
  */
 function start(): void {
   if (started) {
@@ -43,22 +42,19 @@ function start(): void {
     shown = true;
     return;
   }
-  const current = getCurrentWindow();
-  current.isVisible().then(
-    (visible) => {
-      shown = visible;
-      notify();
-    },
-    () => undefined,
-  );
-  void listen<boolean>(
-    EVENT_VISIBILITY,
-    (event) => {
-      shown = event.payload;
-      notify();
-    },
-    { target: current.label },
-  );
+  getCurrentWindow()
+    .isVisible()
+    .then(
+      (visible) => {
+        shown = visible;
+        notify();
+      },
+      () => undefined,
+    );
+  void listenHere<boolean>(EVENT_VISIBILITY, (visible) => {
+    shown = visible;
+    notify();
+  });
 }
 
 /** Registers a subscriber. */
