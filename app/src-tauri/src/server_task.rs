@@ -87,10 +87,19 @@ pub(crate) fn stop_and_wait(app: &AppHandle, deadline: Duration) {
     transition(app, ServerState::Paused);
     let draining = lock(&app.state::<AppState>().server).draining.take();
     if let Some(task) = draining
-        && tauri::async_runtime::block_on(tokio::time::timeout(deadline, task)).is_err()
+        && !wait_for_drain(task, deadline)
     {
         log::warn!("open pages did not close within {deadline:?}");
     }
+}
+
+/// Waits up to `deadline` for a stopped accept loop to finish draining.
+/// Callable from any thread: the timeout is built inside the runtime, since
+/// building one outside it panics, and this runs on the main thread at exit.
+pub(crate) fn wait_for_drain(task: JoinHandle<()>, deadline: Duration) -> bool {
+    tauri::async_runtime::block_on(
+        async move { tokio::time::timeout(deadline, task).await.is_ok() },
+    )
 }
 
 /// Turns signing on or off at the user's request and remembers the choice,
@@ -170,3 +179,7 @@ async fn launch(app: &AppHandle) -> Result<(u16, JoinHandle<()>, Stopper), Strin
     log::info!("listening on wss://127.0.0.1:{port}");
     Ok((port, task, stopper))
 }
+
+#[cfg(test)]
+#[path = "server_task_tests.rs"]
+mod tests;
