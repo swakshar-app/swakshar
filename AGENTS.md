@@ -71,6 +71,11 @@ everyone, so nothing private goes into any of them.
 - `tsconfig`: `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`,
   `noPropertyAccessFromIndexSignature`, `verbatimModuleSyntax`.
 - No `any`. oxlint (not ESLint) with `typescript/no-explicit-any` as an error.
+- Backend events are subscribed only through `listenHere` in
+  `app/src/api/events.ts`, which addresses the current window. Tauri's own
+  `listen` hears every window's events; the approval window hiding once
+  froze the main window that way. A test fails the build on any other import
+  of `@tauri-apps/api/event`.
 - pnpm only: never npm, npx or yarn. `packageManager` pinned in `package.json`,
   `minimumReleaseAge: 10080` in `pnpm-workspace.yaml`, Node pinned in `.nvmrc`,
   `pnpm install --frozen-lockfile` in CI.
