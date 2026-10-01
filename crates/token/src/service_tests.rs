@@ -9,7 +9,7 @@ use crate::error::TokenError;
 const DEADLINE: Duration = Duration::from_secs(2);
 
 /// An idle thread stops in time, and later jobs are refused instead of
-/// reaching a driver that is being torn down.
+/// reaching a driver while the process exits.
 #[test]
 fn shutdown_stops_the_thread() {
     let service = TokenService::spawn().unwrap();

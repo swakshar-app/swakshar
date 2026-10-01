@@ -49,9 +49,12 @@ pub(crate) struct Actor {
 }
 
 impl Actor {
-    /// Serves jobs until a shutdown or until every sender is dropped, then
-    /// closes every module. Once `stopping` is set, queued jobs are dropped
-    /// unanswered instead of starting another driver call.
+    /// Serves jobs until a shutdown or until every sender is dropped. Once
+    /// `stopping` is set, queued jobs are dropped unanswered instead of
+    /// starting another driver call. The modules stay loaded: the process
+    /// is about to exit, and a driver's own finalize and unload can take
+    /// seconds or repeat its teardown at exit. What matters is that no call
+    /// is in flight when the thread ends here.
     pub(crate) fn run(mut self, jobs: &Receiver<Job>, stopping: &AtomicBool) {
         let mut done = None;
         for job in jobs {
@@ -72,20 +75,10 @@ impl Actor {
                 }
             }
         }
-        self.close();
         if let Some(done) = done {
             let _ = done.send(());
         }
-    }
-
-    /// Finalizes every loaded module, so the driver's own teardown at process
-    /// exit never runs while a call is still in flight on this thread.
-    fn close(&mut self) {
-        for (path, pkcs11) in self.contexts.drain() {
-            if let Err(error) = pkcs11.finalize() {
-                log::warn!("closing {} failed: {error}", path.display());
-            }
-        }
+        std::mem::forget(self);
     }
 
     /// Probes every candidate module and lists the tokens they expose.

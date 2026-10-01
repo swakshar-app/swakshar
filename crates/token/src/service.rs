@@ -43,10 +43,11 @@ impl TokenService {
     }
 
     /// Stops the token thread before the process exits: it finishes the
-    /// driver call it is in, starts no other, finalizes every module and
-    /// ends. Waits up to `deadline` and returns false if the thread was still
-    /// busy. Without this, a driver's own teardown at exit can run while a
-    /// call is in flight and crash the process. Safe to call twice.
+    /// driver call it is in, starts no other and ends, leaving the modules
+    /// loaded for the process exit to tear down. Waits up to `deadline` and
+    /// returns false if the thread was still busy. Without this, a driver's
+    /// own teardown at exit can run while a call is in flight and crash the
+    /// process. Safe to call twice.
     #[must_use]
     pub fn shutdown(&self, deadline: Duration) -> bool {
         self.stopping.store(true, Ordering::Release);
