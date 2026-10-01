@@ -46,6 +46,7 @@ export function HelpView(): ReactElement {
     <div className="page">
       <Card title="Checklist" actions={<Summary checks={doctor.data ?? []} />}>
         {doctor.error === null ? null : <Notice tone="danger">{doctor.error}</Notice>}
+        {doctor.data === null && doctor.error === null ? <p className="muted">Loading.</p> : null}
         <ul className="checks">
           {(doctor.data ?? []).map((check) => (
             <li key={check.label} className={`check check-${check.status}`}>

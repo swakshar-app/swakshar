@@ -77,7 +77,9 @@ export function ActivityView(): ReactElement {
         <p className="muted">Kept only on this Mac. No PINs, signatures or full PANs are stored.</p>
         {activity.error === null ? null : <Notice tone="danger">{activity.error}</Notice>}
         {action.error === null ? null : <Notice tone="danger">{action.error}</Notice>}
-        {entries.length === 0 ? (
+        {activity.data === null && activity.error === null ? (
+          <p className="muted">Loading.</p>
+        ) : entries.length === 0 ? (
           <p className="muted">No requests yet.</p>
         ) : (
           <table className="table">

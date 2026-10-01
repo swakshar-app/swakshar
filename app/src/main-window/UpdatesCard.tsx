@@ -44,9 +44,13 @@ export function UpdatesCard(): ReactElement {
   };
   return (
     <Card title="Updates">
-      <p>
-        Version {overview.data?.appVersion ?? ""}. {update === null ? "" : summary(update)}
-      </p>
+      {overview.data === null ? (
+        <p className="muted">Loading.</p>
+      ) : (
+        <p>
+          Version {overview.data.appVersion}. {update === null ? "" : summary(update)}
+        </p>
+      )}
       {update?.state === "idle" && update.error !== null ? <Notice tone="warn">The last check failed: {update.error}</Notice> : null}
       <div className="row">
         <Button icon="refresh" onClick={check} disabled={action.busy || update === null || update.state === "unavailable" || update.state === "checking" || update.state === "downloading"}>
