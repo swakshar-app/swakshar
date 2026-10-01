@@ -4,6 +4,14 @@ What changed in each release, newest first. The release workflow publishes
 each version's section as its release notes, and the in-app update card shows
 it under See changes.
 
+## 0.1.6
+
+- Fixes Restart after an update leaving Swakshar closed, and a crash on
+  Quit, when signing had been on at any point in that session. Updating
+  from 0.1.5 can still leave it closed once; open it from Applications.
+- Anything that goes wrong while quitting is written to the log and the
+  quit carries on, instead of stopping halfway.
+
 ## 0.1.5
 
 - Fixes the main window going blank after a signature. Home stayed on
