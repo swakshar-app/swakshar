@@ -4,6 +4,17 @@ What changed in each release, newest first. The release workflow publishes
 each version's section as its release notes, and the in-app update card shows
 it under See changes.
 
+## 0.1.5
+
+- Fixes the main window going blank after a signature. Home stayed on
+  Loading, Activity looked empty, and Help lost its checklist and version
+  until Swakshar was restarted. The signature itself was always made and
+  recorded.
+- Pages now say Loading until their information arrives, instead of looking
+  empty.
+- The log no longer fills with harmless "mechanism not supported" errors
+  from the token library on every signature.
+
 ## 0.1.4
 
 - Fixes a crash when quitting. If Swakshar was checking your token at the
