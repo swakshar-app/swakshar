@@ -60,6 +60,10 @@ everyone, so nothing private goes into any of them.
   Cargo enforces it with `[registry] global-min-publish-age = "7 days"` in
   `.cargo/config.toml`; until then, check the publish date before adding or
   bumping.
+- Tokio timers (`timeout`, `sleep`) are built inside an `async` block that
+  `block_on` runs, never as its argument: built outside a runtime they panic,
+  and the main thread, where every exit runs, is outside one. Exit steps go
+  through `quit::guarded`, and panics are logged by `panics.rs`.
 - `unsafe_code = "forbid"` in every crate we own. No `unwrap`, `expect`,
   `panic!` or `todo!` outside tests.
 - `cargo fmt`, `cargo clippy -D warnings` and `cargo deny check` stay green.
