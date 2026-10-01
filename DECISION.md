@@ -5,6 +5,23 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## Backend events are subscribed per window
+
+`2026-10-01-23-10-00-IST`
+
+**Decision.** The UI subscribes to backend events only through
+`listenHere` (`app/src/api/events.ts`), which passes the current window as
+the target. No other file may import Tauri's event module; a test enforces
+it. Ships in 0.1.5.
+
+**Reasoning.** Tauri's `listen` is global unless given a target. The main
+window's visibility listener heard the approval window's "hidden" after a
+signature on 2026-10-01, took it as its own and stopped every page from
+refreshing: Home stayed on Loading, Activity looked empty, Help lost its
+checklist. Scoping the one listener fixes the bug; routing every listener
+through one helper, with a test on imports, keeps the next one from
+repeating it.
+
 ## The token driver is closed before the process exits
 
 `2026-09-28-13-30-00-IST`
