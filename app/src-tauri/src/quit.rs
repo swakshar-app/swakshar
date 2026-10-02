@@ -17,12 +17,14 @@ use crate::windows::{self, APPROVE, MAIN};
 
 /// Longest the normal exit may take before the process ends regardless;
 /// longer than [`DRAIN_DEADLINE`] and [`TOKEN_DEADLINE`] together.
-const EXIT_DEADLINE: Duration = Duration::from_secs(5);
+const EXIT_DEADLINE: Duration = Duration::from_secs(12);
 /// Longest quitting waits for open pages to receive their last reply; the
 /// signer itself cuts them off after one second.
 const DRAIN_DEADLINE: Duration = Duration::from_secs(2);
 /// Longest quitting waits for the token thread to finish its driver call.
-const TOKEN_DEADLINE: Duration = Duration::from_secs(2);
+/// Reading a token through a vendor driver can take several seconds, and
+/// exiting mid-call is what crashes.
+const TOKEN_DEADLINE: Duration = Duration::from_secs(8);
 
 /// Quits from the menu bar icon. The windows disappear at once; the exit
 /// then runs [`on_exit`], with a deadline so a stuck driver cannot hold the
