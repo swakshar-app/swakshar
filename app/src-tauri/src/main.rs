@@ -5,6 +5,7 @@ mod activity;
 mod app;
 mod attached;
 mod broker;
+mod cache;
 mod commands;
 mod dock;
 mod error;
