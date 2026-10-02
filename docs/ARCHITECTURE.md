@@ -66,8 +66,9 @@ logging out or a restart into an update, reaches `quit::on_exit` on
 Tauri's exit event: it answers a waiting page, stops the listener and waits
 up to two seconds for open pages to receive their last reply, then shuts the
 token thread down (`TokenService::shutdown`): the thread finishes the driver
-call it is in, starts no queued job and ends, within two seconds, leaving
-the driver loaded for the process exit to tear down. Otherwise that teardown
+call it is in, starts no queued job and ends, within eight seconds (a
+vendor driver can take several to read a token), leaving the driver loaded
+for the process exit to tear down. Otherwise that teardown
 runs while a call is still in flight on the token thread, which crashes.
 Each step runs under `quit::guarded`, so a panic is logged and the next step
 still runs: a panic there aborts the process inside macOS's termination
@@ -75,8 +76,10 @@ callback and skips the relaunch into an update. The wait for open pages is
 built inside the async runtime (`wait_for_drain`), because a tokio timeout
 built on the main thread outside it panics. `panics.rs` writes every panic
 to the log, since a bundled app has no terminal. Quit from the menu bar
-hides the windows first, and a five second deadline ends the process if a
-token driver holds up the rest of the teardown.
+hides the windows first, and a twelve second deadline ends the process if
+a token driver holds up the rest of the teardown. Home and Help share one
+read of the token for three seconds (`cache::Recent` in `AppState`), so
+polling pages do not keep the driver busy.
 
 ## Updates, notifications and diagnostics
 
