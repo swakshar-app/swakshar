@@ -4,6 +4,13 @@ What changed in each release, newest first. The release workflow publishes
 each version's section as its release notes, and the in-app update card shows
 it under See changes.
 
+## 0.1.7
+
+- Quitting waits longer for a slow token driver to finish what it is doing,
+  instead of exiting while a read of the token is still in flight.
+- Home and Help share one read of the token instead of each reading it every
+  few seconds, so the token is left alone more of the time.
+
 ## 0.1.6
 
 - Fixes Restart after an update leaving Swakshar closed, and a crash on
