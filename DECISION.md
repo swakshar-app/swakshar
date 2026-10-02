@@ -5,6 +5,23 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## Token reads are shared for three seconds and quitting waits eight
+
+`2026-10-02-11-40-00-IST`
+
+**Decision.** Home and Help get the token inventory from a three second
+cache in `AppState` rather than each reading the token on every poll;
+approval and the expiry watch still read it fresh. The exit waits up to
+eight seconds for the token thread's current driver call, and the forced
+exit after a menu bar Quit moves to twelve. Ships in 0.1.7.
+
+**Reasoning.** A quit of 0.1.6 on 2026-10-02 logged "the token driver was
+still busy after 2s": Home polls the token every four seconds and Help
+every six, each read goes through the vendor driver and can take seconds,
+so the thread was in a call most of the time and the process exited
+mid-call, the race that crashed 0.1.3. Fewer reads make that rare; the
+longer wait makes it not happen.
+
 ## The exit path cannot panic its way out of a relaunch
 
 `2026-10-02-00-20-00-IST`
