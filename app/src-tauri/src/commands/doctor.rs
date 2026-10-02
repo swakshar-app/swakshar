@@ -32,10 +32,7 @@ pub(crate) async fn gather(app: &AppHandle) -> CommandResult<(OverviewView, Inve
     let status = overview(app).await?;
     let state = app.state::<AppState>();
     let usb = crate::attached::scan();
-    let inventory = state
-        .token
-        .inventory(state.settings().module_paths())
-        .await?;
+    let inventory = state.recent_inventory().await?;
     let tokens = inventory_view(&inventory, &usb.await.unwrap_or_default(), unix_now());
     Ok((status, tokens))
 }

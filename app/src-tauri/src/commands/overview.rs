@@ -87,10 +87,7 @@ pub(crate) async fn get_overview(app: AppHandle) -> CommandResult<OverviewView> 
 pub(crate) async fn list_tokens(app: AppHandle) -> CommandResult<InventoryView> {
     let state = app.state::<AppState>();
     let usb = crate::attached::scan();
-    let inventory = state
-        .token
-        .inventory(state.settings().module_paths())
-        .await?;
+    let inventory = state.recent_inventory().await?;
     Ok(inventory_view(
         &inventory,
         &usb.await.unwrap_or_default(),

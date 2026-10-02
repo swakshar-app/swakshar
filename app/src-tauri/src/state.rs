@@ -3,11 +3,12 @@
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Mutex, MutexGuard, PoisonError};
-use std::time::{Instant, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
-use swakshar_token::TokenService;
+use swakshar_token::{Inventory, TokenError, TokenService};
 
 use crate::activity::ActivityLog;
+use crate::cache::Recent;
 use crate::commands::overview::TrustView;
 use crate::pending::Pending;
 use crate::server_task::ServerControl;
@@ -23,6 +24,11 @@ pub(crate) struct Diagnostics {
     /// A browser has loaded the status page.
     pub(crate) status_page_seen: bool,
 }
+
+/// How long a token read is served to polling pages before the token is
+/// read again. Reading through a vendor driver can take seconds, and Home
+/// and Help each poll every few seconds.
+const INVENTORY_LIFETIME: Duration = Duration::from_secs(3);
 
 /// Everything shared across the app.
 pub(crate) struct AppState {
@@ -44,6 +50,8 @@ pub(crate) struct AppState {
     pub(crate) busy: AtomicBool,
     /// Last trust check and when it ran; asking macOS spawns a process.
     pub(crate) trust_cache: Mutex<Option<(Instant, TrustView)>>,
+    /// Last token read, shared by the pages that poll it.
+    pub(crate) inventory: Recent<Vec<PathBuf>, Inventory>,
     /// Next request id.
     next_id: AtomicU64,
 }
@@ -61,6 +69,7 @@ impl AppState {
             diagnostics: Mutex::new(Diagnostics::default()),
             busy: AtomicBool::new(false),
             trust_cache: Mutex::new(None),
+            inventory: Recent::new(INVENTORY_LIFETIME),
             next_id: AtomicU64::new(1),
         }
     }
@@ -73,6 +82,19 @@ impl AppState {
     /// A new request id.
     pub(crate) fn next_id(&self) -> u64 {
         self.next_id.fetch_add(1, Ordering::Relaxed)
+    }
+
+    /// The token inventory for the current driver list, from the last read
+    /// when it is recent enough, otherwise read again now. For pages that
+    /// poll; approval reads the token fresh.
+    pub(crate) async fn recent_inventory(&self) -> Result<Inventory, TokenError> {
+        let paths = self.settings().module_paths();
+        if let Some(inventory) = self.inventory.get(&paths) {
+            return Ok(inventory);
+        }
+        let inventory = self.token.inventory(paths.clone()).await?;
+        self.inventory.put(paths, inventory.clone());
+        Ok(inventory)
     }
 }
 
@@ -95,3 +117,7 @@ pub(crate) fn mask_serial(serial: &str) -> String {
     let tail: Vec<char> = serial.chars().rev().take(4).collect();
     format!("****{}", tail.iter().rev().collect::<String>())
 }
+
+#[cfg(test)]
+#[path = "state_tests.rs"]
+mod tests;
