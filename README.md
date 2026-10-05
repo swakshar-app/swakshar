@@ -54,6 +54,14 @@ closed. While a window is open it also shows in the Dock and the app
 switcher; Settings can keep it in the Dock all the time. When a new version
 is out, Swakshar offers to download it and restarts when you choose.
 
+## Windows
+
+The Windows installers are not code-signed yet, so SmartScreen shows
+"Windows protected your PC" with an unknown publisher. Choose **More info**,
+then **Run anyway**. Before you do, check that the download is the one the
+release page lists: run `certutil -hashfile Swakshar_<version>_x64-setup.exe
+SHA256` and compare the result with the entry in `SHA256SUMS` on the release.
+
 ## Browsers
 
 | Browser | Extra step |
