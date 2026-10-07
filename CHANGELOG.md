@@ -4,6 +4,12 @@ What changed in each release, newest first. The release workflow publishes
 each version's section as its release notes, and the in-app update card shows
 it under See changes.
 
+## 0.1.8
+
+- When a token is plugged in without its driver, the guide offers Get the
+  driver, which opens the token maker's official download page. Hypersecu's
+  page is known so far; other makers' tokens keep the existing guidance.
+
 ## 0.1.7
 
 - Quitting waits longer for a slow token driver to finish what it is doing,
