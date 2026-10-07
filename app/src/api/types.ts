@@ -88,6 +88,8 @@ export interface AttachedView {
   readonly family: string | null;
   readonly state: "ready" | "missing" | "other-architecture" | "failed" | "not-seen";
   readonly detail: string | null;
+  readonly vendorId: number;
+  readonly driverPage: string | null;
 }
 
 /** Drivers, tokens, and tokens plugged in over USB. */

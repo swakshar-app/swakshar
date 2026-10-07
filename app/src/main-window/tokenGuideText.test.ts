@@ -5,7 +5,7 @@ import { advice, tokenName } from "./tokenGuideText";
 
 /** A plugged-in token with the given fields. */
 function attached(fields: Partial<AttachedView>): AttachedView {
-  return { maker: "Hypersecu", product: "USB TOKEN", family: "ePass2003 / HYP2003", state: "missing", detail: null, ...fields };
+  return { maker: "Hypersecu", product: "USB TOKEN", family: "ePass2003 / HYP2003", state: "missing", detail: null, vendorId: 0x2ccf, driverPage: "https://example.invalid/drivers", ...fields };
 }
 
 describe("tokenName", () => {
@@ -25,6 +25,14 @@ describe("tokenName", () => {
 describe("advice", () => {
   it("names the driver family to install", () => {
     expect(advice(attached({}))).toContain("Install the ePass2003 / HYP2003 driver for macOS");
+  });
+
+  it("points at Get the driver when the maker's page is known", () => {
+    expect(advice(attached({}))).toContain("Get the driver");
+  });
+
+  it("falls back to the Certifying Authority when no page is known", () => {
+    expect(advice(attached({ driverPage: null }))).toContain("Certifying Authority");
   });
 
   it("asks for the token's own driver when the family is unknown", () => {

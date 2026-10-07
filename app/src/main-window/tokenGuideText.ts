@@ -18,7 +18,9 @@ export function advice(token: AttachedView): string {
   const driver = token.family === null ? "the driver that came with it" : `the ${token.family} driver`;
   switch (token.state) {
     case "missing":
-      return `Install ${driver} for macOS. Your Certifying Authority or the shop that sold the token provides it. Swakshar picks it up within a few seconds; there is nothing else to set.`;
+      return token.driverPage === null
+        ? `Install ${driver} for macOS. Your Certifying Authority or the shop that sold the token provides it. Swakshar picks it up within a few seconds; there is nothing else to set.`
+        : `Install ${driver} for macOS. Get the driver opens the maker's download page; Swakshar picks the driver up within a few seconds, with nothing else to set.`;
     case "other-architecture":
       return `The installed driver is built for a different processor than this Mac's. Get the right version of ${driver} from your token's supplier.`;
     case "failed":

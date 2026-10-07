@@ -1,6 +1,7 @@
 /**
  * Guidance for tokens plugged in over USB that no driver reaches yet: which
- * driver to install, or what went wrong with the one that is installed.
+ * driver to install, with the maker's download page when it is known, or
+ * what went wrong with the one that is installed.
  */
 import type { ReactElement } from "react";
 
@@ -36,6 +37,9 @@ export function TokenGuide(props: { readonly tokens: InventoryView | null; reado
       onChange();
     });
   };
+  const download = (vendorId: number): void => {
+    void action.run(() => mainApi.openDriverPage(vendorId));
+  };
   return (
     <div className="guides">
       {waiting.map((token, index) => (
@@ -45,6 +49,9 @@ export function TokenGuide(props: { readonly tokens: InventoryView | null; reado
             <p className="guide-title">{tokenName(token)} is plugged in</p>
             <p>{advice(token)}</p>
             <div className="row">
+              {token.state === "missing" && token.driverPage !== null ? (
+                <Button icon="external" onClick={() => download(token.vendorId)} disabled={action.busy}>Get the driver</Button>
+              ) : null}
               <Button icon="refresh" onClick={onChange} disabled={action.busy}>Check again</Button>
               <Button variant="quiet" icon="plus" onClick={choose} disabled={action.busy}>Driver installed elsewhere? Choose the file</Button>
             </div>

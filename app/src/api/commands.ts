@@ -45,6 +45,8 @@ export const mainApi = {
   addDriver: (): Promise<Settings | null> => invoke<Settings | null>("add_driver"),
   /** Removes a driver the user added. */
   removeDriver: (path: string): Promise<Settings> => invoke<Settings>("remove_driver", { path }),
+  /** Opens the token maker's official driver download page in the browser. */
+  openDriverPage: (vendorId: number): Promise<void> => invoke<void>("open_driver_page", { vendorId }),
   /** Trusts the local certificate; macOS shows its own prompt. */
   installTrust: (): Promise<Overview> => invoke<Overview>("install_trust"),
   /** Removes the local certificate's trust. */
