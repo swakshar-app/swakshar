@@ -69,10 +69,19 @@ export interface TokenView {
   readonly certificates: readonly CertView[];
 }
 
+/** A token seen on the USB bus that no driver could read. */
+export interface DetectedView {
+  readonly family: string;
+  readonly name: string;
+  readonly driverUrl: string | null;
+  readonly driverPresent: boolean;
+}
+
 /** Drivers and tokens. */
 export interface InventoryView {
   readonly modules: readonly ModuleView[];
   readonly tokens: readonly TokenView[];
+  readonly detected: readonly DetectedView[];
 }
 
 /** A certificate the user may sign with. */

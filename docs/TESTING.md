@@ -60,6 +60,9 @@ Run in order on Apple Silicon, then on Intel if available.
    certificate. Plug it in and press Check tokens again: it appears.
 10. Pause from the menu bar: the portal cannot connect. Resume: it can.
 11. Repeat 3 to 5 in Edge and Brave.
+12. Plug in a token whose driver is not installed: Home and `swakshar doctor`
+    name the token and the driver it needs, without showing its serial.
+    Install the driver and plug the token in again: the certificate appears.
 
 ## Command-line checks
 

@@ -109,6 +109,7 @@ fn print_tokens(inventory: &Inventory, now: i64) {
     println!("Tokens:");
     if inventory.tokens.is_empty() {
         println!("  none connected.");
+        print_detected(inventory);
     }
     for token in &inventory.tokens {
         let pin = if token.pin.locked {
@@ -144,5 +145,29 @@ fn print_tokens(inventory: &Inventory, now: i64) {
                 summary.issuer_cn
             );
         }
+    }
+}
+
+/// Tokens seen on the USB bus whose driver is missing or did not load.
+fn print_detected(inventory: &Inventory) {
+    for token in &inventory.detected {
+        let advice = if token.driver_present {
+            "its driver is installed but did not load, see Token drivers above".to_owned()
+        } else if let Some(url) = token.driver_url {
+            format!(
+                "install the {} macOS driver from {url}, then run doctor again",
+                token.family
+            )
+        } else {
+            format!(
+                "install the {} macOS driver from your token vendor or the Certifying \
+                 Authority that issued your DSC, then run doctor again",
+                token.family
+            )
+        };
+        println!(
+            "  {} seen on USB ({}) but no driver read it: {advice}.",
+            token.family, token.name
+        );
     }
 }

@@ -7,6 +7,7 @@ use cryptoki::types::AuthPin;
 
 use crate::certinfo::CertSummary;
 use crate::modules::ModuleCandidate;
+use crate::usb::DetectedToken;
 
 /// Where a certificate lives: driver module, token serial, object id.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -82,6 +83,9 @@ pub struct Inventory {
     pub modules: Vec<ModuleStatus>,
     /// Every token found.
     pub tokens: Vec<TokenEntry>,
+    /// Tokens seen on the USB bus that no driver exposed. Filled only when
+    /// `tokens` is empty.
+    pub detected: Vec<DetectedToken>,
 }
 
 /// One signature to produce on the token thread.

@@ -3,7 +3,7 @@
  */
 import type { ReactElement } from "react";
 
-import type { CertView, InventoryView, ModuleView, TokenView } from "../api/types";
+import type { CertView, DetectedView, InventoryView, ModuleView, TokenView } from "../api/types";
 import { Icon } from "../components/Icon";
 import { Card, Notice, Tag } from "../components/ui";
 
@@ -66,13 +66,38 @@ function Drivers({ modules }: { readonly modules: readonly ModuleView[] }): Reac
   );
 }
 
+/** No token could be read: name any token seen on USB and the driver it needs. */
+function MissingDrivers({ detected }: { readonly detected: readonly DetectedView[] }): ReactElement {
+  if (detected.length === 0) {
+    return <p className="muted">No token connected. Plug in your DSC token.</p>;
+  }
+  return (
+    <>
+      {detected.map((token) => (
+        <Notice key={token.family} tone="warn">
+          <strong>{token.family}</strong> is plugged in ({token.name}), but no driver could read it.{" "}
+          {token.driverPresent
+            ? "Its driver is installed but did not load; see Token drivers below."
+            : `Install the ${token.family} macOS driver from your token vendor or the Certifying Authority that issued your DSC, then plug the token in again.`}
+          {token.driverUrl === null ? null : (
+            <>
+              {" "}
+              Driver page: <code>{token.driverUrl}</code>
+            </>
+          )}
+        </Notice>
+      ))}
+    </>
+  );
+}
+
 /** The tokens card. */
 export function TokensPanel({ tokens, error }: { readonly tokens: InventoryView | null; readonly error: string | null }): ReactElement {
   return (
     <Card title="Your tokens">
       {error === null ? null : <Notice tone="danger">{error}</Notice>}
       {tokens === null ? <p className="muted">Looking for tokens.</p> : null}
-      {tokens !== null && tokens.tokens.length === 0 ? <p className="muted">No token connected. Plug in your DSC token.</p> : null}
+      {tokens !== null && tokens.tokens.length === 0 ? <MissingDrivers detected={tokens.detected} /> : null}
       {tokens?.tokens.map((token) => <TokenCard key={`${token.name}-${token.serial}`} token={token} />)}
       {tokens === null ? null : <Drivers modules={tokens.modules} />}
     </Card>

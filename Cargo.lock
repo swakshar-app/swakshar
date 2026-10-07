@@ -3923,6 +3923,8 @@ dependencies = [
  "log",
  "rcgen",
  "secrecy",
+ "serde",
+ "serde_json",
  "sha2",
  "swakshar-cms",
  "swakshar-protocol",

@@ -77,6 +77,22 @@ pub(crate) struct InventoryView {
     pub(crate) modules: Vec<ModuleView>,
     /// Connected tokens.
     pub(crate) tokens: Vec<TokenView>,
+    /// Tokens seen on the USB bus with no working driver.
+    pub(crate) detected: Vec<DetectedView>,
+}
+
+/// A token on the USB bus that no driver could read.
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct DetectedView {
+    /// Token family.
+    pub(crate) family: String,
+    /// The device's own name.
+    pub(crate) name: String,
+    /// Vendor driver page, when known.
+    pub(crate) driver_url: Option<String>,
+    /// A driver file exists but did not load.
+    pub(crate) driver_present: bool,
 }
 
 /// One driver.
@@ -188,6 +204,16 @@ pub(crate) fn inventory_view(inventory: &Inventory, now: i64) -> InventoryView {
             .tokens
             .iter()
             .map(|token| token_view(token, now))
+            .collect(),
+        detected: inventory
+            .detected
+            .iter()
+            .map(|token| DetectedView {
+                family: token.family.to_owned(),
+                name: token.name.clone(),
+                driver_url: token.driver_url.map(str::to_owned),
+                driver_present: token.driver_present,
+            })
             .collect(),
     }
 }

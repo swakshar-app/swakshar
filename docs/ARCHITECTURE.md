@@ -6,7 +6,7 @@
 |---|---|---|
 | `swakshar-protocol` | Parse requests, render greeting and replies, origin rules, PAN masking, dates. Pure | none |
 | `swakshar-cms` | Build and inspect the `signtype=1` CMS; base64url; `DigestInfo`; RSA SHA-1 verification | RustCrypto `cms`/`der`, ring |
-| `swakshar-token` | PKCS#11 through cryptoki: driver discovery, certificates, PAN matching, the signing thread | cms, protocol |
+| `swakshar-token` | PKCS#11 through cryptoki: driver discovery, certificates, PAN matching, the signing thread; USB detection of tokens with no working driver | cms, protocol |
 | `swakshar-tls` | Per-install CA and loopback leaf; macOS trust store | rcgen |
 | `swakshar-server` | Loopback `wss://` server: TLS, Origin and Host checks, greeting, one request at a time | protocol, rustls, tungstenite |
 | `swakshar-cli` | `swakshar` binary: doctor, setup, serve, selftest, probe | all of the above |

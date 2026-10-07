@@ -16,6 +16,7 @@ use crate::pkcs11::{
     find_certificate, find_private_key, find_slot, load, login, read_tokens, sign_verified,
 };
 use crate::types::{Inventory, ModuleStatus, SignJob, SignMechanism, SignedOutput};
+use crate::usb::tokens_needing_driver;
 
 /// Work for the token thread; each job carries its reply channel.
 pub(crate) enum Job {
@@ -60,7 +61,8 @@ impl Actor {
         }
     }
 
-    /// Probes every candidate module and lists the tokens they expose.
+    /// Probes every candidate module and lists the tokens they expose. When
+    /// none does, looks on the USB bus for a known token without a driver.
     fn inventory(&mut self, extra_modules: &[PathBuf]) -> Inventory {
         let mut inventory = Inventory::default();
         for candidate in candidate_modules(extra_modules) {
@@ -85,6 +87,9 @@ impl Actor {
                 }
             }
             inventory.modules.push(status);
+        }
+        if inventory.tokens.is_empty() {
+            inventory.detected = tokens_needing_driver(&inventory.modules);
         }
         inventory
     }

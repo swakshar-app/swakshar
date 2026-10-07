@@ -14,6 +14,8 @@ cryptoki = { workspace = true }
 der = { workspace = true }
 log = { workspace = true }
 secrecy = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
 sha2 = { workspace = true }
 swakshar-cms = { workspace = true }
 swakshar-protocol = { workspace = true }

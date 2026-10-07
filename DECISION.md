@@ -5,6 +5,28 @@ reasoning. Supersede an entry with a new one; never rewrite an old entry. Keep
 this file under 300 lines by moving older entries into `decisions/` with an
 index.
 
+## Token detection shells out to system_profiler
+
+`2026-10-08-01-00-00-IST`
+
+**Decision.** When no PKCS#11 module exposes a token, `swakshar-token` runs
+`/usr/sbin/system_profiler SPUSBDataType -json` and matches the connected USB
+devices against a table of known DSC token families: by public vendor and
+product id where one exists, and by the device's own manufacturer and product
+strings otherwise. The serial number field is never deserialised. The result
+names the token and the driver it needs in the Home panel and in
+`swakshar doctor`.
+
+**Reasoning.** A USB enumeration crate would add a dependency to the signing
+process for a diagnostic that only matters when something is already wrong,
+and the libusb-based ones need a native library the user would have to
+install, the exact problem this feature exists to remove. `system_profiler`
+ships with macOS, is called by absolute path like the `security` tool in
+`swakshar-tls`, and already does the enumeration. Running the probe only when
+the inventory is empty keeps every signing request free of its latency. Ids
+and names come from public lists only, so nothing here depends on vendor
+binaries.
+
 ## cargo-deny fails on what we can act on
 
 `2026-09-26-15-23-00-IST`

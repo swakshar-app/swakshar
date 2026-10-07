@@ -114,6 +114,12 @@ cannot read.
 - This is UI and a data table, no driver code, so it is safe to build before
   any vendor replies.
 
+Built on 2026-10-07: `crates/token/src/usb.rs` reads
+`system_profiler SPUSBDataType -json` only when the inventory found no token,
+matches public ids and the device's own strings, never reads the serial, and
+fills `Inventory.detected` for the Home panel and `swakshar doctor`. Driver
+links show as text; an in-app open-link command is a follow-up.
+
 ## Where this leaves each token
 
 | Token | Best available path | Needs a vendor driver install? |
@@ -135,8 +141,9 @@ cannot read.
 
 1. Run Phase 0 on each real token and record the ATR and whether OpenSC lists
    the certificate. This settles HYP2003, Longmai and TrustKey.
-2. Do you want me to wire up Route 4 (USB detection and guided install) now?
-   It is safe and independent of the vendor replies.
+2. Route 4 is built. Verify it with a token whose driver is not installed
+   (TESTING.md step 12), and send me the product strings the panel shows so
+   the name hints can be tightened.
 3. Send the Route 2 drafts? If so, from which address, and do you want the
    HYP2003 one first since Hypersecu already ships macOS support?
 

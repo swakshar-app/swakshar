@@ -15,6 +15,7 @@ mod portal;
 mod select;
 mod service;
 mod types;
+mod usb;
 
 pub use certinfo::{CertSummary, summarize};
 pub use cryptoki::types::AuthPin;
@@ -28,3 +29,4 @@ pub use types::{
     CertRef, Inventory, ModuleStatus, PinState, SignJob, SignMechanism, SignedOutput,
     TokenCertificate, TokenEntry,
 };
+pub use usb::DetectedToken;
