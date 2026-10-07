@@ -29,4 +29,4 @@ pub use types::{
     CertRef, Inventory, ModuleStatus, PinState, SignJob, SignMechanism, SignedOutput,
     TokenCertificate, TokenEntry,
 };
-pub use usb::{DriverState, UsbToken, attached_tokens, driver_state};
+pub use usb::{DriverState, UsbToken, attached_tokens, driver_page, driver_state};

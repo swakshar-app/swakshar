@@ -8,6 +8,8 @@ use crate::types::{Inventory, ModuleStatus};
 
 /// USB interface class for smart cards (CCID), which most DSC tokens use.
 const CLASS_SMART_CARD: u8 = 0x0B;
+/// Hypersecu's download page for tokens sold in India, HYP2003 included.
+const HYPERSECU_INDIA_DOWNLOADS: &str = "https://hypersecu.com/copy-of-downloads-for-india";
 
 /// A token maker by USB vendor ID, and the driver families in
 /// [`crate::candidate_modules`] that serve its tokens.
@@ -20,6 +22,8 @@ struct KnownVendor {
     family: &'static str,
     /// Families of known driver paths that work with these tokens.
     driver_families: &'static [&'static str],
+    /// The maker's official driver download page, when one is public.
+    driver_page: Option<&'static str>,
 }
 
 /// Families served by Feitian's ePass2003 driver, also sold as HYP2003.
@@ -37,18 +41,21 @@ const KNOWN_VENDORS: &[KnownVendor] = &[
         maker: "Feitian",
         family: "ePass2003 / HYP2003",
         driver_families: EPASS2003_DRIVERS,
+        driver_page: None,
     },
     KnownVendor {
         vendor_id: 0x2CCF,
         maker: "Hypersecu",
         family: "ePass2003 / HYP2003",
         driver_families: EPASS2003_DRIVERS,
+        driver_page: Some(HYPERSECU_INDIA_DOWNLOADS),
     },
     KnownVendor {
         vendor_id: 0x0529,
         maker: "SafeNet",
         family: "SafeNet eToken",
         driver_families: &["SafeNet eToken"],
+        driver_page: None,
     },
 ];
 
@@ -67,6 +74,8 @@ pub struct UsbToken {
     pub family: Option<&'static str>,
     /// Driver families that serve this token; empty when unknown.
     pub driver_families: &'static [&'static str],
+    /// The maker's official driver download page, when one is public.
+    pub driver_page: Option<&'static str>,
 }
 
 /// USB devices that are known token models or smart card devices. Returns an
@@ -79,6 +88,15 @@ pub fn attached_tokens() -> Vec<UsbToken> {
             Vec::new()
         }
     }
+}
+
+/// The official driver download page of the maker with `vendor_id`, when
+/// one is public. Looked up here so the webview never supplies a URL.
+pub fn driver_page(vendor_id: u16) -> Option<&'static str> {
+    KNOWN_VENDORS
+        .iter()
+        .find(|vendor| vendor.vendor_id == vendor_id)
+        .and_then(|vendor| vendor.driver_page)
 }
 
 /// A token description for `device`, or `None` when it is not a token.
@@ -102,6 +120,7 @@ fn classify(device: &nusb::DeviceInfo) -> Option<UsbToken> {
         product: device.product_string().map(str::to_owned),
         family: known.map(|vendor| vendor.family),
         driver_families: known.map_or(&[], |vendor| vendor.driver_families),
+        driver_page: known.and_then(|vendor| vendor.driver_page),
     })
 }
 

@@ -2,7 +2,7 @@
 
 use std::path::PathBuf;
 
-use super::{DriverState, UsbToken, driver_state};
+use super::{DriverState, HYPERSECU_INDIA_DOWNLOADS, UsbToken, driver_page, driver_state};
 use crate::macho::ArchSupport;
 use crate::modules::ModuleCandidate;
 use crate::types::{Inventory, ModuleStatus, PinState, TokenEntry};
@@ -19,6 +19,7 @@ fn usb(known: bool) -> UsbToken {
         product: Some("ePass2003".to_owned()),
         family: known.then_some("ePass2003"),
         driver_families: if known { FAMILIES } else { &[] },
+        driver_page: None,
     }
 }
 
@@ -177,4 +178,12 @@ fn user_added_drivers_count() {
         vec![token("/mine.dylib")],
     );
     assert_eq!(driver_state(&usb(true), &found), DriverState::Ready);
+}
+
+/// Hypersecu publishes a driver page; Feitian and unknown makers do not.
+#[test]
+fn knows_the_makers_driver_pages() {
+    assert_eq!(driver_page(0x2CCF), Some(HYPERSECU_INDIA_DOWNLOADS));
+    assert_eq!(driver_page(0x096E), None);
+    assert_eq!(driver_page(0x1234), None);
 }
