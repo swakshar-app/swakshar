@@ -77,7 +77,9 @@ sandbox feasibility spike. The steps and open questions are in
 
 ## Later
 
-- One-click install of a token maker's driver from its official download,
-  for brands without a native driver.
+- Downloading and running a token maker's driver inside Swakshar, for brands
+  without a native driver, once a maker offers a stable, signed download
+  that can be pinned by hash. Today Get the driver opens the maker's
+  official page (0.1.8), and only Hypersecu's page is public.
 - Windows and Linux releases, Windows signing through SignPath and an
   `ubuntu-22.04-arm` build (`docs/RELEASING.md`, Going public).
