@@ -17,6 +17,7 @@ const COMMANDS: &[&str] = &[
     "save_settings",
     "add_driver",
     "remove_driver",
+    "open_driver_page",
     "check_for_update",
     "download_update",
     "restart_to_update",

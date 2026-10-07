@@ -3,9 +3,10 @@
 
 use std::path::Path;
 
-use swakshar_token::{ArchSupport, candidate_modules};
+use swakshar_token::{ArchSupport, candidate_modules, driver_page};
 use tauri::{AppHandle, Manager as _};
 use tauri_plugin_dialog::DialogExt as _;
+use tauri_plugin_opener::OpenerExt as _;
 use tokio::sync::oneshot;
 
 use crate::error::{CommandError, CommandResult};
@@ -57,6 +58,22 @@ pub(crate) async fn add_driver(app: AppHandle) -> CommandResult<Option<Settings>
 #[tauri::command]
 pub(crate) fn remove_driver(app: AppHandle, path: String) -> CommandResult<Settings> {
     update_modules(&app, |modules| modules.retain(|module| *module != path))
+}
+
+/// Opens the maker's official driver download page for a plugged-in token.
+/// The page comes from the known-maker table, never from the webview.
+#[tauri::command]
+pub(crate) fn open_driver_page(app: AppHandle, vendor_id: u16) -> CommandResult<()> {
+    let url = driver_page(vendor_id).ok_or_else(|| {
+        CommandError::Message(
+            "This token's maker has no public download page. Your Certifying Authority or \
+             the shop that sold the token provides the driver."
+                .to_owned(),
+        )
+    })?;
+    app.opener()
+        .open_url(url, None::<&str>)
+        .map_err(|error| CommandError::Message(error.to_string()))
 }
 
 /// Refuses files that cannot be this Mac's driver, with a reason.

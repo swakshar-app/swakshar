@@ -69,6 +69,7 @@ pub(crate) fn run() -> Result<(), String> {
             settings_commands::save_settings,
             drivers::add_driver,
             drivers::remove_driver,
+            drivers::open_driver_page,
             update_commands::check_for_update,
             update_commands::download_update,
             update_commands::restart_to_update,

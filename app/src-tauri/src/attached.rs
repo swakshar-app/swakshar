@@ -18,6 +18,10 @@ pub(crate) struct AttachedView {
     pub(crate) state: &'static str,
     /// The driver's own error, for `failed`.
     pub(crate) detail: Option<String>,
+    /// USB vendor id, for looking the maker up again.
+    pub(crate) vendor_id: u16,
+    /// The maker's official driver download page, when one is public.
+    pub(crate) driver_page: Option<String>,
 }
 
 /// Starts listing USB tokens on a blocking thread, so it runs while the
@@ -43,7 +47,13 @@ pub(crate) fn attached_views(usb: &[UsbToken], inventory: &Inventory) -> Vec<Att
                 family: token.family.map(str::to_owned),
                 state,
                 detail,
+                vendor_id: token.vendor_id,
+                driver_page: token.driver_page.map(str::to_owned),
             }
         })
         .collect()
 }
+
+#[cfg(test)]
+#[path = "attached_tests.rs"]
+mod tests;

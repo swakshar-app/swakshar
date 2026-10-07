@@ -16,6 +16,7 @@
     "allow-save-settings",
     "allow-add-driver",
     "allow-remove-driver",
+    "allow-open-driver-page",
     "allow-check-for-update",
     "allow-download-update",
     "allow-restart-to-update",
