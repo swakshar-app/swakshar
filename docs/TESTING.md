@@ -48,7 +48,8 @@ Run in order on Apple Silicon, then on Intel if available.
 1. Fresh install: Home says Signing is off and nothing listens on the portal's
    ports (`lsof -nP -iTCP:1585 -sTCP:LISTEN` prints nothing).
 2. With the token plugged in and its driver not installed: step 1 names the
-   token and says which driver it needs.
+   token and says which driver it needs. For a HYP2003, Get the driver opens
+   Hypersecu's download page in the browser; other makers show no button.
 3. Install the token's driver: within a few seconds, without restarting
    Swakshar, the guide disappears and steps 1 and 2 complete. The certificate
    appears without a PIN, with the certificate authorities folded under More
