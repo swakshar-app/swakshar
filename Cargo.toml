@@ -37,7 +37,7 @@ nusb = "=0.2.7"
 rcgen = "=0.14.10"
 ring = "=0.17.14"
 rpassword = "=7.5.4"
-rustls = { version = "=0.23.45", default-features = false, features = ["logging", "ring", "std", "tls12"] }
+rustls = { version = "=0.23.46", default-features = false, features = ["logging", "ring", "std", "tls12"] }
 rustls-pki-types = { version = "=1.15.1", features = ["std"] }
 secrecy = "=0.10.3"
 serde = { version = "=1.0.229", features = ["derive"] }
