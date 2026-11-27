@@ -4,6 +4,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node
 import { join } from "node:path";
 
 import { installRuntimePackages, type RuntimePackage } from "./install-pdf-dependencies.ts";
+import { verifyMacPdfRuntime } from "./verify-macos-pdf-runtime.ts";
 
 /** Exact versions and accepted wheel hashes, reviewed through the age gate. */
 interface RuntimeLock {
@@ -67,6 +68,7 @@ function main(): void {
   if (nativeCrypto !== null) { cpSync(nativeCrypto.license, join(OUTPUT, "OPENSSL-LICENSE.md")); }
   writeFileSync(join(OUTPUT, "runtime.json"), `${JSON.stringify({ python: LOCK.python, arch: ARCH, ...(nativeCrypto === null ? {} : { openssl: { version: nativeCrypto.version, sha256: nativeCrypto.sha256 } }), packages: packages.map(({ name, version: pinned }) => ({ name, version: pinned })) }, null, 2)}\n`);
   const executable = join(OUTPUT, process.platform === "win32" ? "swakshar-pdf.exe" : "swakshar-pdf");
+  verifyMacPdfRuntime(OUTPUT);
   run(executable, ["--no-plugins", "--help"]);
   run(executable, ["--no-plugins", "sign", "addsig", "pkcs11", "--help"]);
   const archive = join(ROOT, ".pdf-runtime-build", `pdf-runtime-${process.platform}-${ARCH}.tar`);
