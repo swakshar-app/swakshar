@@ -72,10 +72,10 @@ pub(crate) fn engine_path(app: &AppHandle) -> CommandResult<PathBuf> {
 }
 
 /// Serializes the token profile without the PIN; JSON is accepted by pyHanko.
-pub(crate) fn profile(token: &TokenEntry, certificate: &TokenCertificate) -> Vec<u8> {
+pub(crate) fn profile(token: &TokenEntry, certificate: &TokenCertificate) -> serde_json::Value {
     let serial = hex(token.serial.as_bytes());
     let id = hex(&certificate.id);
-    let configuration = json!({
+    json!({
         "pkcs11-setups": { "swakshar": {
             "module-path": token.module,
             "token-criteria": { "serial": serial },
@@ -84,10 +84,12 @@ pub(crate) fn profile(token: &TokenEntry, certificate: &TokenCertificate) -> Vec
             "other-certs-to-pull": []
         }},
         "stamp-styles": { "swakshar": {
-            "type": "text", "stamp-text": "Digitally signed by %(signer)s\nDate: %(ts)s"
+            "type": "text", "stamp-text": "", "border-width": 0,
+            "background-opacity": 1,
+            "background-layout": { "x-align": "mid", "y-align": "mid",
+                "margins": { "left": 0, "right": 0, "top": 0, "bottom": 0 } }
         }}
-    });
-    configuration.to_string().into_bytes()
+    })
 }
 
 /// Runs one offline PAdES signature and discards vendor diagnostics.

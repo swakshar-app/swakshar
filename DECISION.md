@@ -3,6 +3,35 @@
 Newest first. Preserve earlier entries in the linked archive when this ledger
 approaches 300 lines.
 
+## Remove blocking status work and restore the approved PDF stamp
+
+`2026-11-27-12-23-30-UTC`
+
+**Decision.** Ship these fixes as stable patch 0.1.11 after CI and signed
+packaging pass. Share one overview subscription, serialize polling across slow
+responses and visibility changes, coalesce token cache misses and discard
+abandoned queued inventory jobs. Return overview immediately while a single
+background trust probe runs. Bound OS trust probes to three seconds and token
+read waits to twenty seconds; report an unavailable check separately from an
+untrusted certificate. Never interrupt vendor FFI calls or retry a PIN.
+
+**Reasoning.** The owner reported Home stuck loading, delayed PDF selection and
+rendering, excessive spacing, and an unwanted signature appearance. Source
+inspection found overlapping intervals, duplicate overview consumers, an
+unbounded synchronous trust process, JSON byte-array PDF transfer, an eagerly
+loaded PDF parser and an undefined controls layout class. Lazy-load PDF.js,
+transfer the immutable picker snapshot as binary, cancel obsolete renders and
+bound canvas pixels. Bound diagnostic log reads and the launchd status probe.
+
+**Appearance.** Port the previously approved DSC CLI vector stamp into Rust:
+Helvetica, the green check, Signature valid heading, signer and date, no heavy
+border. Share metrics with the placement preview, fit smaller boxes and show UTC
+explicitly. Keep reference scripts, screenshots and personal document details
+outside the public repository. The owner confirmed Acrobat's trust warning is
+outside this fix. Cryptographic signing and no-replace publication stay intact.
+Regression gates run only in CI; installed-app and real-token acceptance remain
+with the owner. No local tests, app launch or browser verification are authorized.
+
 ## Publish stable patch releases for testing through the updater
 
 `2026-11-27-11-55-39-UTC`

@@ -46,8 +46,7 @@ pub(crate) async fn get_pdf_status(app: AppHandle) -> CommandResult<PdfStatus> {
         ));
     }
     let inventory = state
-        .token
-        .inventory(state.settings().module_paths())
+        .read_inventory(state.settings().module_paths())
         .await?;
     let now = unix_now();
     let certificates = inventory

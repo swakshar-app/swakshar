@@ -12,7 +12,7 @@ export interface ServerView {
 
 /** Local certificate trust. */
 export interface TrustView {
-  readonly status: "trusted" | "not-trusted" | "unsupported" | "missing";
+  readonly status: "checking" | "unavailable" | "trusted" | "not-trusted" | "unsupported" | "missing";
   readonly validUntil: string | null;
   readonly command: string | null;
 }

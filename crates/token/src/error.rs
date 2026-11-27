@@ -49,6 +49,9 @@ pub enum TokenError {
     /// The token thread has stopped.
     #[error("the token service has stopped")]
     ServiceStopped,
+    /// The UI stopped waiting for an unresponsive read; no PIN was submitted.
+    #[error("reading the token took too long; reconnect it and refresh certificates")]
+    ReadTimedOut,
 }
 
 impl From<CryptokiError> for TokenError {

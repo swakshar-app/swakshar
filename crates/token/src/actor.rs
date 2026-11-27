@@ -68,7 +68,9 @@ impl Actor {
                     extra_modules,
                     reply,
                 } => {
-                    let _ = reply.send(self.inventory(&extra_modules));
+                    if !reply.is_closed() {
+                        let _ = reply.send(self.inventory(&extra_modules));
+                    }
                 }
                 Job::Sign { job, reply } => {
                     let _ = reply.send(self.sign(*job));

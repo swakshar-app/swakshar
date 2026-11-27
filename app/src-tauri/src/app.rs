@@ -85,6 +85,7 @@ pub(crate) fn run() -> Result<(), String> {
             portal::open_embridge_installer,
             pdf_status::get_pdf_status,
             pdf::choose_pdf,
+            pdf::get_pdf_bytes,
             pdf::sign_pdf,
             pdf::cancel_pdf_signing,
         ])

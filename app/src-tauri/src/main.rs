@@ -14,6 +14,7 @@ mod notify;
 mod panics;
 mod pdf_engine;
 mod pdf_files;
+mod pdf_stamp;
 #[cfg(test)]
 mod pdf_tests;
 mod pdf_types;
@@ -24,6 +25,7 @@ mod server_task;
 mod settings;
 mod state;
 mod tray;
+mod trust_cache;
 mod update_install;
 mod update_rules;
 mod updates;

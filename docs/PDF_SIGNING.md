@@ -44,7 +44,14 @@ Python, pyHanko or command-line tools. The app never searches PATH for a signer.
 Each native release builder packages its own runtime; the universal Mac app
 carries both arm64 and x64 copies.
 
-The engine creates an offline PAdES signature and a text stamp. This version
+The engine creates an offline PAdES signature with the approved DSC CLI vector
+appearance: Helvetica, a green check, a Signature valid heading, the certificate
+holder and the signing date in UTC, without a heavy border. The heading is part
+of the chosen appearance; PDF readers independently validate the signature.
+The standard Helvetica appearance supports WinAnsi names; other glyphs use a
+replacement character in the appearance, while the signing certificate retains
+its complete subject. The preview uses the same font metrics and geometry.
+This version
 does not add a trusted timestamp, revocation information or long-term validation
 data. Password-protected PDFs are refused. It creates a new signature field;
 selecting or moving existing form fields is outside this version. The token
@@ -57,6 +64,8 @@ held in a Rust secret string, and passed only to the signing child's environment
 It is not put in arguments, configuration, logs or history. The child environment
 contains it briefly; software already running as the same user may inspect it.
 Process diagnostics are discarded to avoid leaking token identity or credentials.
+Token reads stop waiting after twenty seconds, without interrupting a vendor
+driver call or submitting a PIN. Refresh after reconnecting an unresponsive token.
 PINs with leading or trailing whitespace are refused before any token login,
 because the upstream command-line signer trims that input.
 
@@ -64,6 +73,13 @@ Cancel, leaving the editor, quitting and the two-minute deadline terminate the
 PDF signing child. Normal success and failure remove staging files. A forced
 process termination or power loss can leave its private staging directory for
 the owner to remove. emBridge maintains its own separate approval lifecycle.
+
+PDF.js loads only when Sign PDF opens. The native picker returns metadata, then
+a main-window-only command transfers that exact snapshot as binary, avoiding
+JSON byte arrays. There is no arbitrary-path read API. Parsing and page rendering
+show progress, discard obsolete work, and release their worker on editor exit.
+Canvas density is capped at two million pixels per visible page. Page controls
+stay together and the preview uses a bounded scroll area.
 
 ## Build an installer
 

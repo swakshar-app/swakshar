@@ -3,16 +3,16 @@
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Mutex, MutexGuard, PoisonError};
-use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use swakshar_token::{Inventory, TokenError, TokenService};
 
 use crate::activity::ActivityLog;
 use crate::cache::Recent;
-use crate::commands::overview::TrustView;
 use crate::pending::Pending;
 use crate::server_task::ServerControl;
 use crate::settings::Settings;
+use crate::trust_cache::TrustCache;
 
 /// What the app has learnt from connections, for the Help view.
 #[derive(Debug, Clone, Default)]
@@ -29,6 +29,8 @@ pub(crate) struct Diagnostics {
 /// read again. Reading through a vendor driver can take seconds, and Home
 /// and Help each poll every few seconds.
 const INVENTORY_LIFETIME: Duration = Duration::from_secs(3);
+/// A vendor call can stall; stop waiting without interrupting an in-flight FFI call.
+const INVENTORY_DEADLINE: Duration = Duration::from_secs(20);
 
 /// Everything shared across the app.
 pub(crate) struct AppState {
@@ -49,9 +51,11 @@ pub(crate) struct AppState {
     /// Set while a request holds the single approval slot.
     pub(crate) busy: AtomicBool,
     /// Last trust check and when it ran; asking macOS spawns a process.
-    pub(crate) trust_cache: Mutex<Option<(Instant, TrustView)>>,
+    pub(crate) trust_cache: Mutex<TrustCache>,
     /// Last token read, shared by the pages that poll it.
     pub(crate) inventory: Recent<Vec<PathBuf>, Inventory>,
+    /// Coalesces cache misses without blocking the async runtime or token actor.
+    inventory_read: tokio::sync::Mutex<()>,
     /// Next request id.
     next_id: AtomicU64,
 }
@@ -68,8 +72,9 @@ impl AppState {
             pending: Mutex::new(None),
             diagnostics: Mutex::new(Diagnostics::default()),
             busy: AtomicBool::new(false),
-            trust_cache: Mutex::new(None),
+            trust_cache: Mutex::new(TrustCache::default()),
             inventory: Recent::new(INVENTORY_LIFETIME),
+            inventory_read: tokio::sync::Mutex::new(()),
             next_id: AtomicU64::new(1),
         }
     }
@@ -92,9 +97,24 @@ impl AppState {
         if let Some(inventory) = self.inventory.get(&paths) {
             return Ok(inventory);
         }
-        let inventory = self.token.inventory(paths.clone()).await?;
+        let _read = self.inventory_read.lock().await;
+        let paths = self.settings().module_paths();
+        if let Some(inventory) = self.inventory.get(&paths) {
+            return Ok(inventory);
+        }
+        let inventory = self.read_inventory(paths.clone()).await?;
         self.inventory.put(paths, inventory.clone());
         Ok(inventory)
+    }
+
+    /// Bounds UI reads; dropping the reply also skips an abandoned queued actor job.
+    pub(crate) async fn read_inventory(
+        &self,
+        paths: Vec<PathBuf>,
+    ) -> Result<Inventory, TokenError> {
+        tokio::time::timeout(INVENTORY_DEADLINE, self.token.inventory(paths))
+            .await
+            .map_err(|_| TokenError::ReadTimedOut)?
     }
 }
 

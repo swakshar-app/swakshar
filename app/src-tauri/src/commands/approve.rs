@@ -119,8 +119,7 @@ pub(crate) async fn approve_request(
 pub(crate) async fn refresh_request(app: AppHandle, id: u64) -> CommandResult<Option<PendingView>> {
     let state = app.state::<AppState>();
     let inventory = state
-        .token
-        .inventory(state.settings().module_paths())
+        .read_inventory(state.settings().module_paths())
         .await?;
     let now = unix_now();
     let mut slot = lock(&state.pending);

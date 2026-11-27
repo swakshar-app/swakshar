@@ -1,7 +1,7 @@
 /**
  * The main window: a sidebar with six sections.
  */
-import { type ReactElement, useState } from "react";
+import { lazy, type ReactElement, Suspense, useState } from "react";
 
 import logo from "../../src-tauri/icons/128x128.png";
 import { mainApi } from "../api/commands";
@@ -13,7 +13,13 @@ import { HomeView } from "./HomeView";
 import { SettingsView } from "./SettingsView";
 import { UpdateToast } from "./UpdateToast";
 import { PortalView } from "./PortalView";
-import { PdfSigningView } from "../pdf/PdfSigningView";
+import { OverviewContext } from "./useOverview";
+
+/** PDF.js and its worker are loaded only when the PDF section is opened. */
+const PdfSigningView = lazy(async () => {
+  const module = await import("../pdf/PdfSigningView");
+  return { default: module.PdfSigningView };
+});
 
 /** How often the shell refreshes the version and update state. */
 const SHELL_INTERVAL_MS = 3000;
@@ -39,7 +45,7 @@ function SectionView({ section }: { readonly section: Section }): ReactElement {
     case "portal":
       return <PortalView />;
     case "pdf":
-      return <PdfSigningView />;
+      return <Suspense fallback={<div className="page"><h1>Sign a PDF</h1><p className="muted" role="status">Preparing the PDF viewer.</p></div>}><PdfSigningView /></Suspense>;
     case "activity":
       return <ActivityView />;
     case "settings":
@@ -55,7 +61,7 @@ export function MainApp(): ReactElement {
   const overview = usePolling(mainApi.overview, SHELL_INTERVAL_MS);
   const version = overview.data?.appVersion ?? null;
   return (
-    <div className="shell">
+    <OverviewContext.Provider value={overview}><div className="shell">
       <nav className="sidebar" aria-label="Sections">
         <div className="brand">
           <img src={logo} alt="" width={28} height={28} />
@@ -79,6 +85,6 @@ export function MainApp(): ReactElement {
         <SectionView section={section} />
       </main>
       {overview.data === null ? null : <UpdateToast update={overview.data.update} onChange={overview.refresh} />}
-    </div>
+    </div></OverviewContext.Provider>
   );
 }

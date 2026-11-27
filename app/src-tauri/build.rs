@@ -32,6 +32,7 @@ const COMMANDS: &[&str] = &[
     "open_embridge_installer",
     "get_pdf_status",
     "choose_pdf",
+    "get_pdf_bytes",
     "sign_pdf",
     "cancel_pdf_signing",
 ];

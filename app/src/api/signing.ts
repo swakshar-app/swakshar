@@ -16,7 +16,7 @@ export interface BridgeStatus {
 export interface PdfDocument {
   readonly id: number;
   readonly name: string;
-  readonly bytes: number[];
+  readonly size: number;
 }
 
 /** One certificate backed by a connected token. */
@@ -60,6 +60,8 @@ export const signingApi = {
   pdfStatus: (): Promise<PdfStatus> => invoke<PdfStatus>("get_pdf_status"),
   /** Opens a native PDF chooser and returns its selected snapshot. */
   choosePdf: (): Promise<PdfDocument | null> => invoke<PdfDocument | null>("choose_pdf"),
+  /** Transfers the immutable selection directly as binary without a filesystem path. */
+  pdfBytes: (documentId: number): Promise<ArrayBuffer> => invoke<ArrayBuffer>("get_pdf_bytes", { documentId }),
   /** Signs once, after a native Save dialog. No automatic retry. */
   signPdf: (request: PdfSignRequest, pin: string | null): Promise<string | null> => invoke<string | null>("sign_pdf", { request, pin }),
   /** Cancels the active PDF subprocess. */

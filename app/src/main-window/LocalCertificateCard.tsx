@@ -6,14 +6,14 @@ import type { ReactElement } from "react";
 
 import { mainApi } from "../api/commands";
 import type { TrustView } from "../api/types";
-import { useAction, usePolling } from "../components/hooks";
+import { useAction } from "../components/hooks";
 import { Button, Card, Notice, Tag, type Tone } from "../components/ui";
-
-/** How often the card refreshes. */
-const TRUST_INTERVAL_MS = 5000;
+import { useOverview } from "./useOverview";
 
 /** Label and tone per trust state. */
 const STATES: Record<TrustView["status"], { readonly label: string; readonly tone: Tone }> = {
+  checking: { label: "Checking local certificate", tone: "neutral" },
+  unavailable: { label: "Trust check unavailable; retrying", tone: "warn" },
   trusted: { label: "Trusted by this Mac", tone: "success" },
   "not-trusted": { label: "Not trusted yet", tone: "warn" },
   missing: { label: "Not created yet", tone: "neutral" },
@@ -22,7 +22,7 @@ const STATES: Record<TrustView["status"], { readonly label: string; readonly ton
 
 /** The Local certificate card. */
 export function LocalCertificateCard(): ReactElement {
-  const overview = usePolling(mainApi.overview, TRUST_INTERVAL_MS);
+  const overview = useOverview();
   const action = useAction();
   const trust = overview.data?.trust ?? null;
   const run = (work: () => Promise<unknown>): void => {
@@ -45,7 +45,7 @@ export function LocalCertificateCard(): ReactElement {
         {trust?.status === "trusted" ? (
           <Button variant="danger" onClick={() => run(mainApi.removeTrust)} disabled={action.busy}>Remove from this Mac</Button>
         ) : (
-          <Button variant="primary" icon="shield" onClick={() => run(mainApi.installTrust)} disabled={action.busy || trust?.status === "unsupported"}>Install certificate</Button>
+          <Button variant="primary" icon="shield" onClick={() => run(mainApi.installTrust)} disabled={action.busy || trust === null || trust.status === "checking" || trust.status === "unavailable" || trust.status === "unsupported"}>Install certificate</Button>
         )}
       </div>
       {trust !== null && trust.command !== null ? (

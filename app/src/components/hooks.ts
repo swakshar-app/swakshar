@@ -18,18 +18,26 @@ export interface Polled<T> {
  * again as soon as it comes back; `load` must be a stable function. A hidden
  * window stops polling, so a closed Swakshar does not keep reading the token.
  */
-export function usePolling<T>(load: () => Promise<T>, intervalMs: number): Polled<T> {
+export function usePolling<T>(load: () => Promise<T>, intervalMs: number, enabled = true): Polled<T> {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const runNow = useRef<() => void>(() => undefined);
+  const inFlight = useRef<{ readonly load: () => Promise<T>; readonly promise: Promise<T> } | null>(null);
   const visible = useWindowVisible();
   useEffect(() => {
-    if (!visible) {
+    if (!visible || !enabled) {
       return undefined;
     }
     let active = true;
+    let pending = false;
+    let timer: ReturnType<typeof window.setTimeout> | undefined;
     const run = (): void => {
-      load().then(
+      if (!active || pending) { return; }
+      pending = true;
+      window.clearTimeout(timer);
+      const request = inFlight.current?.load === load ? inFlight.current.promise : Promise.resolve().then(load);
+      inFlight.current = { load, promise: request };
+      request.then(
         (value) => {
           if (active) {
             setData(value);
@@ -41,17 +49,20 @@ export function usePolling<T>(load: () => Promise<T>, intervalMs: number): Polle
             setError(errorText(reason));
           }
         },
-      );
+      ).finally(() => {
+        if (inFlight.current?.promise === request) { inFlight.current = null; }
+        pending = false;
+        if (active) { timer = window.setTimeout(run, intervalMs); }
+      });
     };
     runNow.current = run;
     run();
-    const timer = window.setInterval(run, intervalMs);
     return () => {
       active = false;
-      window.clearInterval(timer);
+      window.clearTimeout(timer);
       runNow.current = () => undefined;
     };
-  }, [load, intervalMs, visible]);
+  }, [load, intervalMs, visible, enabled]);
   const refresh = useCallback(() => runNow.current(), []);
   return { data, error, refresh };
 }
@@ -67,7 +78,10 @@ export interface Action {
 export function useAction(): Action {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const pending = useRef(false);
   const run = useCallback(async (action: () => Promise<unknown>): Promise<void> => {
+    if (pending.current) { return; }
+    pending.current = true;
     setBusy(true);
     setError(null);
     try {
@@ -75,6 +89,7 @@ export function useAction(): Action {
     } catch (reason: unknown) {
       setError(errorText(reason));
     } finally {
+      pending.current = false;
       setBusy(false);
     }
   }, []);

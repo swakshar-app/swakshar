@@ -127,12 +127,20 @@ fn trust_check(status: &OverviewView) -> DoctorCheck {
         "trusted" => "This Mac trusts Swakshar's local certificate.".to_owned(),
         "missing" => "The local certificate has not been created yet.".to_owned(),
         "unsupported" => "Install the local certificate manually on this system.".to_owned(),
+        "checking" => "Checking the local certificate in the background.".to_owned(),
+        "unavailable" => {
+            "The operating system could not finish checking trust. Retrying shortly.".to_owned()
+        }
         _ => "Not trusted yet. Use Install certificate on the Home view.".to_owned(),
     };
     check(
         "Local certificate",
         status.trust.status == "trusted",
-        "fail",
+        if matches!(status.trust.status, "checking" | "unavailable") {
+            "warn"
+        } else {
+            "fail"
+        },
         detail,
     )
 }

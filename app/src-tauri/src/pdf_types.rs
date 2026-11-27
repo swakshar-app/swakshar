@@ -45,8 +45,8 @@ pub(crate) struct PdfDocument {
     pub(crate) id: u64,
     /// Basename displayed by the UI.
     pub(crate) name: String,
-    /// PDF bytes for the local preview.
-    pub(crate) bytes: Vec<u8>,
+    /// Snapshot size; the preview uses a separate binary IPC response.
+    pub(crate) size: usize,
 }
 
 /// One page and rectangle, in unrotated PDF coordinates.

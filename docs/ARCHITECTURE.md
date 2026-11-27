@@ -12,7 +12,10 @@
 | `swakshar-cli` | `swakshar` binary: doctor, setup, serve, selftest, probe | all of the above |
 | `swakshar-app` | Tauri shell: tray, windows, commands, approval lifecycle | all of the above |
 
-The React UI lives in `app/src`, one bundle for both windows.
+The React UI lives in `app/src`, with shared entry code for both windows and a
+lazy PDF-viewer chunk. The main shell supplies one overview subscription to its
+children. Polling schedules the next read after completion, shares an in-flight
+read across visibility changes and stops while hidden.
 
 ## Threads and tasks
 
@@ -80,6 +83,13 @@ hides the windows first, and a twelve second deadline ends the process if
 a token driver holds up the rest of the teardown. Home and Help share one
 read of the token for three seconds (`cache::Recent` in `AppState`), so
 polling pages do not keep the driver busy.
+Concurrent cache misses share an async lock and recheck the cache before reading.
+App inventory waits expire after twenty seconds; abandoned queued reads are
+discarded by the actor, while in-flight vendor calls finish on their owning thread.
+The overview returns immediately with a checking trust state while a single
+background OS probe refreshes its cache. The probe kills and reaps a stalled
+verification process after three seconds. Cache generations prevent a late probe
+from undoing an explicit trust install or removal.
 
 ## Updates, notifications and diagnostics
 

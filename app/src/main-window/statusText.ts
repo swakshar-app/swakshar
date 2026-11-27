@@ -18,6 +18,9 @@ export function statusText(overview: Overview): { readonly title: string; readon
     case "starting":
       return { title: "Starting", detail: "Preparing the local certificate and a port.", tone: "neutral" };
     case "running":
+      if (trust.status === "checking" || trust.status === "unavailable") {
+        return { title: "Signer is running", detail: trust.status === "checking" ? "Checking your local certificate in the background." : "The local certificate check is unavailable. Retrying shortly.", tone: "neutral" };
+      }
       return trust.status === "trusted"
         ? { title: "Ready for the GST portal", detail: `Listening on 127.0.0.1:${String(server.port ?? "")}. Sign in to the portal and use your DSC as usual.`, tone: "success" }
         : { title: "Finish setup", detail: "Your browser must trust Swakshar's local certificate before the portal can connect.", tone: "warn" };

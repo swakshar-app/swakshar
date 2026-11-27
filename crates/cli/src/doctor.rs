@@ -45,6 +45,9 @@ pub(crate) fn setup(trust: bool) -> Result<(), CliError> {
     println!("It only works for 127.0.0.1 and localhost; its CA key was never saved.");
     match trust_status(&identity) {
         TrustStatus::Trusted => println!("This Mac already trusts it."),
+        TrustStatus::Unavailable => println!(
+            "The operating system could not check trust. Try again when the keychain is available."
+        ),
         TrustStatus::Unsupported => println!(
             "Trust {} manually on this system.",
             identity.ca_path().display()
@@ -68,6 +71,7 @@ fn describe(status: TrustStatus) -> &'static str {
         TrustStatus::Trusted => "yes",
         TrustStatus::NotTrusted => "no (run `swakshar setup --trust`)",
         TrustStatus::Unsupported => "not checked on this system",
+        TrustStatus::Unavailable => "check unavailable; try again",
     }
 }
 

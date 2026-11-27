@@ -7,11 +7,9 @@ import type { ReactElement } from "react";
 import { mainApi } from "../api/commands";
 import type { UpdateView } from "../api/types";
 import { formatTime } from "../components/format";
-import { useAction, usePolling } from "../components/hooks";
+import { useAction } from "../components/hooks";
 import { Button, Card, Notice } from "../components/ui";
-
-/** How often the card refreshes. */
-const UPDATES_INTERVAL_MS = 3000;
+import { useOverview } from "./useOverview";
 
 /** One sentence about the update state. */
 function summary(update: UpdateView): string {
@@ -33,7 +31,7 @@ function summary(update: UpdateView): string {
 
 /** The Updates card. */
 export function UpdatesCard(): ReactElement {
-  const overview = usePolling(mainApi.overview, UPDATES_INTERVAL_MS);
+  const overview = useOverview();
   const action = useAction();
   const update = overview.data?.update ?? null;
   const check = (): void => {

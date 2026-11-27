@@ -130,8 +130,7 @@ pub(crate) async fn run(app: &AppHandle, portal: PortalRequest) -> String {
         return REPLY_FAILED.to_owned();
     };
     let inventory = state
-        .token
-        .inventory(state.settings().module_paths())
+        .read_inventory(state.settings().module_paths())
         .await
         .unwrap_or_default();
     let now = unix_now();

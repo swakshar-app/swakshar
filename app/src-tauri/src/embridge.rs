@@ -3,7 +3,7 @@
 use std::net::{Ipv4Addr, SocketAddr, TcpStream};
 use std::path::Path;
 use std::process::{Command, Stdio};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use serde::{Deserialize, Serialize};
 
@@ -54,13 +54,7 @@ pub(crate) enum BridgeAction {
 pub(crate) fn status() -> BridgeStatus {
     let supported = cfg!(target_os = "macos");
     let installed = supported && Path::new(PLIST).is_file();
-    let loaded = installed
-        && Command::new("/bin/launchctl")
-            .args(["print", SERVICE])
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .status()
-            .is_ok_and(|result| result.success());
+    let loaded = installed && service_loaded();
     let listening = supported
         && TcpStream::connect_timeout(
             &SocketAddr::from((Ipv4Addr::LOCALHOST, PORT)),
@@ -95,6 +89,33 @@ pub(crate) fn status() -> BridgeStatus {
         listening,
         tls_ready,
         hosts_ready,
+    }
+}
+
+/// Bounds the read-only launchd probe without timing out administrator dialogs.
+fn service_loaded() -> bool {
+    let Ok(mut child) = Command::new("/bin/launchctl")
+        .args(["print", SERVICE])
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+    else {
+        return false;
+    };
+    let started = Instant::now();
+    loop {
+        match child.try_wait() {
+            Ok(Some(status)) => return status.success(),
+            Ok(None) if started.elapsed() < Duration::from_secs(1) => {
+                std::thread::sleep(Duration::from_millis(25))
+            }
+            _ => {
+                let _ = child.kill();
+                let _ = child.wait();
+                return false;
+            }
+        }
     }
 }
 

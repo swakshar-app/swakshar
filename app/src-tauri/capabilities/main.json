@@ -31,6 +31,7 @@
     "allow-open-embridge-installer",
     "allow-get-pdf-status",
     "allow-choose-pdf",
+    "allow-get-pdf-bytes",
     "allow-sign-pdf",
     "allow-cancel-pdf-signing"
   ]

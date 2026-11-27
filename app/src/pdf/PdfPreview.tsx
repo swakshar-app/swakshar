@@ -1,14 +1,12 @@
 /** Local page canvas with a draggable signature rectangle. */
-import type { PDFDocumentProxy, PageViewport } from "pdfjs-dist";
-import { type PointerEvent, type ReactElement, useEffect, useRef, useState } from "react";
+import type { PDFDocumentProxy } from "pdfjs-dist";
+import { type PointerEvent, type ReactElement, useRef } from "react";
 
-import { errorText } from "../api/commands";
 import type { PdfBox } from "../api/signing";
 import { Notice } from "../components/ui";
 import { boxFromPoints } from "./placement";
-
-/** Limit preview width while preserving real PDF-space coordinates. */
-const MAX_PREVIEW_WIDTH = 650;
+import { usePageCanvas } from "./usePageCanvas";
+import { SignatureStamp } from "./SignatureStamp";
 
 /** Renders one page and maps pointer coordinates through its rotation and crop box. */
 export function PdfPreview(props: {
@@ -16,30 +14,14 @@ export function PdfPreview(props: {
   readonly page: number;
   readonly box: PdfBox | null;
   readonly disabled: boolean;
+  readonly signer: string;
   readonly onBox: (box: PdfBox | null) => void;
 }): ReactElement {
-  const { pdf, page, box, disabled, onBox } = props;
+  const { pdf, page, box, disabled, signer, onBox } = props;
   const canvas = useRef<HTMLCanvasElement>(null);
+  const container = useRef<HTMLDivElement>(null);
   const start = useRef<readonly number[] | null>(null);
-  const [viewport, setViewport] = useState<PageViewport | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
-    let active = true;
-    let cancel: (() => void) | null = null;
-    void pdf.getPage(page).then(async (pdfPage) => {
-      const element = canvas.current;
-      if (!active || element === null) { return; }
-      const original = pdfPage.getViewport({ scale: 1 });
-      const view = pdfPage.getViewport({ scale: Math.min(1, MAX_PREVIEW_WIDTH / original.width) });
-      element.width = Math.ceil(view.width);
-      element.height = Math.ceil(view.height);
-      const render = pdfPage.render({ canvas: element, viewport: view });
-      cancel = (): void => render.cancel();
-      await render.promise;
-      if (active) { setViewport(view); }
-    }).catch((reason: unknown) => { if (active) { setError(errorText(reason)); } });
-    return () => { active = false; cancel?.(); };
-  }, [pdf, page]);
+  const { viewport, error, rendering } = usePageCanvas(pdf, page, canvas, container);
 
   /** Converts a captured pointer to PDF space, clamped to the displayed page. */
   function point(event: PointerEvent<HTMLDivElement>): readonly number[] | null {
@@ -78,7 +60,8 @@ export function PdfPreview(props: {
   const [x1 = 0, y1 = 0, x2 = 0, y2 = 0] = overlay ?? [];
   return <>
     {error === null ? null : <Notice tone="danger">{error}</Notice>}
-    <div className="pdf-preview-scroll">
+    {rendering ? <p className="muted" role="status">Rendering page {page}.</p> : null}
+    <div className="pdf-preview-scroll" ref={container} aria-busy={rendering}>
       <div className="pdf-preview" onPointerDown={begin} onPointerMove={move} onPointerUp={finish}
         onPointerCancel={() => { start.current = null; onBox(null); }}>
         <canvas ref={canvas} aria-label={`PDF page ${String(page)}`} />
@@ -87,9 +70,9 @@ export function PdfPreview(props: {
           top: `${String(Math.min(y1, y2) / viewport.height * 100)}%`,
           width: `${String(Math.abs(x2 - x1) / viewport.width * 100)}%`,
           height: `${String(Math.abs(y2 - y1) / viewport.height * 100)}%`,
-        }}>Signature</div>}
+        }}><SignatureStamp width={box === null ? 0 : box[2] - box[0]} height={box === null ? 0 : box[3] - box[1]} signer={signer} /></div>}
       </div>
     </div>
-    <p className="muted">Drag on the page to place and resize the signature. Drawing another box replaces this placement.</p>
+    <p className="muted pdf-hint">Drag on the page to place your signature. Draw again to adjust its size or position.</p>
   </>;
 }

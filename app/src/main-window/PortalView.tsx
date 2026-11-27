@@ -35,7 +35,7 @@ export function PortalView(): ReactElement {
               <dt>Local hostname</dt><dd>{bridge.hostsReady ? "Mapped to this Mac" : "Missing. Finish setup in emBridge."}</dd>
             </dl>
             {bridge.listening && !bridge.loaded ? <Notice tone="warn">Another service may be using port 26769. Close it before starting emBridge.</Notice> : null}
-            <div className="actions">
+            <div className="row">
               <Button variant="primary" disabled={action.busy || (bridge.listening && !bridge.loaded)} onClick={() => {
                 void action.run(async () => { await signingApi.bridgeControl("start"); status.refresh(); });
               }}>Start emBridge</Button>

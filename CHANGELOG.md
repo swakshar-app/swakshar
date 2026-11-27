@@ -4,6 +4,19 @@ What changed in each release, newest first. The release workflow publishes
 each version's section as its release notes, and the in-app update card shows
 it under See changes.
 
+## 0.1.11
+
+- Show Home immediately while certificate trust is checked in the background.
+  Share status reads and prevent slow polls from piling up native token work.
+- Open PDFs through binary transfer and load the PDF viewer only when needed.
+  Show reading and rendering progress, cancel obsolete renders and limit canvas
+  memory on large pages.
+- Keep page controls together, reduce spacing and fit the preview to the window.
+- Restore the approved DSC CLI signature appearance: Helvetica, a green check,
+  Signature valid heading, signer and UTC date, without a heavy black border.
+- Bound stalled trust, service-status and token-read waits, and read only the
+  bounded tail of diagnostic logs.
+
 ## 0.1.10
 
 - Sign a local PDF with a DSC token by choosing a page and drawing the visible

@@ -1,10 +1,11 @@
 /* Document preview and placement share the existing card and form system. */
 .pdf-preview-scroll {
   overflow: auto;
-  margin-block: 16px;
+  max-height: 66vh;
+  margin-block: 10px;
   border: 1px solid var(--border);
   background: var(--surface);
-  padding: 12px;
+  padding: 8px;
 }
 
 .pdf-preview {
@@ -25,13 +26,21 @@
 .pdf-signature-box {
   position: absolute;
   pointer-events: none;
-  display: grid;
-  place-content: center;
   overflow: hidden;
-  border: 2px solid var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 12px;
+  outline: 1px dashed var(--accent);
+  background: rgb(255 255 255 / 72%);
+}
+
+.pdf-signature-box svg { display: block; width: 100%; height: 100%; }
+.pdf-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 320px); gap: 16px; align-items: start; }
+.pdf-workspace > * { min-width: 0; }
+.pdf-page .card-header, .pdf-page .card-body { padding: 12px 16px; }
+.pdf-page .card-body { gap: 12px; }
+.pdf-toolbar { justify-content: space-between; gap: 8px; }
+.pdf-hint { font-size: 12px; margin: 0; }
+.pdf-loading { padding: 32px 16px; text-align: center; }
+@media (max-width: 1100px) {
+  .pdf-workspace { grid-template-columns: minmax(0, 1fr); }
 }
 
 .pdf-page-choice {

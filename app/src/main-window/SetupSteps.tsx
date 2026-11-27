@@ -61,9 +61,11 @@ export function SetupSteps(props: {
         <Step index={3} title="Let your browser reach Swakshar" done={trusted} current={firstOpen === 3}>
           <p>The portal connects to Swakshar over a secure local connection, so your Mac must trust Swakshar's local certificate. It works only for this computer (127.0.0.1) and cannot be used for any website. macOS will ask for your password.</p>
           <div className="row">
-            <Button variant="primary" icon="shield" onClick={() => run(mainApi.installTrust)} disabled={action.busy}>Install certificate</Button>
+            <Button variant="primary" icon="shield" onClick={() => run(mainApi.installTrust)} disabled={action.busy || overview.trust.status === "checking" || overview.trust.status === "unavailable"}>Install certificate</Button>
             {trusted && running ? <Button icon="external" onClick={() => run(mainApi.openStatusPage)}>Test in browser</Button> : null}
           </div>
+          {overview.trust.status === "checking" ? <p className="muted" role="status">Checking the local certificate in the background.</p> : null}
+          {overview.trust.status === "unavailable" ? <p className="muted">macOS could not finish checking trust. Swakshar will retry shortly.</p> : null}
           {trusted && !running ? <p className="muted">Turn on signing above to test the connection in a browser.</p> : null}
           {overview.trust.command === null ? null : (
             <details className="details">

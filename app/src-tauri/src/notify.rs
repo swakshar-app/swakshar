@@ -50,7 +50,7 @@ async fn announce_expiring(app: &AppHandle) {
     if !state.settings().notifications {
         return;
     }
-    let Ok(inventory) = state.token.inventory(state.settings().module_paths()).await else {
+    let Ok(inventory) = state.read_inventory(state.settings().module_paths()).await else {
         return;
     };
     let summaries: Vec<CertSummary> = inventory

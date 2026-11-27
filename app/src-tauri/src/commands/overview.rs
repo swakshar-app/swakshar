@@ -1,7 +1,5 @@
 //! Status for the main window, and the actions next to it.
 
-use std::time::{Duration, Instant};
-
 use serde::Serialize;
 use swakshar_protocol::format_date_utc;
 use swakshar_tls::{TrustStatus, install_command, load_identity, tls_dir, trust_status};
@@ -12,9 +10,6 @@ use crate::error::{CommandError, CommandResult};
 use crate::server_task::{self, ServerState};
 use crate::state::{AppState, lock, unix_now};
 use crate::views::{InventoryView, inventory_view};
-
-/// How long a trust check stays fresh.
-const TRUST_CACHE_TTL: Duration = Duration::from_secs(10);
 
 /// Everything the Home view shows.
 #[derive(Debug, Clone, Serialize)]
@@ -58,7 +53,7 @@ pub(crate) struct ServerView {
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct TrustView {
-    /// `trusted`, `not-trusted`, `unsupported` or `missing`.
+    /// `checking`, `unavailable`, `trusted`, `not-trusted`, `unsupported` or `missing`.
     pub(crate) status: &'static str,
     /// Leaf expiry, `dd-MM-yyyy`.
     pub(crate) valid_until: Option<String>,
@@ -135,7 +130,7 @@ pub(crate) async fn overview(app: &AppHandle) -> CommandResult<OverviewView> {
     let waiting = lock(&state.pending).is_some();
     Ok(OverviewView {
         server: server_view(server_task::current(app)),
-        trust: cached_trust_view(app).await?,
+        trust: cached_trust_view(app),
         onboarding_complete: settings.onboarding_complete,
         waiting,
         last_connection: diagnostics
@@ -166,25 +161,28 @@ fn server_view(state: ServerState) -> ServerView {
     }
 }
 
-/// Trust state, asked of macOS at most every `TRUST_CACHE_TTL`: the check
-/// spawns `security`, and the Home and Help views poll.
-async fn cached_trust_view(app: &AppHandle) -> CommandResult<TrustView> {
+/// Returns immediately while a single background task refreshes macOS trust.
+fn cached_trust_view(app: &AppHandle) -> TrustView {
     let state = app.state::<AppState>();
-    let cached = lock(&state.trust_cache)
-        .as_ref()
-        .filter(|(checked, _)| checked.elapsed() < TRUST_CACHE_TTL)
-        .map(|(_, view)| view.clone());
-    if let Some(view) = cached {
-        return Ok(view);
+    let (view, ticket) = lock(&state.trust_cache).read();
+    if let Some(ticket) = ticket {
+        let dir = tls_dir(&state.data_dir);
+        let app = app.clone();
+        tauri::async_runtime::spawn(async move {
+            let result = trust_view(dir).await.unwrap_or(TrustView {
+                status: "unavailable",
+                valid_until: None,
+                command: None,
+            });
+            lock(&app.state::<AppState>().trust_cache).finish(ticket, result);
+        });
     }
-    let view = trust_view(tls_dir(&state.data_dir)).await?;
-    *lock(&state.trust_cache) = Some((Instant::now(), view.clone()));
-    Ok(view)
+    view
 }
 
 /// Forgets the cached trust state, after installing or removing trust.
 pub(crate) fn forget_trust(app: &AppHandle) {
-    *lock(&app.state::<AppState>().trust_cache) = None;
+    lock(&app.state::<AppState>().trust_cache).forget();
 }
 
 /// Trust state; asks macOS on a blocking thread.
@@ -195,6 +193,7 @@ async fn trust_view(dir: std::path::PathBuf) -> CommandResult<TrustView> {
                 TrustStatus::Trusted => "trusted",
                 TrustStatus::NotTrusted => "not-trusted",
                 TrustStatus::Unsupported => "unsupported",
+                TrustStatus::Unavailable => "unavailable",
             },
             valid_until: Some(format_date_utc(identity.not_after)),
             command: Some(install_command(&identity)),

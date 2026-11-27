@@ -5,7 +5,8 @@
 //! is shown as `~`.
 
 use std::fmt::Write as _;
-use std::fs;
+use std::fs::File;
+use std::io::{Read as _, Seek as _, SeekFrom};
 
 use swakshar_protocol::format_date_utc;
 use tauri::{AppHandle, Manager as _};
@@ -20,6 +21,8 @@ use crate::updates;
 const ISSUES_URL: &str = "https://github.com/swakshar-app/swakshar/issues/new";
 /// Log lines included from the end of the log file.
 const LOG_LINES: usize = 80;
+/// Avoid reading a large rotating log in full just to show its final lines.
+const MAX_LOG_BYTES: u64 = 64 * 1024;
 
 /// Builds the report.
 #[tauri::command]
@@ -127,17 +130,31 @@ fn recent_log(app: &AppHandle) -> String {
         return "  (no log folder)\n".to_owned();
     };
     let file = dir.join(format!("{}.log", app.package_info().name));
-    tail_lines(&fs::read_to_string(&file).unwrap_or_default(), LOG_LINES)
+    tail_lines(&log_tail(&file).unwrap_or_default(), LOG_LINES)
+}
+
+/// Reads a bounded suffix, even if the log grows while diagnostics are built.
+fn log_tail(path: &std::path::Path) -> std::io::Result<String> {
+    let mut file = File::open(path)?;
+    let start = file.metadata()?.len().saturating_sub(MAX_LOG_BYTES);
+    file.seek(SeekFrom::Start(start))?;
+    let mut bytes = Vec::new();
+    file.take(MAX_LOG_BYTES).read_to_end(&mut bytes)?;
+    let text = String::from_utf8_lossy(&bytes).into_owned();
+    Ok(if start > 0 {
+        text.split_once('\n')
+            .map_or(String::new(), |(_, tail)| tail.to_owned())
+    } else {
+        text
+    })
 }
 
 /// The last `count` lines of `text`, each indented by two spaces.
 fn tail_lines(text: &str, count: usize) -> String {
-    let lines: Vec<&str> = text.lines().collect();
-    let start = lines.len().saturating_sub(count);
+    let lines: Vec<&str> = text.lines().rev().take(count).collect();
     lines
-        .get(start..)
-        .unwrap_or_default()
         .iter()
+        .rev()
         .map(|line| format!("  {line}\n"))
         .collect()
 }

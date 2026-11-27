@@ -39,15 +39,32 @@ pub(crate) async fn choose_pdf(app: AppHandle) -> CommandResult<Option<PdfDocume
             .to_string_lossy()
             .into_owned();
         let id = app.state::<AppState>().next_id();
+        let size = bytes.len();
         *lock(&app.state::<PdfState>().selected) = Some(SelectedPdf {
             id,
             name: name.clone(),
-            bytes: Arc::new(bytes.clone()),
+            bytes: Arc::new(bytes),
         });
-        Ok(Some(PdfDocument { id, name, bytes }))
+        Ok(Some(PdfDocument { id, name, size }))
     })
     .await
     .map_err(|error| CommandError::Message(error.to_string()))?
+}
+
+/// Transfers only the picker-selected snapshot as binary, avoiding JSON byte arrays.
+#[tauri::command]
+pub(crate) async fn get_pdf_bytes(
+    app: AppHandle,
+    document_id: u64,
+) -> CommandResult<tauri::ipc::Response> {
+    let selected = lock(&app.state::<PdfState>().selected)
+        .as_ref()
+        .filter(|selected| selected.id == document_id)
+        .cloned()
+        .ok_or_else(|| {
+            CommandError::Message("Choose the PDF again before previewing.".to_owned())
+        })?;
+    Ok(tauri::ipc::Response::new(selected.bytes.as_ref().clone()))
 }
 
 /// Holds the existing single-signature slot through dialogs, crypto and publication.
@@ -124,12 +141,16 @@ pub(crate) async fn sign_pdf(
     let destination = picked
         .into_path()
         .map_err(|error| CommandError::Message(error.to_string()))?;
-    let profile = signing_profile(&app, &request, pin.is_some()).await?;
+    let (mut profile, signer) = signing_profile(&app, &request, pin.is_some()).await?;
     tauri::async_runtime::spawn_blocking(move || {
         let _slot = slot;
         let workspace = PdfWorkspace::create(&destination, app.state::<AppState>().next_id())?;
         workspace.write("input.pdf", &selected.bytes)?;
-        workspace.write("profile.json", &profile)?;
+        let timestamp = crate::pdf_stamp::date(time::OffsetDateTime::now_utc());
+        let stamp = crate::pdf_stamp::render(&signer, &request.placement, &timestamp)?;
+        let background = workspace.write("stamp.pdf", &stamp)?;
+        profile["stamp-styles"]["swakshar"]["background"] = serde_json::json!(background);
+        workspace.write("profile.json", profile.to_string().as_bytes())?;
         pdf_engine::sign(
             &app,
             &workspace,
@@ -152,11 +173,10 @@ async fn signing_profile(
     app: &AppHandle,
     request: &PdfSignRequest,
     has_pin: bool,
-) -> CommandResult<Vec<u8>> {
+) -> CommandResult<(serde_json::Value, String)> {
     let state = app.state::<AppState>();
     let inventory = state
-        .token
-        .inventory(state.settings().module_paths())
+        .read_inventory(state.settings().module_paths())
         .await?;
     let (token, certificate) = inventory
         .tokens
@@ -191,7 +211,10 @@ async fn signing_profile(
     if !token.pin.protected_path && !has_pin {
         return Err(CommandError::Message("Enter the token PIN.".to_owned()));
     }
-    Ok(pdf_engine::profile(token, certificate))
+    Ok((
+        pdf_engine::profile(token, certificate),
+        certificate.summary.subject_cn.clone(),
+    ))
 }
 
 /// Cancels the active child process without exposing a general process API.

@@ -5,7 +5,8 @@
 //! Linux report [`TrustStatus::Unsupported`] until their stores are added.
 
 use std::path::PathBuf;
-use std::process::Command;
+use std::process::{Command, Stdio};
+use std::time::{Duration, Instant};
 
 use crate::error::TlsError;
 use crate::identity::TlsIdentity;
@@ -16,6 +17,8 @@ const SECURITY_TOOL: &str = "/usr/bin/security";
 const LOGIN_KEYCHAIN: &str = "Library/Keychains/login.keychain-db";
 /// Host the certificate must be valid for.
 const LOOPBACK_HOST: &str = "127.0.0.1";
+/// A locked or unresponsive keychain must not occupy a worker indefinitely.
+const VERIFY_DEADLINE: Duration = Duration::from_secs(3);
 
 /// Whether browsers on this machine will accept the local certificate.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -26,6 +29,8 @@ pub enum TrustStatus {
     NotTrusted,
     /// This OS is not supported yet.
     Unsupported,
+    /// The OS could not finish checking trust; this does not mean untrusted.
+    Unavailable,
 }
 
 /// Checks trust by asking the OS to verify the leaf for `127.0.0.1`.
@@ -33,17 +38,44 @@ pub fn trust_status(identity: &TlsIdentity) -> TrustStatus {
     if !cfg!(target_os = "macos") {
         return TrustStatus::Unsupported;
     }
-    let verified = Command::new(SECURITY_TOOL)
+    let mut command = Command::new(SECURITY_TOOL);
+    command
         .arg("verify-cert")
         .arg("-c")
         .arg(identity.cert_path())
-        .args(["-p", "ssl", "-s", LOOPBACK_HOST, "-L", "-q"])
-        .output()
-        .is_ok_and(|output| output.status.success());
-    if verified {
-        TrustStatus::Trusted
-    } else {
-        TrustStatus::NotTrusted
+        .args(["-p", "ssl", "-s", LOOPBACK_HOST, "-L", "-q"]);
+    bounded_verify(&mut command)
+}
+
+/// Kills and reaps a stalled verification process instead of leaking a worker.
+fn bounded_verify(command: &mut Command) -> TrustStatus {
+    let Ok(mut child) = command
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+    else {
+        return TrustStatus::Unavailable;
+    };
+    let started = Instant::now();
+    loop {
+        match child.try_wait() {
+            Ok(Some(status)) => {
+                return if status.success() {
+                    TrustStatus::Trusted
+                } else {
+                    TrustStatus::NotTrusted
+                };
+            }
+            Ok(None) if started.elapsed() < VERIFY_DEADLINE => {
+                std::thread::sleep(Duration::from_millis(25));
+            }
+            _ => {
+                let _ = child.kill();
+                let _ = child.wait();
+                return TrustStatus::Unavailable;
+            }
+        }
     }
 }
 

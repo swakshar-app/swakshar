@@ -4345,7 +4345,7 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "swakshar-app"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "log",
  "secrecy",
@@ -4366,12 +4366,13 @@ dependencies = [
  "tauri-plugin-single-instance",
  "tauri-plugin-updater",
  "thiserror 2.0.21",
+ "time",
  "tokio",
 ]
 
 [[package]]
 name = "swakshar-cli"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "der",
  "futures-util",
@@ -4392,7 +4393,7 @@ dependencies = [
 
 [[package]]
 name = "swakshar-cms"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "base64 0.23.1",
  "cms",
@@ -4408,14 +4409,14 @@ dependencies = [
 
 [[package]]
 name = "swakshar-protocol"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "swakshar-server"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "futures-util",
  "log",
@@ -4431,7 +4432,7 @@ dependencies = [
 
 [[package]]
 name = "swakshar-tls"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "der",
  "log",
@@ -4445,7 +4446,7 @@ dependencies = [
 
 [[package]]
 name = "swakshar-token"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "const-oid 0.9.6",
  "cryptoki",
