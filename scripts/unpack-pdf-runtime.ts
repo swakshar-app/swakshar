@@ -3,6 +3,8 @@ import { execFileSync } from "node:child_process";
 import { mkdirSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
+import { verifyMacPdfRuntime } from "./verify-macos-pdf-runtime.ts";
+
 /** Archives come only from native build jobs in the same workflow run. */
 const SOURCE = join(import.meta.dirname, "..", ".pdf-runtime-build", "artifacts");
 /** Tauri copies the fully restored directory into each platform's installer. */
@@ -15,4 +17,7 @@ for (const name of readdirSync(SOURCE)) {
   if (/^pdf-runtime-(darwin|linux|win32)-(arm64|x64)\.tar$/.test(name)) {
     execFileSync(TAR, ["-xf", name, "-C", TARGET], { cwd: SOURCE, stdio: "inherit" });
   }
+}
+if (process.platform === "darwin") {
+  for (const arch of ["arm64", "x64"]) { verifyMacPdfRuntime(join(TARGET, arch)); }
 }

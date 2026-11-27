@@ -1,0 +1,11 @@
+{
+  "bundle": {
+    "resources": [],
+    "macOS": {
+      "files": {
+        "Resources/pdf-engine": "resources/pdf-engine",
+        "Resources/embridge": "resources/embridge"
+      }
+    }
+  }
+}

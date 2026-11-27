@@ -3,6 +3,24 @@
 Newest first. Preserve earlier entries in the linked archive when this ledger
 approaches 300 lines.
 
+## Preserve signed Python framework links in the Mac installer
+
+`2026-11-27-11-13-00-UTC`
+
+**Decision.** On macOS, replace generic resource copying with Tauri's custom
+files mapping to the same Contents/Resources locations. Verify the Python
+framework's required symlinks and strict code signatures on native CI builders
+before archiving and after restoring both runtimes. Keep the existing signing
+identity, entitlements and mandatory app/disk-image notarization gates.
+
+**Reasoning.** After the owner resolved Apple's account agreement, notarization
+submission 79266ccd-2597-41aa-9138-e1400aaad405 rejected both Python framework
+binaries as invalid. The pinned Tauri CLI's generic resource copier copies each
+file with fs::copy, dereferencing links. Its custom-directory copier explicitly
+recreates symlinks. PyInstaller requires those links to survive distribution.
+Use the preserving copier rather than altering credentials or bypassing checks.
+CI will establish the original and restored signatures before final notarization.
+
 ## Gate publication on the final tagged CI build
 
 `2026-11-27-13-26-00-IST`
