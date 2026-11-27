@@ -3,6 +3,22 @@
 Newest first. Preserve earlier entries in the linked archive when this ledger
 approaches 300 lines.
 
+## Gate publication on the final tagged CI build
+
+`2026-11-27-13-26-00-IST`
+
+**Decision.** Once source CI is green, validate the corrected Windows archive
+tool in the unpublished v0.1.10 candidate's full release workflow. Publish only
+after every native runtime and installer, Apple notarization, checksums and
+provenance pass. This supersedes requiring a complete additional manual build
+before the candidate tag; it does not relax any publication gate.
+
+**Reasoning.** Manual CI has already verified all four native PDF runtimes,
+Linux installers and universal Mac compilation/signing. The owner has resolved
+Apple's pending account agreement. The final workflow must package and notarize
+the exact tagged source in all cases; use that draft build to verify the Windows
+native tar correction rather than producing the same installers twice first.
+
 ## Select Windows' native archive tool explicitly
 
 `2026-11-27-13-21-00-IST`
