@@ -23,7 +23,7 @@ export function usePdf(source: PdfDocument): { readonly pdf: PDFDocumentProxy | 
       if (!active) { return; }
       setStage("Preparing PDF pages");
       task = getDocument({
-        data: new Uint8Array(bytes), isEvalSupported: false,
+        data: new Uint8Array(bytes), enableXfa: false,
         cMapUrl: "/pdfjs/cmaps/", cMapPacked: true, standardFontDataUrl: "/pdfjs/standard_fonts/",
         iccUrl: "/pdfjs/iccs/", wasmUrl: "/pdfjs/wasm/",
       });

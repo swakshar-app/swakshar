@@ -18,9 +18,9 @@ describe("binary PDF loading lifecycle", () => {
     mocks.parse.mockReturnValue({ promise: Promise.resolve(document), destroy });
     const { result, unmount } = renderHook(() => usePdf({ id: 1, name: "example.pdf", size: 4 }));
     await waitFor(() => { expect(result.current.pdf).toBe(document); });
-    const options = mocks.parse.mock.calls[0]?.[0] as { data: Uint8Array; isEvalSupported: boolean };
+    const options = mocks.parse.mock.calls[0]?.[0] as { data: Uint8Array; enableXfa: boolean };
     expect(options.data.buffer).toBe(bytes);
-    expect(options.isEvalSupported).toBe(false);
+    expect(options.enableXfa).toBe(false);
     unmount();
     expect(destroy).toHaveBeenCalledTimes(1);
   });

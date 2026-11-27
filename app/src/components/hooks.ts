@@ -30,12 +30,12 @@ export function usePolling<T>(load: () => Promise<T>, intervalMs: number, enable
     }
     let active = true;
     let pending = false;
-    let timer: ReturnType<typeof window.setTimeout> | undefined;
+    let timer: number | undefined;
     const run = (): void => {
       if (!active || pending) { return; }
       pending = true;
       window.clearTimeout(timer);
-      const request = inFlight.current?.load === load ? inFlight.current.promise : Promise.resolve().then(load);
+      const request = inFlight.current?.load === load ? inFlight.current.promise : load();
       inFlight.current = { load, promise: request };
       request.then(
         (value) => {
