@@ -4,12 +4,25 @@ What changed in each release, newest first. The release workflow publishes
 each version's section as its release notes, and the in-app update card shows
 it under See changes.
 
+## 0.1.10
+
+- Sign a local PDF with a DSC token by choosing a page and drawing the visible
+  signature rectangle. Save a new signed copy and cancel an active request.
+- On macOS, install the bundled emBridge companion, inspect connection checks,
+  and start or stop its service with administrator approval for Income Tax use.
+- Installers include PDF preview assets and the native signing runtime. Users
+  do not need Python or PDF command-line tools; token drivers remain required.
+- Correct native runtime packaging, including Intel Mac crypto build tools and
+  Windows archive extraction. Builds 0.1.8 and 0.1.9 were not published.
+- Include frontend, Rust and CI dependency security fixes. This prerelease is
+  for installed-app and real-token acceptance; 0.1.7 remains the stable release.
+
 ## 0.1.9
 
-- First downloadable acceptance build for Income Tax companion controls and
+- Intended acceptance build for Income Tax companion controls and
   PDF signature placement on a chosen page, with the signing runtime bundled.
 - Uses Python 3.14.10, available for every native builder, and checks the frozen
-  PDF command before packaging. The earlier 0.1.8 build was not published.
+  PDF command before packaging. Neither 0.1.8 nor 0.1.9 was published.
 - Includes the Rust, frontend and CI security dependency updates below.
 
 ## 0.1.8

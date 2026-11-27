@@ -3,6 +3,19 @@
 Newest first. Preserve earlier entries in the linked archive when this ledger
 approaches 300 lines.
 
+## Reserve a fresh tag for the verified acceptance build
+
+`2026-11-27-13-06-00-IST`
+
+**Decision.** Advance the app and workspace packages to 0.1.10. Preserve failed
+release tags and unpublished drafts for 0.1.8 and 0.1.9. Tag the new version only
+after source CI and the corrected manual packaging workflow pass, then publish
+the tagged build as a prerelease after notarization, checksums and provenance.
+
+**Reasoning.** The owner will test from a release download. A complete changelog
+entry must describe both signing features because earlier versions were never
+published. Keep v0.1.7 as the stable updater release while acceptance is pending.
+
 ## Extract runtime archives without Windows drive-letter ambiguity
 
 `2026-11-27-13-02-00-IST`
