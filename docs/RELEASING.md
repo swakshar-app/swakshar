@@ -42,6 +42,16 @@ Versions stay on 0.1.x (0.1.1, 0.1.2, and so on) until the owner calls for
 0.2.0; see `DECISION.md`. Add the version's section to `CHANGELOG.md` first,
 or the release stops at its first step.
 
+The owner tests through the existing in-app updater. Version 0.1.10 is the
+stable/latest release. Ship each subsequent fix as the next stable patch
+release, such as 0.1.11 and 0.1.12, after all source CI, native packaging,
+notarization, checksum and provenance gates pass. Keep published tags and
+artifacts immutable. Promote an already-complete prerelease by changing its
+release metadata, without rebuilding its artifacts. Mark the resulting release
+non-prerelease and latest so the installed app's existing endpoint offers it.
+Dependency installs, tests and builds run only in CI; the owner performs
+installed-app, real-token and portal acceptance after release publication.
+
 ```sh
 node scripts/bump-version.ts 0.2.0     # Cargo.toml, tauri.conf.json, package.json
 pnpm install && cargo update -w        # refresh lockfiles for the new version
