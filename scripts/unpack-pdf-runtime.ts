@@ -11,6 +11,6 @@ const TARGET = join(import.meta.dirname, "..", "app", "src-tauri", "resources", 
 mkdirSync(TARGET, { recursive: true });
 for (const name of readdirSync(SOURCE)) {
   if (/^pdf-runtime-(darwin|linux|win32)-(arm64|x64)\.tar$/.test(name)) {
-    execFileSync("tar", ["-xf", join(SOURCE, name), "-C", TARGET], { stdio: "inherit" });
+    execFileSync("tar", ["-xf", name, "-C", TARGET], { cwd: SOURCE, stdio: "inherit" });
   }
 }

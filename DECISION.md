@@ -3,6 +3,18 @@
 Newest first. Preserve earlier entries in the linked archive when this ledger
 approaches 300 lines.
 
+## Extract runtime archives without Windows drive-letter ambiguity
+
+`2026-11-27-13-02-00-IST`
+
+**Decision.** Run runtime extraction from the downloaded artifact directory and
+pass its relative archive filename to tar. Keep the destination absolute.
+
+**Reasoning.** All four frozen runtimes passed in manual packaging CI. The
+Windows app job then invoked Git Bash's GNU tar, which parsed the colon in an
+absolute `D:\\...` archive path as a remote host separator. A relative archive
+filename works with both GNU tar and the native tar tools on every runner.
+
 ## Keep isolated crypto build tools on the subprocess path
 
 `2026-11-27-12-51-00-IST`
