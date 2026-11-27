@@ -23,7 +23,7 @@ pnpm tauri dev
 ```
 
 PDF signing in a development app also needs `pnpm bundle:pdf` with Python
-3.12.16 on the builder. Installer builds require the native PDF runtime and,
+3.14.10 on the builder. Installer builds require the native PDF runtime and,
 on macOS, the pinned emBridge archive. See [runtime packaging](docs/PDF_SIGNING.md)
 before running `pnpm tauri build`.
 

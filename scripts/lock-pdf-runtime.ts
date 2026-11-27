@@ -5,10 +5,10 @@ import { join } from "node:path";
 /** Minimum age for every wheel accepted into the runtime lock. */
 const MIN_RELEASE_MS = 7 * 24 * 60 * 60 * 1000;
 /** Conditional packages required on platforms other than the resolution host. */
-const EXTRA_PACKAGES = ["pefile", "pywin32-ctypes", "tzdata", "typing_extensions", "colorama"];
-/** Only these dependencies are platform-specific with Python 3.12. */
+const EXTRA_PACKAGES = ["pefile", "pywin32-ctypes", "tzdata", "typing_extensions", "colorama", "maturin"];
+/** Only these dependencies are platform-specific with Python 3.14. */
 const PLATFORMS: Readonly<Record<string, readonly string[]>> = {
-  macholib: ["darwin"], pefile: ["win32"], "pywin32-ctypes": ["win32"], colorama: ["win32"],
+  macholib: ["darwin"], maturin: ["darwin"], pefile: ["win32"], "pywin32-ctypes": ["win32"], colorama: ["win32"],
 };
 
 /** PyPI file metadata needed for version age and pip hash checking. */
@@ -38,7 +38,8 @@ async function pin(name: string, maximum: string | null): Promise<unknown> {
   const [version, files] = selected;
   const wheels = files.filter((file) => file.filename.endsWith(".whl") && Date.parse(file.upload_time_iso_8601) <= cutoff);
   return { name, version, platforms: PLATFORMS[name.toLowerCase()] ?? ["darwin", "linux", "win32"],
-    published: wheels.map((file) => file.upload_time_iso_8601).toSorted()[0], hashes: [...new Set(wheels.map((file) => file.digests.sha256))] };
+    published: wheels.map((file) => file.upload_time_iso_8601).toSorted()[0], hashes: [...new Set(wheels.map((file) => file.digests.sha256))],
+    sourceHashes: name.toLowerCase() === "cryptography" ? files.filter((file) => file.filename.endsWith(".tar.gz") && Date.parse(file.upload_time_iso_8601) <= cutoff).map((file) => file.digests.sha256) : [] };
 }
 
 /** Writes JSON only; pip requirement lines are generated in memory when building. */
@@ -49,7 +50,7 @@ async function main(): Promise<void> {
   const packages = new Map(report.install.map(({ metadata }) => [metadata.name.toLowerCase(), metadata.version]));
   for (const name of EXTRA_PACKAGES) { if (!packages.has(name)) { packages.set(name, ""); } }
   const pins = await Promise.all([...packages].toSorted(([a], [b]) => a.localeCompare(b)).map(([name, version]) => pin(name, version || null)));
-  const output = { python: "3.12.16", minimumAgeDays: 7, packages: pins };
+  const output = { python: "3.14.10", minimumAgeDays: 7, packages: pins };
   const lines = ["{", `  "python": ${JSON.stringify(output.python)},`, "  \"minimumAgeDays\": 7,", "  \"packages\": [",
     ...pins.map((entry, index) => `    ${JSON.stringify(entry)}${index === pins.length - 1 ? "" : ","}`), "  ]", "}", ""];
   writeFileSync(join(import.meta.dirname, "pdf-runtime.lock.json"), lines.join("\n"));
