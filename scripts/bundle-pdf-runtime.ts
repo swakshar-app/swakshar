@@ -68,6 +68,10 @@ function main(): void {
   if (nativeCrypto !== null) { cpSync(nativeCrypto.license, join(OUTPUT, "OPENSSL-LICENSE.md")); }
   writeFileSync(join(OUTPUT, "runtime.json"), `${JSON.stringify({ python: LOCK.python, arch: ARCH, ...(nativeCrypto === null ? {} : { openssl: { version: nativeCrypto.version, sha256: nativeCrypto.sha256 } }), packages: packages.map(({ name, version: pinned }) => ({ name, version: pinned })) }, null, 2)}\n`);
   const executable = join(OUTPUT, process.platform === "win32" ? "swakshar-pdf.exe" : "swakshar-pdf");
+  if (process.platform === "darwin" && identity) {
+    run("/usr/bin/codesign", ["--force", "--timestamp", "--options", "runtime", "--sign", identity,
+      join(OUTPUT, "_internal", "Python.framework")]);
+  }
   verifyMacPdfRuntime(OUTPUT);
   run(executable, ["--no-plugins", "--help"]);
   run(executable, ["--no-plugins", "sign", "addsig", "pkcs11", "--help"]);
