@@ -3,6 +3,30 @@
 Newest first. Preserve earlier entries in the linked archive when this ledger
 approaches 300 lines.
 
+## Pin a Python runtime available on every release builder
+
+`2026-11-27-12-30-00-IST`
+
+**Decision.** Package Python 3.14.10 and regenerate the runtime's age-gated
+wheel lock for Python 3.14. GitHub's runtime catalog provides native macOS arm64
+and x64, Windows x64 and Ubuntu 22.04 x64 binaries. Include its exact upstream
+license. Version 3.14.10 was tagged on 2026-10-25 and its runner distributions
+were published on 2026-10-26, both older than seven days.
+
+**Intel crypto.** Cryptography 50.0.2 no longer publishes Intel Mac wheels. Build
+its original, hash-locked source on that runner using pinned Maturin and upstream's
+enforced Rust lockfile, with static OpenSSL 4.0.3 from its dated source/hash lock.
+Keep current cryptography rather than downgrading it for Intel. Carry the OpenSSL
+license and provenance in the frozen runtime; users need no external OpenSSL.
+
+**Reasoning.** Source CI passed, but the first packaging run could not obtain
+Python 3.12.16 on macOS or Windows. Source-release availability alone did not
+establish runner binary availability. Check the actual binary catalog and run
+the frozen CLI before producing installers. Keep the failed v0.1.8 tag immutable
+and create v0.1.9 for the corrected build after its CI passes. The original
+emBridge ZIP is now hosted as a hash-checked dependency release, and its HTTPS
+URL is configured in the repository variable used by native builds.
+
 ## Verify CI and publish a downloadable acceptance build
 
 `2026-11-27-12-19-19-IST`

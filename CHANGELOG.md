@@ -4,6 +4,14 @@ What changed in each release, newest first. The release workflow publishes
 each version's section as its release notes, and the in-app update card shows
 it under See changes.
 
+## 0.1.9
+
+- First downloadable acceptance build for Income Tax companion controls and
+  PDF signature placement on a chosen page, with the signing runtime bundled.
+- Uses Python 3.14.10, available for every native builder, and checks the frozen
+  PDF command before packaging. The earlier 0.1.8 build was not published.
+- Includes the Rust, frontend and CI security dependency updates below.
+
 ## 0.1.8
 
 - Income Tax on macOS can install the bundled emBridge companion, show its

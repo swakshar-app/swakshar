@@ -3,11 +3,13 @@ import { execFileSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { installRuntimePackages, type RuntimePackage } from "./install-pdf-dependencies.ts";
+
 /** Exact versions and accepted wheel hashes, reviewed through the age gate. */
 interface RuntimeLock {
   readonly python: string;
   readonly minimumAgeDays: number;
-  readonly packages: readonly { readonly name: string; readonly version: string; readonly published: string; readonly platforms: readonly string[]; readonly hashes: readonly string[] }[];
+  readonly packages: readonly RuntimePackage[];
 }
 
 /** All build intermediates are ignored and never shipped as repository source. */
@@ -41,10 +43,7 @@ function main(): void {
   const environment = join(WORK, "venv");
   run(PYTHON, ["-m", "venv", environment]);
   const python = join(environment, process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
-  const requirements = packages.map((entry) => `${entry.name}==${entry.version} ${entry.hashes.map((hash) => `--hash=sha256:${hash}`).join(" ")}`).join("\n");
-  const requirementsPath = join(WORK, "requirements.md");
-  writeFileSync(requirementsPath, `# Hash-locked build dependencies\n${requirements}\n`);
-  run(python, ["-m", "pip", "install", "--disable-pip-version-check", "--only-binary=:all:", "--no-deps", "--require-hashes", "-r", requirementsPath]);
+  const nativeCrypto = installRuntimePackages(python, packages, WORK);
   run(python, ["-m", "pip", "check"]);
   const location = JSON.parse(execFileSync(python, ["-c", "import json,sysconfig; print(json.dumps({'site':sysconfig.get_path('purelib')}))"], { encoding: "utf8" })) as { readonly site: string };
   const collect = ["pyhanko", "pyhanko.cli", "pyhanko_certvalidator", "pkcs11", "asn1crypto", "oscrypto", "tzlocal", "tzdata", "certifi"];
@@ -65,7 +64,8 @@ function main(): void {
   const pythonLicense = join(ROOT, "docs", "third-party", "PYTHON.md");
   if (!existsSync(pythonLicense)) { throw new Error("The Python distribution license must accompany the bundled runtime."); }
   cpSync(pythonLicense, join(OUTPUT, "PYTHON-LICENSE.md"));
-  writeFileSync(join(OUTPUT, "runtime.json"), `${JSON.stringify({ python: LOCK.python, arch: ARCH, packages: packages.map(({ name, version: pinned }) => ({ name, version: pinned })) }, null, 2)}\n`);
+  if (nativeCrypto !== null) { cpSync(nativeCrypto.license, join(OUTPUT, "OPENSSL-LICENSE.md")); }
+  writeFileSync(join(OUTPUT, "runtime.json"), `${JSON.stringify({ python: LOCK.python, arch: ARCH, ...(nativeCrypto === null ? {} : { openssl: { version: nativeCrypto.version, sha256: nativeCrypto.sha256 } }), packages: packages.map(({ name, version: pinned }) => ({ name, version: pinned })) }, null, 2)}\n`);
   const executable = join(OUTPUT, process.platform === "win32" ? "swakshar-pdf.exe" : "swakshar-pdf");
   run(executable, ["--no-plugins", "--help"]);
   run(executable, ["--no-plugins", "sign", "addsig", "pkcs11", "--help"]);

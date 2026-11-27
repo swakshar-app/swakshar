@@ -67,7 +67,7 @@ the owner to remove. emBridge maintains its own separate approval lifecycle.
 
 ## Build an installer
 
-Run these commands in the Swakshar checkout with Python 3.12.16 available as
+Run these commands in the Swakshar checkout with Python 3.14.10 available as
 `python3` (or set `SWAKSHAR_BUILD_PYTHON` to its full path):
 
 ```sh
@@ -85,8 +85,9 @@ exact original ZIP. Archive checksums are enforced before extraction. That
 mirror is not provisioned by these source changes.
 
 `scripts/pdf-runtime.lock.json` pins every build/runtime package and accepted
-wheel hash. All accepted versions were at least seven days old when selected.
-Python 3.12.16 was tagged on 2026-10-25. PyInstaller packages the upstream
+artifact hash. All accepted versions were at least seven days old when selected.
+Python 3.14.10 was tagged on 2026-10-25, with binaries available for every
+native runner in GitHub's Python catalog. PyInstaller packages the upstream
 entrypoint without adding project Python or JavaScript source files. Runtime
 archives preserve executable permissions and relative symlinks between CI jobs.
 Packaging fails if required executables, licenses or the macOS companion are absent.
@@ -98,6 +99,12 @@ certificate through Apple's certificate-import action. PyInstaller signs the
 helper and collected native libraries with the existing app entitlements before
 they enter the bundle. CI refuses an unsigned macOS runtime. The owner still
 verifies the final app's signing and notarization before a release.
+
+Cryptography 50 has no Intel Mac wheel. That builder compiles its locked original
+source using hash-locked Maturin and static OpenSSL 4.0.3 from
+`scripts/openssl.lock.json`. Upstream's Rust lockfile is enforced by its build
+configuration. Its license and source digest accompany the frozen runtime;
+end users do not need Homebrew or an OpenSSL installation.
 
 ## Owner verification
 
@@ -126,4 +133,4 @@ Check both Mac processor builds and the platform installers before publishing.
 - [pyHanko token configuration](https://docs.pyhanko.eu/en/latest/cli-guide/config.html)
 - [PDF.js viewport and rendering](https://mozilla.github.io/pdf.js/examples/)
 - [PyInstaller packaging](https://pyinstaller.org/en/latest/usage.html)
-- [Python 3.12.16 license](third-party/PYTHON.md)
+- [Python 3.14.10 license](third-party/PYTHON.md)
