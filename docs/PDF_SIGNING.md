@@ -108,9 +108,10 @@ end users do not need Homebrew or an OpenSSL installation.
 
 ## Owner verification
 
-The owner requested a downloadable release for acceptance after CI passes.
-CI and signed packaging must pass before publishing that prerelease. Real-token,
-portal and installed-app acceptance remain with the owner. Source gates are:
+The owner tests stable patch releases through the existing in-app updater.
+CI and signed packaging must pass before each release is published as latest.
+Real-token, portal and installed-app acceptance then remain with the owner.
+Source gates run in CI:
 
 ```sh
 cargo fmt --all --check
@@ -124,7 +125,7 @@ emBridge from the bundled DMG; check Start/Stop, trust and portal DSC registrati
 sign a PDF on different pages and with rotated/offset page boxes; inspect its
 cryptographic signature and visible placement in a PDF reader. Verify wrong-PIN
 warnings, cancellation, quitting and protection against replacing existing files.
-Check both Mac processor builds and the platform installers before publishing.
+Check both Mac processor builds and the platform installers during acceptance.
 
 ## Upstream references
 
