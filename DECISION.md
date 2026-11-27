@@ -3,6 +3,29 @@
 Newest first. Preserve earlier entries in the linked archive when this ledger
 approaches 300 lines.
 
+## Verify CI and publish a downloadable acceptance build
+
+`2026-11-27-12-19-19-IST`
+
+**Decision.** The owner authorized fixing failing CI and creating a release once
+checks pass, with real-token and portal acceptance performed from the downloaded
+build. Run the source gates and signed packaging workflow. Publish the resulting
+acceptance build as a prerelease; leave the existing stable updater release in
+place until acceptance. This supersedes the earlier no-build/no-release scope.
+
+**Reasoning.** The first CI run found a removed PDF.js 6 rectangle API and lint
+issues, plus a Tauri core/transitive version mismatch. Use viewport point
+transforms, keyed editor/page state and current compatible Tauri 2.12.7 with
+tauri-build 2.7.6. Update tauri-plugin-updater to 2.14.1 so its ZIP dependency can
+resolve to the patched major version instead of vulnerable ZIP 4.
+
+**Age approval.** The owner explicitly approved url 2.5.9 and cookie 0.18.3 as
+two security patch exceptions to the seven-day dependency age on 2026-11-27.
+These address RUSTSEC-2026-0592 and RUSTSEC-2026-0594. URL 2.5.9 requires
+form_urlencoded ^1.2.3, so that mandatory dependency accompanies the approved
+URL patch; Cargo rejects the older 1.2.2. Keep unrelated dependencies under the
+seven-day rule. No security advisories are suppressed.
+
 ## Consolidate Dependabot fixes with the signing features
 
 `2026-11-27-12-08-42-IST`

@@ -32,13 +32,13 @@ async function pin(name: string, maximum: string | null): Promise<unknown> {
   const versions = Object.entries(index.releases).filter(([version, files]) =>
     /^\d+(?:\.\d+)*$/.test(version) && (maximum === null || compare(version, maximum) <= 0)
     && files.some((file) => file.filename.endsWith(".whl") && Date.parse(file.upload_time_iso_8601) <= cutoff),
-  ).sort(([left], [right]) => compare(right, left));
+  ).toSorted(([left], [right]) => compare(right, left));
   const selected = versions[0];
   if (selected === undefined) { throw new Error(`No aged wheel release for ${name}`); }
   const [version, files] = selected;
   const wheels = files.filter((file) => file.filename.endsWith(".whl") && Date.parse(file.upload_time_iso_8601) <= cutoff);
   return { name, version, platforms: PLATFORMS[name.toLowerCase()] ?? ["darwin", "linux", "win32"],
-    published: wheels.map((file) => file.upload_time_iso_8601).sort()[0], hashes: [...new Set(wheels.map((file) => file.digests.sha256))] };
+    published: wheels.map((file) => file.upload_time_iso_8601).toSorted()[0], hashes: [...new Set(wheels.map((file) => file.digests.sha256))] };
 }
 
 /** Writes JSON only; pip requirement lines are generated in memory when building. */
@@ -48,7 +48,7 @@ async function main(): Promise<void> {
   const report = JSON.parse(readFileSync(reportPath, "utf8")) as Resolution;
   const packages = new Map(report.install.map(({ metadata }) => [metadata.name.toLowerCase(), metadata.version]));
   for (const name of EXTRA_PACKAGES) { if (!packages.has(name)) { packages.set(name, ""); } }
-  const pins = await Promise.all([...packages].sort(([a], [b]) => a.localeCompare(b)).map(([name, version]) => pin(name, version || null)));
+  const pins = await Promise.all([...packages].toSorted(([a], [b]) => a.localeCompare(b)).map(([name, version]) => pin(name, version || null)));
   const output = { python: "3.12.16", minimumAgeDays: 7, packages: pins };
   const lines = ["{", `  "python": ${JSON.stringify(output.python)},`, "  \"minimumAgeDays\": 7,", "  \"packages\": [",
     ...pins.map((entry, index) => `    ${JSON.stringify(entry)}${index === pins.length - 1 ? "" : ","}`), "  ]", "}", ""];
