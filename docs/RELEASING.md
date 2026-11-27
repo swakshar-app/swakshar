@@ -16,6 +16,11 @@ public and on a plan that has them):
 | `TAURI_SIGNING_PRIVATE_KEY` | Contents of the updater private key file |
 | `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | Its password |
 
+Set the repository variable `SWAKSHAR_EMBRIDGE_ARCHIVE_URL` to an HTTPS mirror
+of the exact emBridge archive pinned in `scripts/embridge.lock.json`. The Mac
+PDF runtime jobs reuse the existing Developer ID secrets with the owner's
+approval. See [runtime packaging and licensing](PDF_SIGNING.md) before building.
+
 The updater key signs every update; the app carries its public key. Create
 it once, on the owner's Mac:
 
@@ -52,16 +57,18 @@ so this happens right after going public and before telling anyone.
 
 `.github/workflows/release.yml` then:
 
-1. creates a draft GitHub release for the tag, titled with the bare tag
+1. packages hash-locked native PDF runtimes on macOS arm64 and x64, Windows
+   x64 and Linux x64; macOS runtimes are signed with the existing Developer ID;
+2. creates a draft GitHub release for the tag, titled with the bare tag
    (`v0.1.1`);
-2. builds on `macos-15` (universal, signed, notarized), `windows-2025` (x64)
+3. builds on `macos-15` (universal, signed, notarized), `windows-2025` (x64)
    and `ubuntu-22.04` (x64), uploading every bundle to the draft. On macOS
    the app is notarized and stapled by Tauri, then the disk image is
    notarized and stapled too and replaces the first upload;
-3. points the download links in `latest.json` at the release's own
+4. points the download links in `latest.json` at the release's own
    downloads (`scripts/updater-manifest.ts`) instead of the GitHub API links
    tauri-action writes, which count against the anonymous API limit;
-4. writes `SHA256SUMS` and, when the repository is public, attests build
+5. writes `SHA256SUMS` and, when the repository is public, attests build
    provenance over it.
 
 Before installing, check the macOS image the way Gatekeeper will:

@@ -1,0 +1,46 @@
+/* Document preview and placement share the existing card and form system. */
+.pdf-preview-scroll {
+  overflow: auto;
+  margin-block: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 12px;
+}
+
+.pdf-preview {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.pdf-preview canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.pdf-signature-box {
+  position: absolute;
+  pointer-events: none;
+  display: grid;
+  place-content: center;
+  overflow: hidden;
+  border: 2px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+}
+
+.pdf-page-choice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pdf-page-choice input { width: 76px; }
+.pdf-pin { border: 0; margin: 0; padding: 0; }
+.portal-checks { display: grid; grid-template-columns: auto 1fr; gap: 10px 20px; }
+.portal-checks dd { margin: 0; }

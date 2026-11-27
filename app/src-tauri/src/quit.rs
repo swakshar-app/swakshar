@@ -47,6 +47,9 @@ pub(crate) fn quit(app: &AppHandle) {
 /// thread finishes its driver call, so the driver's own teardown at exit
 /// never races a call in flight. Safe to run more than once.
 pub(crate) fn on_exit(app: &AppHandle) {
+    guarded("stopping PDF signing", || {
+        crate::pdf_engine::cancel(&app.state::<crate::pdf_types::PdfState>());
+    });
     guarded("answering the waiting page", || cancel_waiting(app));
     guarded("stopping the signer", || {
         server_task::stop_and_wait(app, DRAIN_DEADLINE);

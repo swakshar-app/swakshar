@@ -22,6 +22,11 @@ cargo test --workspace --locked
 pnpm tauri dev
 ```
 
+PDF signing in a development app also needs `pnpm bundle:pdf` with Python
+3.12.16 on the builder. Installer builds require the native PDF runtime and,
+on macOS, the pinned emBridge archive. See [runtime packaging](docs/PDF_SIGNING.md)
+before running `pnpm tauri build`.
+
 ## Adding a token driver
 
 Install the vendor's driver, note where the PKCS#11 module lands, and add it to

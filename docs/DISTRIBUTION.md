@@ -34,8 +34,8 @@ picker, so no window gains updater permissions. Ships in v0.1.0.
    X.Y.Z". Nothing downloads without the user's click. The card can be
    dismissed until the update reaches its next step.
 3. **Install.** Once downloaded: Restart now, or Restart when idle, which
-   waits until no request is waiting and no GST page has connected for five
-   minutes. Never while a request is waiting. Signing comes back as the user
+   waits until neither GST nor PDF signing is active and no GST page has
+   connected for five minutes. Signing comes back as the user
    left it.
 4. **Trust.** Two signatures guard every update: Tauri's (ed25519 key held
    only in GitHub secrets and the owner's password manager) and Apple's

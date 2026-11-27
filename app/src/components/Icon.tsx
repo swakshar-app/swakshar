@@ -6,6 +6,7 @@ import type { ReactElement } from "react";
 
 /** Available icons. */
 export type IconName =
+  | "document"
   | "home"
   | "clock"
   | "sliders"
@@ -25,6 +26,7 @@ export type IconName =
 
 /** Path data per icon. */
 const PATHS: Record<IconName, readonly string[]> = {
+  document: ["M6 3h8l4 4v14H6V3Z", "M14 3v5h4", "M9 12h6", "M9 16h6"],
   home: ["M3 11 12 4l9 7", "M5 10v10h14V10"],
   clock: ["M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z", "M12 7v5l3 2"],
   sliders: ["M4 7h9", "M17 7h3", "M4 17h3", "M11 17h9", "M13 5v4", "M7 15v4"],

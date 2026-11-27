@@ -74,7 +74,7 @@ pub(crate) fn restart(app: &AppHandle, when_idle: bool) -> Result<(), String> {
         }
         return Ok(());
     }
-    if lock(&app.state::<AppState>().pending).is_some() {
+    if app.state::<AppState>().busy.load(Ordering::Acquire) {
         return Err("A signature request is waiting. Finish it, then restart.".to_owned());
     }
     install_and_restart(app)
@@ -107,7 +107,7 @@ fn watch_for_idle(app: &AppHandle) {
 /// No request waiting, and no GST page connected in the last few minutes.
 fn idle(app: &AppHandle) -> bool {
     let state = app.state::<AppState>();
-    let waiting = lock(&state.pending).is_some();
+    let waiting = state.busy.load(Ordering::Acquire);
     let last = lock(&state.diagnostics)
         .last_connection
         .as_ref()

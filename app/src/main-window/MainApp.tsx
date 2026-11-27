@@ -1,5 +1,5 @@
 /**
- * The main window: a sidebar with four sections.
+ * The main window: a sidebar with six sections.
  */
 import { type ReactElement, useState } from "react";
 
@@ -12,16 +12,20 @@ import { HelpView } from "./HelpView";
 import { HomeView } from "./HomeView";
 import { SettingsView } from "./SettingsView";
 import { UpdateToast } from "./UpdateToast";
+import { PortalView } from "./PortalView";
+import { PdfSigningView } from "../pdf/PdfSigningView";
 
 /** How often the shell refreshes the version and update state. */
 const SHELL_INTERVAL_MS = 3000;
 
 /** Sections of the main window. */
-type Section = "home" | "activity" | "settings" | "help";
+type Section = "home" | "portal" | "pdf" | "activity" | "settings" | "help";
 
 /** Sidebar entries. */
 const SECTIONS: ReadonlyArray<{ readonly id: Section; readonly label: string; readonly icon: IconName }> = [
   { id: "home", label: "Home", icon: "home" },
+  { id: "portal", label: "Income Tax", icon: "shield" },
+  { id: "pdf", label: "Sign PDF", icon: "document" },
   { id: "activity", label: "Activity", icon: "clock" },
   { id: "settings", label: "Settings", icon: "sliders" },
   { id: "help", label: "Help", icon: "book" },
@@ -32,6 +36,10 @@ function SectionView({ section }: { readonly section: Section }): ReactElement {
   switch (section) {
     case "home":
       return <HomeView />;
+    case "portal":
+      return <PortalView />;
+    case "pdf":
+      return <PdfSigningView />;
     case "activity":
       return <ActivityView />;
     case "settings":

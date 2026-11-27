@@ -26,6 +26,14 @@ const COMMANDS: &[&str] = &[
     "remove_trust",
     "get_activity",
     "clear_activity",
+    "get_embridge_status",
+    "control_embridge",
+    "open_embridge_download",
+    "open_embridge_installer",
+    "get_pdf_status",
+    "choose_pdf",
+    "sign_pdf",
+    "cancel_pdf_signing",
 ];
 
 /// Runs tauri-build with the app manifest.

@@ -8,9 +8,15 @@ mod broker;
 mod cache;
 mod commands;
 mod dock;
+mod embridge;
 mod error;
 mod notify;
 mod panics;
+mod pdf_engine;
+mod pdf_files;
+#[cfg(test)]
+mod pdf_tests;
+mod pdf_types;
 mod pending;
 mod quit;
 mod relaunch;
