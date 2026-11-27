@@ -8,6 +8,12 @@ import { errorText } from "../api/commands";
 const MAX_PIXELS = 2_000_000;
 const MAX_WIDTH = 850;
 
+/** A completion is usable only for the document, page and size that produced it. */
+interface Rendered {
+  readonly pdf: PDFDocumentProxy; readonly page: number; readonly width: number;
+  readonly viewport: PageViewport | null; readonly error: string | null;
+}
+
 /** Fits the canvas to its container and ignores obsolete page or resize work. */
 export function usePageCanvas(pdf: PDFDocumentProxy, page: number, canvas: RefObject<HTMLCanvasElement | null>, container: RefObject<HTMLDivElement | null>): {
   readonly viewport: PageViewport | null;
@@ -15,9 +21,7 @@ export function usePageCanvas(pdf: PDFDocumentProxy, page: number, canvas: RefOb
   readonly rendering: boolean;
 } {
   const [width, setWidth] = useState(650);
-  const [viewport, setViewport] = useState<PageViewport | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [rendering, setRendering] = useState(true);
+  const [rendered, setRendered] = useState<Rendered | null>(null);
   useEffect(() => {
     const element = container.current;
     if (element === null) { return undefined; }
@@ -32,7 +36,6 @@ export function usePageCanvas(pdf: PDFDocumentProxy, page: number, canvas: RefOb
   useEffect(() => {
     let active = true;
     let cancel: (() => void) | undefined;
-    setViewport(null); setError(null); setRendering(true);
     void pdf.getPage(page).then(async (pdfPage) => {
       const element = canvas.current;
       if (!active || element === null) { return; }
@@ -46,11 +49,12 @@ export function usePageCanvas(pdf: PDFDocumentProxy, page: number, canvas: RefOb
       const render = pdfPage.render({ canvas: element, viewport: view, transform: [density, 0, 0, density, 0, 0] });
       cancel = (): void => render.cancel();
       await render.promise;
-      if (active) { setViewport(view); setRendering(false); }
+      if (active) { setRendered({ pdf, page, width, viewport: view, error: null }); }
     }).catch((reason: unknown) => {
-      if (active) { setError(errorText(reason)); setRendering(false); }
+      if (active) { setRendered({ pdf, page, width, viewport: null, error: errorText(reason) }); }
     });
     return () => { active = false; cancel?.(); };
   }, [pdf, page, width, canvas]);
-  return { viewport, error, rendering };
+  const current = rendered?.pdf === pdf && rendered.page === page && rendered.width === width ? rendered : null;
+  return { viewport: current?.viewport ?? null, error: current?.error ?? null, rendering: current === null };
 }
