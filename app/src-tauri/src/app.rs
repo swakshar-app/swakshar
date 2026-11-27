@@ -6,8 +6,8 @@ use tauri::{App, RunEvent};
 use tauri_plugin_autostart::MacosLauncher;
 
 use crate::commands::{
-    approve, diagnostics, doctor, drivers, history, overview, settings as settings_commands, trust,
-    updates as update_commands,
+    approve, diagnostics, doctor, drivers, history, overview, pdf, pdf_status, portal,
+    settings as settings_commands, trust, updates as update_commands,
 };
 use crate::settings::Settings;
 use crate::state::AppState;
@@ -52,6 +52,7 @@ pub(crate) fn run() -> Result<(), String> {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(AppState::new(data_dir, token, settings))
         .manage(Updates::default())
+        .manage(crate::pdf_types::PdfState::default())
         .setup(move |app| setup(app, show_window, signing))
         .on_window_event(windows::on_event)
         .invoke_handler(tauri::generate_handler![
@@ -78,6 +79,14 @@ pub(crate) fn run() -> Result<(), String> {
             trust::remove_trust,
             history::get_activity,
             history::clear_activity,
+            portal::get_embridge_status,
+            portal::control_embridge,
+            portal::open_embridge_download,
+            portal::open_embridge_installer,
+            pdf_status::get_pdf_status,
+            pdf::choose_pdf,
+            pdf::sign_pdf,
+            pdf::cancel_pdf_signing,
         ])
         .build(tauri::generate_context!())
         .map_err(|error| error.to_string())?

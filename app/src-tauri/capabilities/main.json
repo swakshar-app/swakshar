@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "main-window",
-  "description": "Setup, status, activity, settings and help. Cannot answer signature requests.",
+  "description": "Setup, status, portal companion, explicit local PDF signing, activity, settings and help. Cannot answer GST signature requests.",
   "windows": ["main"],
   "permissions": [
     "core:event:default",
@@ -24,6 +24,14 @@
     "allow-install-trust",
     "allow-remove-trust",
     "allow-get-activity",
-    "allow-clear-activity"
+    "allow-clear-activity",
+    "allow-get-embridge-status",
+    "allow-control-embridge",
+    "allow-open-embridge-download",
+    "allow-open-embridge-installer",
+    "allow-get-pdf-status",
+    "allow-choose-pdf",
+    "allow-sign-pdf",
+    "allow-cancel-pdf-signing"
   ]
 }

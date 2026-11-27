@@ -3,6 +3,13 @@
 What ships next, in order. Settled choices live in `DECISION.md`; this file
 only says what is planned and what it waits on.
 
+## v0.1.8: PDF placement and Income Tax companion
+
+Implementation adds visible PDF signatures on a chosen page and macOS emBridge
+installation and service controls. Installers bundle the native PDF runtime and
+the pinned vendor companion. Owner acceptance and the CI archive mirror remain
+before release; see [PDF_SIGNING.md](PDF_SIGNING.md).
+
 ## v0.1.0: first signed macOS release
 
 Built and on `develop`:

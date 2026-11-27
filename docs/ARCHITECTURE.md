@@ -96,13 +96,31 @@ into bug reports; nothing is sent.
 
 | Window | Commands it may call |
 |---|---|
-| `main` | overview, tokens, drivers, doctor, settings, trust, activity, pause, updates, diagnostics |
+| `main` | overview, tokens, drivers, doctor, settings, trust, activity, pause, updates, diagnostics, emBridge controls, explicit local PDF signing |
 | `approve` | `get_pending_request`, `refresh_request`, `approve_request`, `cancel_request` |
 
 `build.rs` declares every command; `capabilities/*.json` grants each window
 its subset. The CSP allows only the app's own assets and Tauri IPC. The
 driver file picker is opened by `add_driver` in Rust, so no window holds a
 dialog permission.
+
+## PDF and Income Tax workflows
+
+The main window's Sign PDF section previews a native-picker-selected byte
+snapshot with bundled PDF.js. A drawn box is converted from the displayed page
+through its crop/rotation transform into PDF coordinates. Signing takes the
+same atomic busy slot as GST requests, resolves the selected certificate against
+a fresh inventory, and invokes the bundled pyHanko runtime. The PIN reaches only
+that child process's environment. A private staging directory holds the snapshot,
+a PIN-free JSON profile and the result; an atomic hard link publishes a new
+file without replacing an existing destination. Cancellation and quit terminate
+the child. Updates wait while either signing workflow holds the slot.
+
+The Income Tax section opens a bundled vendor installer and controls the installed
+macOS emBridge launchd service through fixed privileged commands. Its port, TLS
+and hosts checks are independent. emBridge retains the portal protocol, certificate
+choice and PIN approval; Swakshar does not implement those encrypted endpoints.
+See [packaging, restrictions and verification](PDF_SIGNING.md).
 
 ## Files on disk
 

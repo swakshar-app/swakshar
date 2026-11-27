@@ -3,23 +3,53 @@
 # SHA256SUMS, and build provenance once the repository is public.
 # Manual dispatch: the same builds, uploaded as workflow artifacts, no release.
 name: release
-
 on:
   push:
     tags: ["v*.*.*"]
   workflow_dispatch:
-
 permissions:
   contents: read
-
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
-
 env:
   CARGO_TERM_COLOR: always
-
 jobs:
+  pdf-runtime:
+    name: PDF runtime (${{ matrix.name }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: macos-arm64, runner: macos-15 }
+          - { name: macos-x64, runner: macos-15-intel }
+          - { name: windows, runner: windows-2025 }
+          - { name: linux, runner: ubuntu-22.04 }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with: { python-version: '3.12.16' }
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with: { node-version-file: .nvmrc }
+      - name: Import the existing macOS signing certificate for the PDF runtime
+        if: runner.os == 'macOS'
+        uses: apple-actions/import-codesign-certs@288b8ec97b82c66b6f2a6baaf7acc8dfbcbe331c # v7.2.0
+        with:
+          p12-file-base64: ${{ secrets.APPLE_CERTIFICATE }}
+          p12-password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+      - name: Bundle the hash-locked PDF runtime
+        env:
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+        run: node scripts/bundle-pdf-runtime.ts
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: pdf-runtime-${{ matrix.name }}
+          path: .pdf-runtime-build/pdf-runtime-*.tar
+          include-hidden-files: true
+          if-no-files-found: error
   draft:
     name: Draft release
     if: github.event_name == 'push'
@@ -35,12 +65,10 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
       - name: Install Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .nvmrc
-
       # Fails the release when CHANGELOG.md has no section for this version.
       - name: Read the release notes from CHANGELOG.md
         id: notes
@@ -51,7 +79,6 @@ jobs:
             cat "${RUNNER_TEMP}/notes.md"
             echo "SWAKSHAR_NOTES_END"
           } >> "${GITHUB_OUTPUT}"
-
       - name: Create a draft release for the tag
         id: create
         env:
@@ -63,11 +90,10 @@ jobs:
             -F body=@"${RUNNER_TEMP}/notes.md" \
             -F draft=true --jq '.id')"
           echo "id=${id}" >> "${GITHUB_OUTPUT}"
-
   build:
     name: Build ${{ matrix.name }}
-    needs: draft
-    if: ${{ !cancelled() && needs.draft.result != 'failure' }}
+    needs: [draft, pdf-runtime]
+    if: ${{ !cancelled() && needs.draft.result != 'failure' && needs.pdf-runtime.result == 'success' }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     permissions:
@@ -80,26 +106,30 @@ jobs:
             runner: macos-15
             targets: aarch64-apple-darwin x86_64-apple-darwin
             args: --target universal-apple-darwin
+            runtime: macos-*
+            platform: macos
           - name: Windows x64
             runner: windows-2025
             targets: x86_64-pc-windows-msvc
             args: --target x86_64-pc-windows-msvc
+            runtime: windows
+            platform: windows
           - name: Linux x64
             runner: ubuntu-22.04
             targets: x86_64-unknown-linux-gnu
             args: --target x86_64-unknown-linux-gnu
+            runtime: linux
+            platform: linux
     steps:
       - name: Check out
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
       - name: Install Linux build dependencies
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf xdg-utils
-
       - name: Install the pinned Rust toolchain and targets
         shell: bash
         env:
@@ -108,33 +138,41 @@ jobs:
           rustup toolchain install
           read -r -a targets <<< "${TARGETS}"
           rustup target add "${targets[@]}"
-
       - name: Cache Rust build output
         uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           key: ${{ matrix.runner }}
-
       - name: Fail if Cargo.lock is out of date
         run: cargo fetch --locked
-
       - name: Install pnpm
         uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
-
       - name: Install Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .nvmrc
           cache: pnpm
-
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
-
+      - name: Download native PDF runtimes
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: pdf-runtime-${{ matrix.runtime }}
+          path: .pdf-runtime-build/artifacts
+          merge-multiple: true
+      - name: Package the offline companion and require complete runtimes
+        shell: bash
+        env:
+          SWAKSHAR_EMBRIDGE_ARCHIVE_URL: ${{ vars.SWAKSHAR_EMBRIDGE_ARCHIVE_URL }}
+          SWAKSHAR_BUNDLE_PLATFORM: ${{ matrix.platform }}
+        run: |
+          node scripts/unpack-pdf-runtime.ts
+          node scripts/bundle-embridge.ts
+          node scripts/require-bundles.ts
       - name: Write the App Store Connect API key
         if: runner.os == 'macOS'
         env:
           APPLE_API_PRIVATE_KEY: ${{ secrets.APPLE_API_PRIVATE_KEY }}
         run: printf '%s' "${APPLE_API_PRIVATE_KEY}" > "${RUNNER_TEMP}/AuthKey.p8"
-
       - name: Build, sign and upload
         id: tauri
         uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # action-v1.0.0
@@ -156,7 +194,6 @@ jobs:
           releaseBody: ${{ needs.draft.outputs.notes }}
           updaterJsonPreferNsis: true
           uploadWorkflowArtifacts: ${{ github.event_name == 'workflow_dispatch' }}
-
       # Tauri notarizes the app but not the disk image around it, and
       # Gatekeeper checks the image first when a downloaded one is opened.
       - name: Notarize and staple the disk image
@@ -172,7 +209,6 @@ jobs:
           xcrun stapler staple "${dmg}"
           spctl --assess --type open --context context:primary-signature --verbose "${dmg}"
           echo "DMG_PATH=${dmg}" >> "${GITHUB_ENV}"
-
       - name: Replace the draft's disk image with the stapled one
         if: runner.os == 'macOS' && github.event_name == 'push'
         env:
@@ -184,7 +220,6 @@ jobs:
               gh release delete-asset "${GITHUB_REF_NAME}" "${name}" --repo "${GITHUB_REPOSITORY}" --yes
             done
           gh release upload "${GITHUB_REF_NAME}" "${DMG_PATH}" --repo "${GITHUB_REPOSITORY}"
-
       - name: Replace the workflow artifact with the stapled disk image
         if: runner.os == 'macOS' && github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -192,7 +227,6 @@ jobs:
           name: darwin-universal-dmg
           path: ${{ env.DMG_PATH }}
           overwrite: true
-
   checksums:
     name: Checksums and provenance
     needs: build
@@ -208,12 +242,10 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
       - name: Install Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .nvmrc
-
       # tauri-action links a draft's latest.json to GitHub API asset URLs,
       # which count against the anonymous API limit; point them at the
       # release downloads before the checksums are written.
@@ -231,21 +263,17 @@ jobs:
             "${GITHUB_REPOSITORY}" "${GITHUB_REF_NAME}" > "${dir}/out/latest.json"
           gh release upload "${GITHUB_REF_NAME}" "${dir}/out/latest.json" \
             --repo "${GITHUB_REPOSITORY}" --clobber
-
       - name: Download the draft release assets
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release download "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --dir dist
-
       - name: Write SHA256SUMS
         working-directory: dist
         run: sha256sum -- * > SHA256SUMS
-
       - name: Upload SHA256SUMS to the draft
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload "${GITHUB_REF_NAME}" dist/SHA256SUMS --repo "${GITHUB_REPOSITORY}"
-
       # Attestations need a public repository on Free, Pro and Team plans.
       - name: Attest build provenance
         if: github.event.repository.visibility == 'public'

@@ -56,6 +56,29 @@ That decision is the asset to protect.
 
 Logs record origins and outcomes, never PINs, signatures or full PANs.
 
+## PDF and companion boundaries
+
+PDF signing accepts only a native-picker-selected immutable snapshot, with a
+50 MB cap. The main window has explicit PDF signing permission; the GST approval
+window gains no new commands. The helper path is fixed inside the app bundle,
+never supplied by a page or resolved through PATH. Bundled PDF.js renders locally
+without executing document scripts. Its workers, fonts and decoding assets stay
+within the app's CSP; WebAssembly decoding is allowed without general script eval.
+
+The PDF helper receives a PIN only in its own transient environment. It is not
+persisted or logged, but another same-user process may inspect that environment.
+No subprocess diagnostics are returned to the UI. Fresh lockout flags, explicit
+last-try acknowledgement, no automatic retry and a shared GST/PDF busy slot bound
+token access. Staging directories are private on Unix and cleaned on normal
+completion; forced process termination or power loss can leave document staging
+files. Atomic no-replace publication protects a concurrently created destination.
+
+emBridge is a separate vendor process with its own approval and PIN flow. Its
+installer opens only on an explicit click; service changes use fixed commands
+and native administrator approval. Swakshar does not take possession of the
+vendor's TLS keys or bypass system trust checks. This boundary does not extend
+Swakshar's GST origin protections to emBridge's own service.
+
 ## Residual risks
 
 - Malware running as the user can already watch the screen and keyboard. No

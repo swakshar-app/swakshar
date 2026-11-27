@@ -12,7 +12,13 @@ const MAX_LINES = 300;
 /** Extensions of authored files. */
 const EXTENSIONS = new Set([".rs", ".ts", ".tsx", ".css", ".html", ".toml", ".yml", ".yaml", ".md", ".json", ".plist"]);
 /** Directories that hold dependencies or build output. */
-const SKIP_DIRS = new Set([".git", "node_modules", "target", "dist", "gen"]);
+const SKIP_DIRS = new Set([".git", "node_modules", "target", "dist", "gen", ".pdf-runtime-build"]);
+/** Third-party assets and frozen runtimes are generated, not authored source. */
+const SKIP_PATHS = new Set([
+  join(ROOT, "app", "public", "pdfjs"),
+  join(ROOT, "app", "src-tauri", "resources", "pdf-engine"),
+  join(ROOT, "app", "src-tauri", "resources", "embridge"),
+]);
 /** Generated files. */
 const SKIP_FILES = new Set(["pnpm-lock.yaml", "Cargo.lock"]);
 
@@ -29,7 +35,7 @@ async function walk(dir: string): Promise<string[]> {
     entries.map(async (entry): Promise<string[]> => {
       const path = join(dir, entry.name);
       if (entry.isDirectory()) {
-        return SKIP_DIRS.has(entry.name) ? [] : walk(path);
+        return SKIP_DIRS.has(entry.name) || SKIP_PATHS.has(path) ? [] : walk(path);
       }
       return entry.isFile() && EXTENSIONS.has(extname(entry.name)) && !SKIP_FILES.has(entry.name) ? [path] : [];
     }),

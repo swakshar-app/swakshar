@@ -6,7 +6,7 @@
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://127.0.0.1:1420",
-    "beforeBuildCommand": "pnpm build",
+    "beforeBuildCommand": "node ../scripts/require-bundles.ts && pnpm build",
     "frontendDist": "../dist"
   },
   "app": {
@@ -36,11 +36,15 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src ipc: http://ipc.localhost",
+      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; style-src 'self'; img-src 'self' data: blob:; font-src 'self' blob:; connect-src 'self' ipc: http://ipc.localhost",
       "freezePrototype": true
     }
   },
   "bundle": {
+    "resources": {
+      "resources/pdf-engine/": "pdf-engine/",
+      "resources/embridge/": "embridge/"
+    },
     "active": true,
     "targets": "all",
     "category": "Productivity",

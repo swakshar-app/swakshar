@@ -7,6 +7,7 @@ import "./styles/controls.css";
 import "./styles/layout.css";
 import "./styles/sections.css";
 import "./styles/approve.css";
+import "./styles/pdf.css";
 
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { StrictMode } from "react";

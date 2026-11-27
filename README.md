@@ -27,6 +27,11 @@ Swakshar is that signer:
 
 ## Status
 
+The development branch also adds local PDF signing with a signature box drawn
+on any page, plus macOS Income Tax signing through a bundled emBridge companion.
+The PDF runtime ships inside the installer. These additions await owner
+verification and release; see [build and usage instructions](docs/PDF_SIGNING.md).
+
 Released for macOS: download the `.dmg` from the
 [latest release](https://github.com/swakshar-app/swakshar/releases/latest). It
 is signed and notarized, works on Apple silicon and Intel, and updates itself
