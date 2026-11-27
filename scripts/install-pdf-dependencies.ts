@@ -33,6 +33,14 @@ function requirement(entry: RuntimePackage, hashes: readonly string[]): string {
   return `${entry.name}==${entry.version} ${hashes.map((hash) => `--hash=sha256:${hash}`).join(" ")}`;
 }
 
+/** Carries the repository's Rust pin into pip's temporary source-build directory. */
+function rustToolchain(): string {
+  const file = readFileSync(join(import.meta.dirname, "..", "rust-toolchain.toml"), "utf8");
+  const version = /^channel = "([0-9.]+)"$/mu.exec(file)?.[1];
+  if (version === undefined) { throw new Error("The crypto builder needs the repository Rust pin."); }
+  return version;
+}
+
 /** Builds static OpenSSL so the Intel helper never needs a user's Homebrew library. */
 function buildOpenSsl(work: string): NativeCrypto & { readonly prefix: string } {
   const lock = JSON.parse(readFileSync(join(import.meta.dirname, "openssl.lock.json"), "utf8")) as OpenSslLock;
@@ -64,7 +72,7 @@ export function installRuntimePackages(python: string, packages: readonly Runtim
   const sourcePath = join(work, "crypto-source.md");
   writeFileSync(sourcePath, `${requirement(crypto, crypto.sourceHashes)}\n`);
   execFileSync(python, [...PIP_INSTALL, "--no-binary=:all:", "--no-build-isolation", "-r", sourcePath], {
-    stdio: "inherit", env: { ...process.env, OPENSSL_DIR: native.prefix, OPENSSL_STATIC: "1", MACOSX_DEPLOYMENT_TARGET: "12.0" },
+    stdio: "inherit", env: { ...process.env, RUSTUP_TOOLCHAIN: rustToolchain(), OPENSSL_DIR: native.prefix, OPENSSL_STATIC: "1", MACOSX_DEPLOYMENT_TARGET: "12.0" },
   });
   return native;
 }
