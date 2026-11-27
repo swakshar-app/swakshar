@@ -14,8 +14,8 @@ it under See changes.
   do not need Python or PDF command-line tools; token drivers remain required.
 - Correct native runtime packaging, including Intel Mac crypto build tools and
   Windows archive extraction. Builds 0.1.8 and 0.1.9 were not published.
-- Include frontend, Rust and CI dependency security fixes. This prerelease is
-  for installed-app and real-token acceptance; 0.1.7 remains the stable release.
+- Include frontend, Rust and CI dependency security fixes. This stable release
+  is available through the existing in-app updater for owner acceptance.
 
 ## 0.1.9
 
