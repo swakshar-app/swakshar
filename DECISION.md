@@ -3,6 +3,26 @@
 Newest first. Preserve earlier entries in the linked archive when this ledger
 approaches 300 lines.
 
+## Publish stable patch releases for testing through the updater
+
+`2026-11-27-11-55-39-UTC`
+
+**Decision.** The owner explicitly requests promoting the completed v0.1.10
+release to stable and latest so the existing in-app updater can deliver it for
+testing. Publish subsequent fixes as successive stable patch releases, starting
+with v0.1.11, with new immutable tags and complete release artifacts. Preserve
+the current major/minor version until the owner requests otherwise.
+
+**Reasoning.** The installed app follows releases/latest/download/latest.json,
+which excludes prereleases. Every v0.1.10 source and native packaging job passed,
+including notarization, checksums and provenance; the owner also validated the
+downloaded DMG with stapler and Gatekeeper. Promote those exact artifacts rather
+than rebuilding or replacing published files. Future fixes must pass CI and
+signed packaging before stable publication. Installed-app, real-token and portal
+acceptance stays with the owner. This supersedes holding v0.1.7 as latest during
+acceptance. The owner separately authorized merging PR 20 during this release
+promotion; merge after its required CI checks pass.
+
 ## Seal the assembled Python framework before transfer
 
 `2026-11-27-11-15-00-UTC`
