@@ -3,6 +3,22 @@
 Newest first. Preserve earlier entries in the linked archive when this ledger
 approaches 300 lines.
 
+## Keep isolated crypto build tools on the subprocess path
+
+`2026-11-27-12-51-00-IST`
+
+**Decision.** Prepend the private Python environment's executable directory to
+the Intel cryptography source builder's PATH. Keep installations, verification
+and release builds in CI, as the owner requested. Exercise packaging through a
+manual workflow run before creating another immutable release tag.
+
+**Reasoning.** The v0.1.9 runtime jobs passed on Apple Silicon, Windows and Linux.
+Intel compiled static OpenSSL but failed because Maturin's Python entrypoint
+launches the `maturin` executable by name. Invoking pip through the private
+Python executable does not activate that environment's PATH. Its pinned wheel
+was installed correctly; expose that environment's tools to its subprocesses.
+The failed release remains an unpublished draft.
+
 ## Pin a Python runtime available on every release builder
 
 `2026-11-27-12-30-00-IST`
