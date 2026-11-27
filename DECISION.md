@@ -3,6 +3,23 @@
 Newest first. Preserve earlier entries in the linked archive when this ledger
 approaches 300 lines.
 
+## Seal the assembled Python framework before transfer
+
+`2026-11-27-11-15-00-UTC`
+
+**Decision.** After PyInstaller collection and the runtime copy finish, sign the
+completed Python.framework as a bundle with the already-approved Developer ID,
+secure timestamp and hardened runtime. Then enforce the strict signature checks
+before archiving and after transfer. Preserve symlinks during final app copying.
+
+**Reasoning.** The new native gate in run 45988604947 caught the arm64 framework
+before Tauri: codesign reported that code has no resources but its signature
+requires them. PyInstaller had signed the collected binary before assembling
+the framework and its Info.plist, leaving no complete framework resource seal.
+Sign the assembled bundle rather than weakening verification. This complements
+the symlink-preservation fix and reuses the owner's existing signing approval;
+no keys, credentials or entitlements are changed.
+
 ## Preserve signed Python framework links in the Mac installer
 
 `2026-11-27-11-13-00-UTC`
