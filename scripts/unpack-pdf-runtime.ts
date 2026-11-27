@@ -7,10 +7,12 @@ import { join } from "node:path";
 const SOURCE = join(import.meta.dirname, "..", ".pdf-runtime-build", "artifacts");
 /** Tauri copies the fully restored directory into each platform's installer. */
 const TARGET = join(import.meta.dirname, "..", "app", "src-tauri", "resources", "pdf-engine");
+/** Git Bash's tar does not understand native Windows drive-letter paths. */
+const TAR = process.platform === "win32" ? join(process.env["SystemRoot"] ?? "C:\\Windows", "System32", "tar.exe") : "tar";
 
 mkdirSync(TARGET, { recursive: true });
 for (const name of readdirSync(SOURCE)) {
   if (/^pdf-runtime-(darwin|linux|win32)-(arm64|x64)\.tar$/.test(name)) {
-    execFileSync("tar", ["-xf", name, "-C", TARGET], { cwd: SOURCE, stdio: "inherit" });
+    execFileSync(TAR, ["-xf", name, "-C", TARGET], { cwd: SOURCE, stdio: "inherit" });
   }
 }

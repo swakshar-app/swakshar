@@ -3,6 +3,20 @@
 Newest first. Preserve earlier entries in the linked archive when this ledger
 approaches 300 lines.
 
+## Select Windows' native archive tool explicitly
+
+`2026-11-27-13-21-00-IST`
+
+**Decision.** Extract PDF runtimes with System32's native `tar.exe` on Windows.
+Keep the relative archive filename and use the platform tar on macOS and Linux.
+This supersedes relying on whichever tar Git Bash puts first on PATH.
+
+**Reasoning.** The first extraction fix removed GNU tar's remote-host parsing
+of the archive path, but CI then showed that the same MSYS executable also
+rejects the absolute native Windows destination path. Selecting the operating
+system's archive tool handles drive letters and backslashes consistently with
+the successful runtime creation job, which ran outside Git Bash.
+
 ## Reserve a fresh tag for the verified acceptance build
 
 `2026-11-27-13-06-00-IST`
