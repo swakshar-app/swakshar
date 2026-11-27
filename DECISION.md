@@ -3,6 +3,27 @@
 Newest first. Preserve earlier entries in the linked archive when this ledger
 approaches 300 lines.
 
+## Consolidate Dependabot fixes with the signing features
+
+`2026-11-27-12-08-42-IST`
+
+**Decision.** Include the open Cargo, pnpm and GitHub Actions dependency groups
+in the same PR, as the owner requested. Pin Rustls 0.23.46, Vite 8.3.4, Vitest
+5.0.5 and Happy DOM 21.0.4, alongside the other grouped updates. Refresh the
+Cargo and pnpm lockfiles with their seven-day publication gates. Use current
+GitHub Action releases eligible under the age gate with full commit pins,
+including the new runtime jobs. cargo-deny-action stays at 2.1.3 because 2.1.4
+was published on 2026-11-24 and cannot yet meet the seven-day minimum.
+
+**Reasoning.** These versions cover the repository's 20 open Dependabot security
+alerts as inspected on 2026-11-27. The proposed Happy DOM 21.0.3 update still
+falls below the advisory's patched 21.0.4, so use the latter. Rustls and Tokio
+remain within the selected architecture and their existing major versions.
+Release metadata and minimum Rust versions support the pinned Rust toolchain.
+Alerts remain open until GitHub scans the merged dependency graph. Leave the
+existing unrelated advisory policy unchanged. Version 0.1.8 documents the
+combined feature and dependency change; it does not authorize a release.
+
 ## Bundle the signing runtime and the permitted portal companion
 
 `2026-11-27-11-56-32-IST`

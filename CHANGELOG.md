@@ -4,6 +4,17 @@ What changed in each release, newest first. The release workflow publishes
 each version's section as its release notes, and the in-app update card shows
 it under See changes.
 
+## 0.1.8
+
+- Income Tax on macOS can install the bundled emBridge companion, show its
+  connection checks, and start or stop its service with administrator approval.
+- Sign a local PDF with a DSC token by choosing a page and drawing the signature
+  rectangle. Save a new signed copy and cancel an active signing request.
+- Installers include the PDF signing runtime and preview assets. End users do
+  not need Python or PDF command-line tools.
+- Updates Rust, frontend and CI dependencies, including fixes for the open
+  Rustls, Vite, Vitest mocker and Happy DOM security advisories.
+
 ## 0.1.7
 
 - Quitting waits longer for a slow token driver to finish what it is doing,
