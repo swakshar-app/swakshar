@@ -26,8 +26,6 @@ export function PdfPreview(props: {
   useEffect(() => {
     let active = true;
     let cancel: (() => void) | null = null;
-    setViewport(null);
-    setError(null);
     void pdf.getPage(page).then(async (pdfPage) => {
       const element = canvas.current;
       if (!active || element === null) { return; }
@@ -73,7 +71,10 @@ export function PdfPreview(props: {
     if (event.currentTarget.hasPointerCapture(event.pointerId)) { event.currentTarget.releasePointerCapture(event.pointerId); }
   }
 
-  const overlay = viewport === null || box === null ? null : viewport.convertToViewportRectangle([...box]);
+  const overlay = viewport === null || box === null ? null : [
+    ...viewport.convertToViewportPoint(box[0], box[1]),
+    ...viewport.convertToViewportPoint(box[2], box[3]),
+  ];
   const [x1 = 0, y1 = 0, x2 = 0, y2 = 0] = overlay ?? [];
   return <>
     {error === null ? null : <Notice tone="danger">{error}</Notice>}

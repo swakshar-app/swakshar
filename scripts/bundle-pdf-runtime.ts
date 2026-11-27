@@ -66,6 +66,9 @@ function main(): void {
   if (!existsSync(pythonLicense)) { throw new Error("The Python distribution license must accompany the bundled runtime."); }
   cpSync(pythonLicense, join(OUTPUT, "PYTHON-LICENSE.md"));
   writeFileSync(join(OUTPUT, "runtime.json"), `${JSON.stringify({ python: LOCK.python, arch: ARCH, packages: packages.map(({ name, version: pinned }) => ({ name, version: pinned })) }, null, 2)}\n`);
+  const executable = join(OUTPUT, process.platform === "win32" ? "swakshar-pdf.exe" : "swakshar-pdf");
+  run(executable, ["--no-plugins", "--help"]);
+  run(executable, ["--no-plugins", "sign", "addsig", "pkcs11", "--help"]);
   const archive = join(ROOT, ".pdf-runtime-build", `pdf-runtime-${process.platform}-${ARCH}.tar`);
   run("tar", ["-cf", archive, "-C", join(OUTPUT, ".."), ARCH]);
 }

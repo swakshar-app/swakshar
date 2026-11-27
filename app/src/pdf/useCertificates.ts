@@ -13,9 +13,7 @@ export function useCertificates(): {
   const [data, setData] = useState<PdfStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const generation = useRef(0);
-  const refresh = useCallback(async (): Promise<void> => {
-    const current = ++generation.current;
-    setData(null); setError(null);
+  const load = useCallback(async (current: number): Promise<void> => {
     try {
       const next = await signingApi.pdfStatus();
       if (current === generation.current) { setData(next); }
@@ -23,9 +21,15 @@ export function useCertificates(): {
       if (current === generation.current) { setError(errorText(reason)); }
     }
   }, []);
+  /** User refresh clears stale PIN flags before starting the new read. */
+  const refresh = useCallback(async (): Promise<void> => {
+    const current = ++generation.current;
+    setData(null); setError(null);
+    await load(current);
+  }, [load]);
   useEffect(() => {
-    void refresh();
+    void load(++generation.current);
     return () => { generation.current += 1; };
-  }, [refresh]);
+  }, [load]);
   return { data, error, refresh };
 }

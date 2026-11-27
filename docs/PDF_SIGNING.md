@@ -101,9 +101,9 @@ verifies the final app's signing and notarization before a release.
 
 ## Owner verification
 
-No tests, browser QA, application launch or installer build were run for this
-implementation. Source formatting and dependency preparation are not product
-verification. Run the existing gates:
+The owner requested a downloadable release for acceptance after CI passes.
+CI and signed packaging must pass before publishing that prerelease. Real-token,
+portal and installed-app acceptance remain with the owner. Source gates are:
 
 ```sh
 cargo fmt --all --check
