@@ -32,6 +32,10 @@ outside this fix. Cryptographic signing and no-replace publication stay intact.
 Regression gates run only in CI; installed-app and real-token acceptance remain
 with the owner. No local tests, app launch or browser verification are authorized.
 
+**Publication.** Stable/latest v0.1.11 was published at 2026-11-27-12-56-05-UTC.
+Source CI 45998825586 and release CI 45999542220 passed; the public updater
+manifest serves signed 0.1.11 packages for every supported platform.
+
 ## Publish stable patch releases for testing through the updater
 
 `2026-11-27-11-55-39-UTC`
