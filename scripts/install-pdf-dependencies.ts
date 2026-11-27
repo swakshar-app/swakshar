@@ -2,7 +2,7 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { delimiter, dirname, join } from "node:path";
 
 /** Package artifacts accepted by the runtime's publication-age and hash locks. */
 export interface RuntimePackage {
@@ -72,7 +72,8 @@ export function installRuntimePackages(python: string, packages: readonly Runtim
   const sourcePath = join(work, "crypto-source.md");
   writeFileSync(sourcePath, `${requirement(crypto, crypto.sourceHashes)}\n`);
   execFileSync(python, [...PIP_INSTALL, "--no-binary=:all:", "--no-build-isolation", "-r", sourcePath], {
-    stdio: "inherit", env: { ...process.env, RUSTUP_TOOLCHAIN: rustToolchain(), OPENSSL_DIR: native.prefix, OPENSSL_STATIC: "1", MACOSX_DEPLOYMENT_TARGET: "12.0" },
+    stdio: "inherit", env: { ...process.env, PATH: `${dirname(python)}${delimiter}${process.env["PATH"] ?? ""}`,
+      RUSTUP_TOOLCHAIN: rustToolchain(), OPENSSL_DIR: native.prefix, OPENSSL_STATIC: "1", MACOSX_DEPLOYMENT_TARGET: "12.0" },
   });
   return native;
 }
